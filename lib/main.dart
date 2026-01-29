@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:optica_sana/screens/add_customer_screen.dart';
 import 'package:optica_sana/screens/customer_details_screen.dart';
-import '../db_flutter/bootstrap.dart';
+import 'package:optica_sana/db_flutter/bootstrap.dart';
 import 'package:optica_sana/db_flutter/models.dart';
-import '../db_flutter/repositories/contact_lenses_repo.dart';
-import '../db_flutter/repositories/customer_repo.dart';
-import '../db_flutter/repositories/glasses_repo.dart';
+import 'package:optica_sana/db_flutter/repositories/contact_lenses_repo.dart';
+import 'package:optica_sana/db_flutter/repositories/customer_repo.dart';
+import 'package:optica_sana/db_flutter/repositories/glasses_repo.dart';
 import 'package:optica_sana/flutter_services/customer_service.dart';
 
 void main() async {
@@ -68,6 +69,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+    _onSearchChanged(); // Initial search
   }
 
   void _onSearchChanged() {
@@ -113,8 +115,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
               itemBuilder: (context, index) {
                 final customer = _customers[index];
                 return ListTile(
-                  title: Text('${customer.fname} ${customer.lname}'),
-                  subtitle: Text('SSN: ${customer.ssn}'),
+                  title: Text("${customer.fname} ${customer.lname}"),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -131,6 +132,21 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  AddCustomerScreen(customerService: widget.customerService),
+            ),
+          ).then((_) {
+            // Refresh the customer list after adding a new one
+            _onSearchChanged();
+          });
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

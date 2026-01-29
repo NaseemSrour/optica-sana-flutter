@@ -46,10 +46,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
 
   Future<void> _saveTest() async {
     if (_formKey.currentState!.validate()) {
-      final newMap = <String, dynamic>{
-        'id': null,
-        'customer_id': widget.customer.id,
-      };
+      final newMap = <String, dynamic>{'id': widget.customer.id};
       _controllers.forEach((key, controller) {
         // Simplified conversion
         newMap[key] = controller.text;

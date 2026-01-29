@@ -7,7 +7,9 @@ class CustomerRepo {
 
   Future<Customer> addCustomer(Customer newCustomer) async {
     final db = await _dbHelper.database;
-    final id = await db.insert('customers', newCustomer.toMap());
+    var newCustomerMap = newCustomer.toMap();
+    newCustomerMap.remove('id');
+    final id = await db.insert('customers', newCustomerMap);
     newCustomer.id = id;
     return newCustomer;
   }
