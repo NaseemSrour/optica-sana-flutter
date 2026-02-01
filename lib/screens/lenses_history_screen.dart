@@ -216,8 +216,8 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-        Text(value),
+        Text('$label: ', style: Theme.of(context).textTheme.labelLarge),
+        Text(value, style: Theme.of(context).textTheme.bodyLarge),
       ],
     );
   }
@@ -225,18 +225,24 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
   Widget _buildTestNavigationHeader(ContactLensesTest? test) {
     if (test == null) return const SizedBox.shrink();
     return Container(
-      color: Theme.of(context).primaryColorDark,
+      color: Theme.of(context).colorScheme.primary,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'Test ${_tests.length - _currentIndex} of ${_tests.length}',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.white,
+            ),
           ),
           Text(
             'Date: ${DateFormat('dd/MM/yyyy').format(test.examDate)}',
-            style: const TextStyle(fontSize: 16),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontSize: 16, color: Colors.white),
           ),
         ],
       ),
@@ -266,7 +272,6 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
           enabled: _isEditing,
           decoration: InputDecoration(
             labelText: field.replaceAll('_', ' ').toUpperCase(),
-            border: const OutlineInputBorder(),
             isDense: true,
           ),
         );

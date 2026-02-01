@@ -245,11 +245,15 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
     final leftEyeData = ['-1.25', '-0.75', '85', '', '', '6/7.5'];
 
     return Table(
-      border: TableBorder.all(color: Colors.grey),
+      border: TableBorder.all(
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+      ),
       columnWidths: const {0: FlexColumnWidth(1.5)},
       children: [
         TableRow(
-          decoration: BoxDecoration(color: Theme.of(context).primaryColorDark),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+          ),
           children: [const Text('Eye'), ...headers]
               .map(
                 (h) => Center(
@@ -257,7 +261,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       h.toString(),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -278,7 +285,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               eye,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -326,11 +335,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         return TextFormField(
           controller: _controllers[entry.value],
           enabled: _isEditing,
-          decoration: InputDecoration(
-            labelText: entry.key,
-            border: const OutlineInputBorder(),
-            isDense: true,
-          ),
+          decoration: InputDecoration(labelText: entry.key, isDense: true),
           validator: (value) {
             if (['SSN', 'First Name', 'Last Name'].contains(entry.key)) {
               if (value == null || value.isEmpty) {

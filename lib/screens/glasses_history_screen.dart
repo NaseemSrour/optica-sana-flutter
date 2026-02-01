@@ -212,8 +212,8 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-        Text(value),
+        Text('$label: ', style: Theme.of(context).textTheme.labelLarge),
+        Text(value, style: Theme.of(context).textTheme.bodyLarge),
       ],
     );
   }
@@ -221,18 +221,24 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
   Widget _buildTestNavigationHeader(GlassesTest? test) {
     if (test == null) return const SizedBox.shrink();
     return Container(
-      color: Theme.of(context).primaryColorDark,
+      color: Theme.of(context).colorScheme.primary,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             'Test ${_tests.length - _currentIndex} of ${_tests.length}',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.white,
+            ),
           ),
           Text(
             'Date: ${DateFormat('dd/MM/yyyy').format(test.examDate)}',
-            style: const TextStyle(fontSize: 16),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontSize: 16, color: Colors.white),
           ),
         ],
       ),
@@ -260,18 +266,24 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Table(
-        border: TableBorder.all(color: Colors.grey.withOpacity(0.5)),
+        border: TableBorder.all(
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+        ),
         columnWidths: const {0: IntrinsicColumnWidth()},
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         children: [
           TableRow(
-            decoration: BoxDecoration(color: Colors.grey.withOpacity(0.2)),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+            ),
             children: [
-              const Padding(
-                padding: EdgeInsets.all(8.0),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: Text(
                   'Eye',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               ...rightEyeFields.map(
@@ -280,7 +292,9 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
                   child: Text(
                     field.substring(2).replaceAll('_', ' ').toUpperCase(),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -300,7 +314,9 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Text(
             eyeLabel,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         ...fields.map((field) {

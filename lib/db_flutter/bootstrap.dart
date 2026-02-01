@@ -21,6 +21,7 @@ class DatabaseHelper {
   _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
+    print("PATH TO DB FILE IS: " + path.toString());
     return await openDatabase(
       path,
       version: _databaseVersion,

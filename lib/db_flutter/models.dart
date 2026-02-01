@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class Customer {
   int id;
   int ssn;
@@ -219,7 +221,7 @@ class GlassesTest {
     return GlassesTest(
       id: map['id'],
       customerId: map['customer_id'],
-      examDate: DateTime.parse(map['exam_date']),
+      examDate: DateFormat('yyyy-MM-dd').parse(map['exam_date']),
       examiner: map['examiner'],
       rFv: map['r_fv'],
       rSphere: map['r_sphere'],
@@ -281,7 +283,7 @@ class GlassesTest {
     return {
       'id': id,
       'customer_id': customerId,
-      'exam_date': examDate.toIso8601String(),
+      'exam_date': DateFormat('yyyy-MM-dd').format(examDate),
       'examiner': examiner,
       'r_fv': rFv,
       'r_sphere': rSphere,
@@ -455,7 +457,7 @@ class ContactLensesTest {
     return ContactLensesTest(
       id: map['id'],
       customerId: map['customer_id'],
-      examDate: DateTime.parse(map['exam_date']),
+      examDate: DateFormat('yyyy-MM-dd').parse(map['exam_date']),
       examiner: map['examiner'],
       rRH: map['r_rH'],
       rRV: map['r_rV'],
@@ -509,7 +511,7 @@ class ContactLensesTest {
     return {
       'id': id,
       'customer_id': customerId,
-      'exam_date': examDate.toIso8601String(),
+      'exam_date': DateFormat('yyyy-MM-dd').format(examDate),
       'examiner': examiner,
       'r_rH': rRH,
       'r_rV': rRV,

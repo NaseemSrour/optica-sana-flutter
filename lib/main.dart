@@ -10,6 +10,7 @@ import 'package:optica_sana/db_flutter/repositories/contact_lenses_repo.dart';
 import 'package:optica_sana/db_flutter/repositories/customer_repo.dart';
 import 'package:optica_sana/db_flutter/repositories/glasses_repo.dart';
 import 'package:optica_sana/flutter_services/customer_service.dart';
+import 'package:optica_sana/themes/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +45,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Optica Sana',
-      theme: ThemeData(primarySwatch: Colors.blue, brightness: Brightness.dark),
+      theme: AppTheme.themeData,
       home: CustomerSearchScreen(customerService: customerService),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
 
@@ -20,6 +21,19 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   final _formKey = GlobalKey<FormState>();
   final _controllers = <String, TextEditingController>{};
 
+  String _formatDateForDb(String date) {
+    if (date.isEmpty) return '';
+    try {
+      // Parse with d/M/yyyy to allow for single-digit day/month
+      final inputDate = DateFormat('d/M/yyyy').parse(date);
+      // Format to yyyy-MM-dd to ensure leading zeros for DB sorting
+      return DateFormat('yyyy-MM-dd').format(inputDate);
+    } catch (e) {
+      // If parsing fails, return original string.
+      return date;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +45,9 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     sampleTest.toMap().forEach((key, value) {
       if (key != 'id' && key != 'customer_id') {
         _controllers[key] = TextEditingController(
-          text: value?.toString() ?? '',
+          text: key == 'exam_date'
+              ? DateFormat('dd/MM/yyyy').format(DateTime.now())
+              : value?.toString() ?? '',
         );
       }
     });
@@ -57,11 +73,14 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         final newTest = ContactLensesTest.fromMap(
           newMap.map((key, value) {
             if (value is String) {
-              if (key.contains('date')) return MapEntry(key, value);
+              if (key.contains('date')) {
+                return MapEntry(key, _formatDateForDb(value));
+              }
               final asDouble = double.tryParse(value);
               if (asDouble != null) {
-                if (asDouble == asDouble.toInt())
+                if (asDouble == asDouble.toInt()) {
                   return MapEntry(key, asDouble.toInt());
+                }
                 return MapEntry(key, asDouble);
               }
             }
@@ -110,7 +129,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
               controller: _controllers[key],
               decoration: InputDecoration(
                 labelText: key.replaceAll('_', ' ').toUpperCase(),
-                border: const OutlineInputBorder(),
+                hintText: key.contains('date') ? 'DD/MM/YYYY' : null,
                 isDense: true,
               ),
             );

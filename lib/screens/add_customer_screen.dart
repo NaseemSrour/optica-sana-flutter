@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../db_flutter/bootstrap.dart';
 import '../db_flutter/models.dart' as models;
 import '../flutter_services/customer_service.dart';
@@ -31,6 +32,19 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _notesController = TextEditingController();
   bool _mailing = false;
 
+  String _formatDateForDb(String date) {
+    if (date.isEmpty) return '';
+    try {
+      // Parse with d/M/yyyy to allow for single-digit day/month
+      final inputDate = DateFormat('d/M/yyyy').parse(date);
+      // Format to yyyy-MM-dd to ensure leading zeros for DB sorting
+      return DateFormat('yyyy-MM-dd').format(inputDate);
+    } catch (e) {
+      // If parsing fails, return original string.
+      return date;
+    }
+  }
+
   @override
   void dispose() {
     _ssnController.dispose();
@@ -55,11 +69,11 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   Future<void> _saveCustomer() async {
     if (_formKey.currentState!.validate()) {
       final newCustomer = models.Customer(
-        id: 0, // ID will be set by the database
+        id: 0, // This is a dummy ID - it will be set by the database upon INSERTing.
         ssn: int.tryParse(_ssnController.text) ?? 0,
         fname: _fnameController.text,
         lname: _lnameController.text,
-        birthDate: _birthDateController.text,
+        birthDate: _formatDateForDb(_birthDateController.text),
         sex: _sexController.text,
         telHome: _telHomeController.text,
         telMobile: _telMobileController.text,
@@ -85,9 +99,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to add customer: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to add customer: $e')));
         }
       }
     }
@@ -96,9 +110,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add New Customer'),
-      ),
+      appBar: AppBar(title: const Text('Add New Customer')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -139,7 +151,10 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
                 TextFormField(
                   controller: _birthDateController,
-                  decoration: const InputDecoration(labelText: 'Birth Date'),
+                  decoration: const InputDecoration(
+                    labelText: 'Birth Date',
+                    hintText: 'DD/MM/YYYY',
+                  ),
                 ),
                 TextFormField(
                   controller: _sexController,

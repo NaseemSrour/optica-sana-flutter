@@ -7,7 +7,9 @@ class GlassesRepo {
 
   Future<GlassesTest> addTest(GlassesTest test) async {
     final db = await _dbHelper.database;
-    final id = await db.insert('glasses_tests', test.toMap());
+    var newGlassesTestMap = test.toMap();
+    newGlassesTestMap.remove('id');
+    final id = await db.insert('glasses_tests', newGlassesTestMap);
     test.id = id;
     return test;
   }
@@ -26,7 +28,7 @@ class GlassesRepo {
   }
 
   Future<List<GlassesTest>> listTestsForCustomer(int customerId) async {
-    if (customerId <= 0) {
+    if (customerId < 0) {
       throw ArgumentError("customer_id must be a positive integer");
     }
     final db = await _dbHelper.database;
@@ -34,8 +36,10 @@ class GlassesRepo {
       'glasses_tests',
       where: 'customer_id = ?',
       whereArgs: [customerId],
-      orderBy: 'exam_date DESC',
+      orderBy:
+          'exam_date DESC', // DESC works because of 'yyyy-MM-dd' format in DB. It's important that leading zeros are present. For example, '2023-05-09' and not '2023-5-9' in DB.
     );
+    print(maps.toString());
     return maps.map((map) => GlassesTest.fromMap(map)).toList();
   }
 
