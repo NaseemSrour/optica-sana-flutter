@@ -143,24 +143,38 @@ class CustomerService {
   Future<void> _validateInputGlassesTest(GlassesTest test) async {
     await _validateCustomerExists(test.customerId);
 
-    final rCylinder = double.tryParse(test.rCylinder ?? '0') ?? 0;
-    final rAxis = int.tryParse(test.rAxis ?? '');
-    if (rCylinder == 0) {
-      if (rAxis != null) {
-        throw Exception("R_Axis must be null when cylinder is 0.00");
+    // Validation for rCylinder and rAxis
+    if (test.rCylinder != null && test.rCylinder!.isNotEmpty) {
+      final rCylinder = double.tryParse(test.rCylinder!);
+      if (rCylinder == null) {
+        throw Exception("R_Cylinder must be a valid number.");
       }
-    } else if (rAxis == null || rAxis < 0 || rAxis > 180) {
-      throw Exception("R_Axis must be an integer between 0 and 180");
+      if (rCylinder != 0) {
+        if (test.rAxis == null || test.rAxis!.isEmpty) {
+          throw Exception("R_Axis is required when R_Cylinder is not 0.");
+        }
+        final rAxis = int.tryParse(test.rAxis!);
+        if (rAxis == null || rAxis < 0 || rAxis > 180) {
+          throw Exception("R_Axis must be an integer between 0 and 180.");
+        }
+      }
     }
 
-    final lCylinder = double.tryParse(test.lCylinder ?? '0') ?? 0;
-    final lAxis = int.tryParse(test.lAxis ?? '');
-    if (lCylinder == 0) {
-      if (lAxis != null) {
-        throw Exception("L_Axis must be null when cylinder is 0.00");
+    // Validation for lCylinder and lAxis
+    if (test.lCylinder != null && test.lCylinder!.isNotEmpty) {
+      final lCylinder = double.tryParse(test.lCylinder!);
+      if (lCylinder == null) {
+        throw Exception("L_Cylinder must be a valid number.");
       }
-    } else if (lAxis == null || lAxis < 0 || lAxis > 180) {
-      throw Exception("L_Axis must be an integer between 0 and 180");
+      if (lCylinder != 0) {
+        if (test.lAxis == null || test.lAxis!.isEmpty) {
+          throw Exception("L_Axis is required when L_Cylinder is not 0.");
+        }
+        final lAxis = int.tryParse(test.lAxis!);
+        if (lAxis == null || lAxis < 0 || lAxis > 180) {
+          throw Exception("L_Axis must be an integer between 0 and 180.");
+        }
+      }
     }
   }
 
@@ -181,7 +195,6 @@ class CustomerService {
     } else if (rLensAxis == null || rLensAxis < 0 || rLensAxis > 180) {
       throw Exception("R_lens_Axis must be an integer between 0 and 180");
     }
-
     final lLensCyl = double.tryParse(test.lLensCyl ?? '0') ?? 0;
     final lLensAxis = int.tryParse(test.lLensAxis ?? '');
     if (lLensCyl == 0) {
