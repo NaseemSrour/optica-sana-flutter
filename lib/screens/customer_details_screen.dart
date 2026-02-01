@@ -6,6 +6,7 @@ import 'package:optica_sana/screens/add_lenses_test_screen.dart';
 import 'package:optica_sana/screens/lenses_history_screen.dart';
 import '../flutter_services/customer_service.dart';
 import 'package:optica_sana/db_flutter/models.dart';
+import '../widgets/glasses_test_table.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
   final Customer customer;
@@ -26,6 +27,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   late final Map<String, TextEditingController> _controllers;
   final FocusNode _focusNode = FocusNode();
+  GlassesTest? _latestGlassesTest;
 
   @override
   void initState() {
@@ -48,6 +50,26 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       'referer': TextEditingController(text: widget.customer.referer),
       'notes': TextEditingController(text: widget.customer.notes),
     };
+    _fetchLatestGlassesTest();
+  }
+
+  Future<void> _fetchLatestGlassesTest() async {
+    try {
+      final latestTest = await widget.customerService.getLatestGlasses(
+        widget.customer.id!,
+      );
+      if (mounted) {
+        setState(() {
+          _latestGlassesTest = latestTest;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching latest glasses test: $e')),
+        );
+      }
+    }
   }
 
   void _toggleEditMode() {
@@ -227,76 +249,14 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                _buildEyeDataTable(),
-                const SizedBox(height: 20),
                 _buildOtherDetailsGrid(),
+                const SizedBox(height: 20),
+                GlassesTestTable(glassesTest: _latestGlassesTest),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildEyeDataTable() {
-    // This is a placeholder. You would populate this with GlassesTest data.
-    final headers = ['Sphere', 'Cylinder', 'Axis', 'Prism', 'Base', 'V/A'];
-    final rightEyeData = ['-1.00', '-0.50', '90', '', '', '6/6'];
-    final leftEyeData = ['-1.25', '-0.75', '85', '', '', '6/7.5'];
-
-    return Table(
-      border: TableBorder.all(
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-      ),
-      columnWidths: const {0: FlexColumnWidth(1.5)},
-      children: [
-        TableRow(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          children: [const Text('Eye'), ...headers]
-              .map(
-                (h) => Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      h.toString(),
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
-        ),
-        _buildEyeDataRow('Right (OD)', rightEyeData),
-        _buildEyeDataRow('Left (OS)', leftEyeData),
-      ],
-    );
-  }
-
-  TableRow _buildEyeDataRow(String eye, List<String> data) {
-    return TableRow(
-      children: [
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              eye,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-        ...data.map(
-          (d) => Center(
-            child: Padding(padding: const EdgeInsets.all(8.0), child: Text(d)),
-          ),
-        ),
-      ],
     );
   }
 

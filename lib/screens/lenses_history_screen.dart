@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
+import '../widgets/lenses_test_tables.dart';
 
 class LensesHistoryScreen extends StatefulWidget {
   final Customer customer;
@@ -61,9 +62,29 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
     if (_tests.isEmpty) return;
     final currentTest = _tests[_currentIndex];
     final testMap = currentTest.toMap();
+
+    _controllers.clear();
     testMap.forEach((key, value) {
       _controllers[key] = TextEditingController(text: value?.toString() ?? '');
     });
+
+    // Handle composite fields
+    _controllers['r_base_curve'] = TextEditingController(
+      text:
+          '${currentTest.rBaseCurveNumerator ?? ''}/${currentTest.rBaseCurveDenominator ?? ''}',
+    );
+    _controllers['r_lens_va'] = TextEditingController(
+      text:
+          '${currentTest.rLensVaNumerator ?? ''}/${currentTest.rLensVaDenominator ?? ''}',
+    );
+    _controllers['l_base_curve'] = TextEditingController(
+      text:
+          '${currentTest.lBaseCurveNumerator ?? ''}/${currentTest.lBaseCurveDenominator ?? ''}',
+    );
+    _controllers['l_lens_va'] = TextEditingController(
+      text:
+          '${currentTest.lLensVaNumerator ?? ''}/${currentTest.lLensVaDenominator ?? ''}',
+    );
   }
 
   void _navigateTests(int delta) {
@@ -89,10 +110,43 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
     final updatedValues = <String, dynamic>{
       'id': _tests[_currentIndex].id,
       'customer_id': _tests[_currentIndex].customerId,
+      'exam_date': DateFormat(
+        'yyyy-MM-dd',
+      ).format(_tests[_currentIndex].examDate),
     };
 
     _controllers.forEach((key, controller) {
-      updatedValues[key] = controller.text;
+      if (key == 'r_base_curve') {
+        final parts = controller.text.split('/');
+        updatedValues['r_base_curve_numerator'] = parts.isNotEmpty
+            ? parts[0]
+            : '';
+        updatedValues['r_base_curve_denominator'] = parts.length > 1
+            ? parts[1]
+            : '';
+      } else if (key == 'r_lens_va') {
+        final parts = controller.text.split('/');
+        updatedValues['r_lens_va_numerator'] = parts.isNotEmpty ? parts[0] : '';
+        updatedValues['r_lens_va_denominator'] = parts.length > 1
+            ? parts[1]
+            : '';
+      } else if (key == 'l_base_curve') {
+        final parts = controller.text.split('/');
+        updatedValues['l_base_curve_numerator'] = parts.isNotEmpty
+            ? parts[0]
+            : '';
+        updatedValues['l_base_curve_denominator'] = parts.length > 1
+            ? parts[1]
+            : '';
+      } else if (key == 'l_lens_va') {
+        final parts = controller.text.split('/');
+        updatedValues['l_lens_va_numerator'] = parts.isNotEmpty ? parts[0] : '';
+        updatedValues['l_lens_va_denominator'] = parts.length > 1
+            ? parts[1]
+            : '';
+      } else {
+        updatedValues[key] = controller.text;
+      }
     });
 
     try {
@@ -237,32 +291,13 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
   }
 
   Widget _buildTestDataForm(ContactLensesTest test) {
-    final fields = test
-        .toMap()
-        .keys
-        .where((k) => k != 'id' && k != 'customer_id' && k != 'exam_date')
-        .toList();
-
-    return GridView.builder(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 250,
-        childAspectRatio: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+      child: LensesTestTables(
+        lensesTest: test,
+        isEditing: _isEditing,
+        controllers: _controllers,
       ),
-      itemCount: fields.length,
-      itemBuilder: (context, index) {
-        final field = fields[index];
-        return TextFormField(
-          controller: _controllers[field],
-          enabled: _isEditing,
-          decoration: InputDecoration(
-            labelText: field.replaceAll('_', ' ').toUpperCase(),
-            isDense: true,
-          ),
-        );
-      },
     );
   }
 }

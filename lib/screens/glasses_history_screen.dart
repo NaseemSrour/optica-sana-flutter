@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
+import '../widgets/glasses_test_table.dart';
 
 class GlassesHistoryScreen extends StatefulWidget {
   final Customer customer;
@@ -233,63 +234,12 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
   }
 
   Widget _buildTestDataForm(GlassesTest test) {
-    final rightEyeFields = [
-      'r_sphere',
-      'r_cylinder',
-      'r_axis',
-      'r_prism',
-      'r_base',
-      'r_va',
-    ];
-    final leftEyeFields = [
-      'l_sphere',
-      'l_cylinder',
-      'l_axis',
-      'l_prism',
-      'l_base',
-      'l_va',
-    ];
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      child: Table(
-        border: TableBorder.all(
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-        ),
-        columnWidths: const {0: IntrinsicColumnWidth()},
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        children: [
-          TableRow(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Eye',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-              ...rightEyeFields.map(
-                (field) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    field.substring(2).replaceAll('_', ' ').toUpperCase(),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          _buildEyeDataRow('Right (OD)', rightEyeFields),
-          _buildEyeDataRow('Left (OS)', leftEyeFields),
-        ],
+      child: GlassesTestTable(
+        glassesTest: test,
+        isEditing: _isEditing,
+        controllers: _controllers,
       ),
     );
   }
