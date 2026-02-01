@@ -86,30 +86,17 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
   Future<void> _saveTest() async {
     if (!_isEditing || _tests.isEmpty) return;
 
-    final currentTestMap = _tests[_currentIndex].toMap();
-    final updatedValues = <String, dynamic>{};
+    final updatedValues = <String, dynamic>{
+      'id': _tests[_currentIndex].id,
+      'customer_id': _tests[_currentIndex].customerId,
+    };
 
     _controllers.forEach((key, controller) {
       updatedValues[key] = controller.text;
     });
 
-    final newMap = Map<String, dynamic>.from(currentTestMap);
-    updatedValues.forEach((key, value) {
-      if (value is String) {
-        if (currentTestMap[key] is int?) {
-          newMap[key] = int.tryParse(value);
-        } else if (currentTestMap[key] is double?) {
-          newMap[key] = double.tryParse(value);
-        } else if (key == 'exam_date') {
-          newMap[key] = value;
-        } else {
-          newMap[key] = value;
-        }
-      }
-    });
-
     try {
-      final updatedTest = ContactLensesTest.fromMap(newMap);
+      final updatedTest = ContactLensesTest.fromMap(updatedValues);
       await widget.customerService.updateContactLensesTest(updatedTest);
       setState(() {
         _tests[_currentIndex] = updatedTest;

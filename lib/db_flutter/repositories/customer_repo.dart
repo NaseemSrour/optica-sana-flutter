@@ -27,7 +27,7 @@ class CustomerRepo {
     return null;
   }
 
-  Future<Customer?> getCustomerBySSN(int customerSSN) async {
+  Future<Customer?> getCustomerBySSN(String customerSSN) async {
     final db = await _dbHelper.database;
     final maps = await db.query(
       'customers',

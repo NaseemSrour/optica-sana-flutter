@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 class Customer {
   int id;
-  int ssn;
+  String ssn;
   String fname;
   String lname;
   String? birthDate;
@@ -17,9 +17,9 @@ class Customer {
   String? occupation;
   String? hobbies;
   String? referer;
-  int? glassesNum;
-  int? lensesNum;
-  bool? mailing;
+  String? glassesNum;
+  String? lensesNum;
+  String? mailing;
   String? notes;
 
   Customer({
@@ -48,7 +48,7 @@ class Customer {
   factory Customer.fromMap(Map<String, dynamic> map) {
     return Customer(
       id: map['id'],
-      ssn: map['ssn'],
+      ssn: map['ssn'].toString(),
       fname: map['fname'],
       lname: map['lname'],
       birthDate: map['birth_date'],
@@ -63,9 +63,9 @@ class Customer {
       occupation: map['occupation'],
       hobbies: map['hobbies'],
       referer: map['referer'],
-      glassesNum: map['glasses_num'],
-      lensesNum: map['lenses_num'],
-      mailing: map['mailing'] == 1,
+      glassesNum: map['glasses_num']?.toString(),
+      lensesNum: map['lenses_num']?.toString(),
+      mailing: map['mailing'],
       notes: map['notes'],
     );
   }
@@ -90,7 +90,7 @@ class Customer {
       'referer': referer,
       'glasses_num': glassesNum,
       'lenses_num': lensesNum,
-      'mailing': mailing == true ? 1 : 0,
+      'mailing': mailing,
       'notes': notes,
     };
   }
@@ -106,46 +106,46 @@ class GlassesTest {
   // --- Right Eye (OD) values ---
   String? rFv;
   String? rSphere;
-  double? rCylinder;
-  int? rAxis;
-  double? rPrism;
+  String? rCylinder;
+  String? rAxis;
+  String? rPrism;
   String? rBase;
   String? rVa;
   String? bothVa;
-  double? rAddRead;
-  double? rAddInt;
-  double? rAddBif;
-  double? rAddMul;
-  double? rHigh;
-  double? rPd;
-  double? sumPd;
-  double? nearPd;
+  String? rAddRead;
+  String? rAddInt;
+  String? rAddBif;
+  String? rAddMul;
+  String? rHigh;
+  String? rPd;
+  String? sumPd;
+  String? nearPd;
   // --- Left Eye (OS) values ---
   String? lFv;
   String? lSphere;
-  double? lCylinder;
-  int? lAxis;
-  double? lPrism;
+  String? lCylinder;
+  String? lAxis;
+  String? lPrism;
   String? lBase;
   String? lVa;
-  double? lAddRead; // Presbyopia addition
-  double? lAddInt;
-  double? lAddBif;
-  double? lAddMul;
-  double? lHigh;
-  double? lPd;
+  String? lAddRead; // Presbyopia addition
+  String? lAddInt;
+  String? lAddBif;
+  String? lAddMul;
+  String? lHigh;
+  String? lPd;
 
   // --- Symptoms / Notes ---
   String? dominantEye;
-  double? rIop;
-  double? lIop;
+  String? rIop;
+  String? lIop;
   String? glassesRole;
   String? lensesMaterial;
-  double? lensesDiameter1;
-  double? lensesDiameter2;
-  double? lensesDiameterDecentrationHorizontal;
-  double? lensesDiameterDecentrationVertical;
-  double? segmentDiameter;
+  String? lensesDiameter1;
+  String? lensesDiameter2;
+  String? lensesDiameterDecentrationHorizontal;
+  String? lensesDiameterDecentrationVertical;
+  String? segmentDiameter;
   String? lensesManufacturer;
   String? lensesColor;
   String? lensesCoated;
@@ -225,45 +225,45 @@ class GlassesTest {
       examiner: map['examiner'],
       rFv: map['r_fv'],
       rSphere: map['r_sphere'],
-      rCylinder: map['r_cylinder'],
-      rAxis: map['r_axis'],
-      rPrism: map['r_prism'],
+      rCylinder: map['r_cylinder']?.toString(),
+      rAxis: map['r_axis']?.toString(),
+      rPrism: map['r_prism']?.toString(),
       rBase: map['r_base'],
       rVa: map['r_va'],
       bothVa: map['both_va'],
-      rAddRead: map['r_add_read'],
-      rAddInt: map['r_add_int'],
-      rAddBif: map['r_add_bif'],
-      rAddMul: map['r_add_mul'],
-      rHigh: map['r_high'],
-      rPd: map['r_pd'],
-      sumPd: map['sum_pd'],
-      nearPd: map['near_pd'],
+      rAddRead: map['r_add_read']?.toString(),
+      rAddInt: map['r_add_int']?.toString(),
+      rAddBif: map['r_add_bif']?.toString(),
+      rAddMul: map['r_add_mul']?.toString(),
+      rHigh: map['r_high']?.toString(),
+      rPd: map['r_pd']?.toString(),
+      sumPd: map['sum_pd']?.toString(),
+      nearPd: map['near_pd']?.toString(),
       lFv: map['l_fv'],
       lSphere: map['l_sphere'],
-      lCylinder: map['l_cylinder'],
-      lAxis: map['l_axis'],
-      lPrism: map['l_prism'],
+      lCylinder: map['l_cylinder']?.toString(),
+      lAxis: map['l_axis']?.toString(),
+      lPrism: map['l_prism']?.toString(),
       lBase: map['l_base'],
       lVa: map['l_va'],
-      lAddRead: map['l_add_read'],
-      lAddInt: map['l_add_int'],
-      lAddBif: map['l_add_bif'],
-      lAddMul: map['l_add_mul'],
-      lHigh: map['l_high'],
-      lPd: map['l_pd'],
+      lAddRead: map['l_add_read']?.toString(),
+      lAddInt: map['l_add_int']?.toString(),
+      lAddBif: map['l_add_bif']?.toString(),
+      lAddMul: map['l_add_mul']?.toString(),
+      lHigh: map['l_high']?.toString(),
+      lPd: map['l_pd']?.toString(),
       dominantEye: map['dominant_eye'],
-      rIop: map['r_iop'],
-      lIop: map['l_iop'],
+      rIop: map['r_iop']?.toString(),
+      lIop: map['l_iop']?.toString(),
       glassesRole: map['glasses_role'],
       lensesMaterial: map['lenses_material'],
-      lensesDiameter1: map['lenses_diameter_1'],
-      lensesDiameter2: map['lenses_diameter_2'],
+      lensesDiameter1: map['lenses_diameter_1']?.toString(),
+      lensesDiameter2: map['lenses_diameter_2']?.toString(),
       lensesDiameterDecentrationHorizontal:
-          map['lenses_diameter_decentration_horizontal'],
+          map['lenses_diameter_decentration_horizontal']?.toString(),
       lensesDiameterDecentrationVertical:
-          map['lenses_diameter_decentration_vertical'],
-      segmentDiameter: map['segment_diameter'],
+          map['lenses_diameter_decentration_vertical']?.toString(),
+      segmentDiameter: map['segment_diameter']?.toString(),
       lensesManufacturer: map['lenses_manufacturer'],
       lensesColor: map['lenses_color'],
       lensesCoated: map['lenses_coated'],
@@ -350,54 +350,54 @@ class ContactLensesTest {
   String? examiner;
 
   // # ===== Keratometry =====
-  double? rRH;
-  double? rRV;
-  double? rAver; // avg of (r_rH and r_rV)
-  double? rKCyl; // elha nos7a, mnjebha b3den
-  int? rAxH; // independent of cylinder
-  double? rRT;
-  double? rRN;
-  double? rRI;
-  double? rRS;
-  double? lRH;
-  double? lRV;
-  double? lAver; // avg of (l_rH and l_rV)
-  double? lKCyl;
-  int? lAxH; // independent of cylinder
-  double? lRT;
-  double? lRN;
-  double? lRI;
-  double? lRS;
+  String? rRH;
+  String? rRV;
+  String? rAver; // avg of (r_rH and r_rV)
+  String? rKCyl; // elha nos7a, mnjebha b3den
+  String? rAxH; // independent of cylinder
+  String? rRT;
+  String? rRN;
+  String? rRI;
+  String? rRS;
+  String? lRH;
+  String? lRV;
+  String? lAver; // avg of (l_rH and l_rV)
+  String? lKCyl;
+  String? lAxH; // independent of cylinder
+  String? lRT;
+  String? lRN;
+  String? lRI;
+  String? lRS;
 
   // ===== Contact Lens Prescription (Right) =====
   String? rLensType;
   String? rManufacturer;
   String? rBrand;
-  double? rDiameter;
-  double? rBaseCurveNumerator;
-  double? rBaseCurveDenominator;
-  double? rLensSph;
-  double? rLensCyl;
-  int? rLensAxis;
+  String? rDiameter;
+  String? rBaseCurveNumerator;
+  String? rBaseCurveDenominator;
+  String? rLensSph;
+  String? rLensCyl;
+  String? rLensAxis;
   String? rMaterial;
   String? rTint;
-  int? rLensVaNumerator;
-  int? rLensVaDenominator;
+  String? rLensVaNumerator;
+  String? rLensVaDenominator;
 
   // ===== Contact Lens Prescription (Left) =====
   String? lLensType;
   String? lManufacturer;
   String? lBrand;
-  double? lDiameter;
-  double? lBaseCurveNumerator;
-  double? lBaseCurveDenominator;
-  double? lLensSph;
-  double? lLensCyl;
-  int? lLensAxis;
+  String? lDiameter;
+  String? lBaseCurveNumerator;
+  String? lBaseCurveDenominator;
+  String? lLensSph;
+  String? lLensCyl;
+  String? lLensAxis;
   String? lMaterial;
   String? lTint;
-  int? lLensVaNumerator;
-  int? lLensVaDenominator;
+  String? lLensVaNumerator;
+  String? lLensVaDenominator;
 
   String? notes;
 
@@ -459,50 +459,50 @@ class ContactLensesTest {
       customerId: map['customer_id'],
       examDate: DateFormat('yyyy-MM-dd').parse(map['exam_date']),
       examiner: map['examiner'],
-      rRH: map['r_rH'],
-      rRV: map['r_rV'],
-      rAver: map['r_aver'],
-      rKCyl: map['r_k_cyl'],
-      rAxH: map['r_axH'],
-      rRT: map['r_rT'],
-      rRN: map['r_rN'],
-      rRI: map['r_rI'],
-      rRS: map['r_rS'],
-      lRH: map['l_rH'],
-      lRV: map['l_rV'],
-      lAver: map['l_aver'],
-      lKCyl: map['l_k_cyl'],
-      lAxH: map['l_axH'],
-      lRT: map['l_rT'],
-      lRN: map['l_rN'],
-      lRI: map['l_rI'],
-      lRS: map['l_rS'],
+      rRH: map['r_rH']?.toString(),
+      rRV: map['r_rV']?.toString(),
+      rAver: map['r_aver']?.toString(),
+      rKCyl: map['r_k_cyl']?.toString(),
+      rAxH: map['r_axH']?.toString(),
+      rRT: map['r_rT']?.toString(),
+      rRN: map['r_rN']?.toString(),
+      rRI: map['r_rI']?.toString(),
+      rRS: map['r_rS']?.toString(),
+      lRH: map['l_rH']?.toString(),
+      lRV: map['l_rV']?.toString(),
+      lAver: map['l_aver']?.toString(),
+      lKCyl: map['l_k_cyl']?.toString(),
+      lAxH: map['l_axH']?.toString(),
+      lRT: map['l_rT']?.toString(),
+      lRN: map['l_rN']?.toString(),
+      lRI: map['l_rI']?.toString(),
+      lRS: map['l_rS']?.toString(),
       rLensType: map['r_lens_type'],
       rManufacturer: map['r_manufacturer'],
       rBrand: map['r_brand'],
-      rDiameter: map['r_diameter'],
-      rBaseCurveNumerator: map['r_base_curve_numerator'],
-      rBaseCurveDenominator: map['r_base_curve_denominator'],
-      rLensSph: map['r_lens_sph'],
-      rLensCyl: map['r_lens_cyl'],
-      rLensAxis: map['r_lens_axis'],
+      rDiameter: map['r_diameter']?.toString(),
+      rBaseCurveNumerator: map['r_base_curve_numerator']?.toString(),
+      rBaseCurveDenominator: map['r_base_curve_denominator']?.toString(),
+      rLensSph: map['r_lens_sph']?.toString(),
+      rLensCyl: map['r_lens_cyl']?.toString(),
+      rLensAxis: map['r_lens_axis']?.toString(),
       rMaterial: map['r_material'],
       rTint: map['r_tint'],
-      rLensVaNumerator: map['r_lens_va_numerator'],
-      rLensVaDenominator: map['r_lens_va_denominator'],
+      rLensVaNumerator: map['r_lens_va_numerator']?.toString(),
+      rLensVaDenominator: map['r_lens_va_denominator']?.toString(),
       lLensType: map['l_lens_type'],
       lManufacturer: map['l_manufacturer'],
       lBrand: map['l_brand'],
-      lDiameter: map['l_diameter'],
-      lBaseCurveNumerator: map['l_base_curve_numerator'],
-      lBaseCurveDenominator: map['l_base_curve_denominator'],
-      lLensSph: map['l_lens_sph'],
-      lLensCyl: map['l_lens_cyl'],
-      lLensAxis: map['l_lens_axis'],
+      lDiameter: map['l_diameter']?.toString(),
+      lBaseCurveNumerator: map['l_base_curve_numerator']?.toString(),
+      lBaseCurveDenominator: map['l_base_curve_denominator']?.toString(),
+      lLensSph: map['l_lens_sph']?.toString(),
+      lLensCyl: map['l_lens_cyl']?.toString(),
+      lLensAxis: map['l_lens_axis']?.toString(),
       lMaterial: map['l_material'],
       lTint: map['l_tint'],
-      lLensVaNumerator: map['l_lens_va_numerator'],
-      lLensVaDenominator: map['l_lens_va_denominator'],
+      lLensVaNumerator: map['l_lens_va_numerator']?.toString(),
+      lLensVaDenominator: map['l_lens_va_denominator']?.toString(),
       notes: map['notes'],
     );
   }

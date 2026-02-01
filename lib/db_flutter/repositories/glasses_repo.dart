@@ -39,7 +39,6 @@ class GlassesRepo {
       orderBy:
           'exam_date DESC', // DESC works because of 'yyyy-MM-dd' format in DB. It's important that leading zeros are present. For example, '2023-05-09' and not '2023-5-9' in DB.
     );
-    print(maps.toString());
     return maps.map((map) => GlassesTest.fromMap(map)).toList();
   }
 

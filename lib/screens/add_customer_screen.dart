@@ -30,7 +30,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _hobbiesController = TextEditingController();
   final _refererController = TextEditingController();
   final _notesController = TextEditingController();
-  bool _mailing = false;
+  String _mailing = 'false';
 
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
@@ -70,7 +70,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     if (_formKey.currentState!.validate()) {
       final newCustomer = models.Customer(
         id: 0, // This is a dummy ID - it will be set by the database upon INSERTing.
-        ssn: int.tryParse(_ssnController.text) ?? 0,
+        ssn: _ssnController.text,
         fname: _fnameController.text,
         lname: _lnameController.text,
         birthDate: _formatDateForDb(_birthDateController.text),
@@ -206,10 +206,10 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
                 CheckboxListTile(
                   title: const Text('Mailing'),
-                  value: _mailing,
+                  value: _mailing == 'true',
                   onChanged: (bool? value) {
                     setState(() {
-                      _mailing = value ?? false;
+                      _mailing = (value ?? false).toString();
                     });
                   },
                 ),

@@ -62,7 +62,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
 
       final updatedCustomer = Customer(
         id: widget.customer.id,
-        ssn: int.parse(_controllers['ssn']!.text),
+        ssn: _controllers['ssn']!.text,
         fname: _controllers['fname']!.text,
         lname: _controllers['lname']!.text,
         birthDate: _controllers['birth_date']!.text,

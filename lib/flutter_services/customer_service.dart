@@ -34,7 +34,7 @@ class CustomerService {
     if (int.tryParse(customerSSN) == null) {
       throw Exception("ID must contain only numbers!");
     }
-    return _customerRepo.getCustomerBySSN(int.parse(customerSSN));
+    return _customerRepo.getCustomerBySSN(customerSSN);
   }
 
   Future<Customer?> getCustomer(int customerId) {
@@ -98,7 +98,7 @@ class CustomerService {
 
   // Contact Lenses Test Operations
   Future<int> addContactLensesTest(ContactLensesTest test) async {
-    await _validateInputContactLensesTest(test);
+    _validateInputContactLensesTest(test);
     return await _lensesRepo.addTest(test);
   }
 
@@ -126,7 +126,7 @@ class CustomerService {
 
   // Validation helper functions
   void _validateInputCustomer(Customer customer) {
-    if (customer.ssn.toString().length != 9) {
+    if (customer.ssn.length != 9) {
       throw Exception("ID should be 9 digits long!");
     }
     if (customer.fname.trim().isEmpty || customer.lname.trim().isEmpty) {
@@ -143,19 +143,23 @@ class CustomerService {
   Future<void> _validateInputGlassesTest(GlassesTest test) async {
     await _validateCustomerExists(test.customerId);
 
-    if (test.rCylinder == null || test.rCylinder == 0) {
-      if (test.rAxis != null) {
+    final rCylinder = double.tryParse(test.rCylinder ?? '0') ?? 0;
+    final rAxis = int.tryParse(test.rAxis ?? '');
+    if (rCylinder == 0) {
+      if (rAxis != null) {
         throw Exception("R_Axis must be null when cylinder is 0.00");
       }
-    } else if (test.rAxis == null || test.rAxis! < 0 || test.rAxis! > 180) {
+    } else if (rAxis == null || rAxis < 0 || rAxis > 180) {
       throw Exception("R_Axis must be an integer between 0 and 180");
     }
 
-    if (test.lCylinder == null || test.lCylinder == 0) {
-      if (test.lAxis != null) {
+    final lCylinder = double.tryParse(test.lCylinder ?? '0') ?? 0;
+    final lAxis = int.tryParse(test.lAxis ?? '');
+    if (lCylinder == 0) {
+      if (lAxis != null) {
         throw Exception("L_Axis must be null when cylinder is 0.00");
       }
-    } else if (test.lAxis == null || test.lAxis! < 0 || test.lAxis! > 180) {
+    } else if (lAxis == null || lAxis < 0 || lAxis > 180) {
       throw Exception("L_Axis must be an integer between 0 and 180");
     }
   }
@@ -167,23 +171,24 @@ class CustomerService {
       throw Exception("Exam date is required!");
     }
 
-    if (test.rLensCyl == null || test.rLensCyl == 0) {
-      if (test.rLensAxis != null) {
+    final rLensCyl = double.tryParse(test.rLensCyl ?? '0') ?? 0;
+    final rLensAxis = int.tryParse(test.rLensAxis ?? '');
+
+    if (rLensCyl == 0) {
+      if (rLensAxis != null) {
         throw Exception("R_lens_axis must be null when cylinder is null or 0");
       }
-    } else if (test.rLensAxis == null ||
-        test.rLensAxis! < 0 ||
-        test.rLensAxis! > 180) {
+    } else if (rLensAxis == null || rLensAxis < 0 || rLensAxis > 180) {
       throw Exception("R_lens_Axis must be an integer between 0 and 180");
     }
 
-    if (test.lLensCyl == null || test.lLensCyl == 0) {
-      if (test.lLensAxis != null) {
+    final lLensCyl = double.tryParse(test.lLensCyl ?? '0') ?? 0;
+    final lLensAxis = int.tryParse(test.lLensAxis ?? '');
+    if (lLensCyl == 0) {
+      if (lLensAxis != null) {
         throw Exception("L_lens_axis must be null when cylinder is null or 0");
       }
-    } else if (test.lLensAxis == null ||
-        test.lLensAxis! < 0 ||
-        test.lLensAxis! > 180) {
+    } else if (lLensAxis == null || lLensAxis < 0 || lLensAxis > 180) {
       throw Exception("L_lens_Axis must be an integer between 0 and 180");
     }
   }

@@ -62,31 +62,19 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   Future<void> _saveTest() async {
     if (_formKey.currentState!.validate()) {
       final newMap = <String, dynamic>{
-        'id': null,
+        'id': 0,
         'customer_id': widget.customer.id,
       };
       _controllers.forEach((key, controller) {
-        newMap[key] = controller.text;
+        if (key == 'exam_date') {
+          newMap[key] = _formatDateForDb(controller.text);
+        } else {
+          newMap[key] = controller.text;
+        }
       });
 
       try {
-        final newTest = ContactLensesTest.fromMap(
-          newMap.map((key, value) {
-            if (value is String) {
-              if (key.contains('date')) {
-                return MapEntry(key, _formatDateForDb(value));
-              }
-              final asDouble = double.tryParse(value);
-              if (asDouble != null) {
-                if (asDouble == asDouble.toInt()) {
-                  return MapEntry(key, asDouble.toInt());
-                }
-                return MapEntry(key, asDouble);
-              }
-            }
-            return MapEntry(key, value);
-          }),
-        );
+        final newTest = ContactLensesTest.fromMap(newMap);
 
         await widget.customerService.addContactLensesTest(newTest);
         Navigator.pop(context);
