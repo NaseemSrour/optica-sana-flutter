@@ -236,10 +236,147 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
   Widget _buildTestDataForm(GlassesTest test) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      child: GlassesTestTable(
-        glassesTest: test,
-        isEditing: _isEditing,
-        controllers: _controllers,
+      child: Column(
+        children: [
+          GlassesTestTable(
+            glassesTest: test,
+            isEditing: _isEditing,
+            controllers: _controllers,
+          ),
+          const SizedBox(height: 20),
+          _buildAdditionalInfo(test),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdditionalInfo(GlassesTest test) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: _buildTextField('both_va', 'Both VA')),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildTextField('sum_pd', 'Sum PD')),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildTextField('near_pd', 'Near PD')),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField('dominant_eye', 'Dominant Eye'),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildTextField('r_iop', 'R IOP')),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildTextField('l_iop', 'L IOP')),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildTextField('glasses_role', 'Glasses Role'),
+              const SizedBox(height: 16),
+              _buildTextField('lenses_material', 'Lenses Material'),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      'lenses_diameter_1',
+                      'Lenses Diameter 1',
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      'lenses_diameter_2',
+                      'Lenses Diameter 2',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      'lenses_diameter_decentration_horizontal',
+                      'Lenses Dia. Decent. H',
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      'lenses_diameter_decentration_vertical',
+                      'Lenses Dia. Decent. V',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildTextField('segment_diameter', 'Segment Diameter'),
+              const SizedBox(height: 16),
+              _buildTextField('diagnosis', 'Diagnosis'),
+            ],
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            children: [
+              _buildTextField('lenses_manufacturer', 'Lenses Manufacturer'),
+              const SizedBox(height: 16),
+              _buildTextField('lenses_color', 'Lenses Color'),
+              const SizedBox(height: 16),
+              _buildTextField('lenses_coated', 'Lenses Coated'),
+              const SizedBox(height: 16),
+              _buildTextField('catalog_num', 'Catalog Num'),
+              const SizedBox(height: 16),
+              _buildTextField('frame_manufacturer', 'Frame Manufacturer'),
+              const SizedBox(height: 16),
+              _buildTextField('frame_supplier', 'Frame Supplier'),
+              const SizedBox(height: 16),
+              _buildTextField('frame_model', 'Frame Model'),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(child: _buildTextField('frame_size', 'Frame Size')),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      'frame_bar_length',
+                      'Frame Bar Length',
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField('frame_color', 'Frame Color'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildTextField('notes', 'Notes', maxLines: 5),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(String key, String label, {int? maxLines = 1}) {
+    return TextFormField(
+      controller: _controllers[key],
+      enabled: _isEditing,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        isDense: true,
       ),
     );
   }

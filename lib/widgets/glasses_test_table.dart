@@ -77,20 +77,21 @@ class GlassesTestTable extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 20),
-        if (isEditing)
-          TextFormField(
-            controller: controllers!['notes'],
-            decoration: const InputDecoration(
-              labelText: 'Notes',
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 3,
-          )
-        else
-          Text(
-            'Notes: ${glassesTest!.notes ?? 'N/A'}',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
+        // The notes field is now displayed in the main screen
+        // if (isEditing)
+        //   TextFormField(
+        //     controller: controllers!['notes'],
+        //     decoration: const InputDecoration(
+        //       labelText: 'Notes',
+        //       border: OutlineInputBorder(),
+        //     ),
+        //     maxLines: 3,
+        //   )
+        // else
+        //   Text(
+        //     'Notes: ${glassesTest!.notes ?? 'N/A'}',
+        //     style: Theme.of(context).textTheme.bodyLarge,
+        //   ),
       ],
     );
   }
