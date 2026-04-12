@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:optica_sana/themes/app_theme.dart';
 import 'package:optica_sana/screens/glasses_history_screen.dart';
 import 'package:optica_sana/screens/add_glasses_test_screen.dart';
 import 'package:optica_sana/screens/add_lenses_test_screen.dart';
@@ -66,7 +68,11 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error fetching latest glasses test: $e')),
+          SnackBar(
+            content: Text(
+              'msg_glasses_fetched_error'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
         );
       }
     }
@@ -109,12 +115,16 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         await widget.customerService.updateCustomer(updatedCustomer);
         _toggleEditMode();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Customer saved successfully!')),
+          SnackBar(content: Text('msg_customer_saved'.tr())),
         );
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error saving customer: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'msg_customer_save_error'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
+        );
       }
     }
   }
@@ -135,6 +145,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
             SaveIntent(),
         LogicalKeySet(LogicalKeyboardKey.f2): EditIntent(),
+        LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyG):
             ViewGlassesIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyL):
@@ -156,6 +167,16 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         ),
         EditIntent: CallbackAction<EditIntent>(
           onInvoke: (intent) => _toggleEditMode(),
+        ),
+        BackIntent: CallbackAction<BackIntent>(
+          onInvoke: (intent) {
+            if (_isEditing) {
+              _toggleEditMode();
+            } else {
+              Navigator.pop(context);
+            }
+            return null;
+          },
         ),
         ViewGlassesIntent: CallbackAction<ViewGlassesIntent>(
           onInvoke: (intent) => _navigateTo(
@@ -192,11 +213,19 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Customer Details${_isEditing ? " (Editing)" : ""}'),
+          title: Text(
+            _isEditing
+                ? 'title_customer_details_editing'.tr()
+                : 'title_customer_details'.tr(),
+          ),
           actions: [
             IconButton(
-              tooltip: 'View Glasses History (Ctrl+G)',
-              icon: const Icon(Icons.visibility),
+              tooltip: 'tooltip_view_glasses'.tr(),
+              icon: Image.asset(
+                'assets/icons/glasses_history.png',
+                width: 48,
+                height: 48,
+              ),
               onPressed: () => _navigateTo(
                 GlassesHistoryScreen(
                   customer: widget.customer,
@@ -205,8 +234,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
               ),
             ),
             IconButton(
-              tooltip: 'View Lenses History (Ctrl+L)',
-              icon: const Icon(Icons.contact_page),
+              tooltip: 'tooltip_view_lenses'.tr(),
+              icon: Image.asset(
+                'assets/icons/lenses_history.png',
+                width: 48,
+                height: 48,
+              ),
               onPressed: () => _navigateTo(
                 LensesHistoryScreen(
                   customer: widget.customer,
@@ -216,8 +249,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             ),
             const VerticalDivider(),
             IconButton(
-              tooltip: 'Add New Glasses Test (Ctrl+Shift+G)',
-              icon: const Icon(Icons.add_box),
+              tooltip: 'tooltip_add_glasses_test'.tr(),
+              icon: Image.asset(
+                'assets/icons/add_glasses.png',
+                width: 48,
+                height: 48,
+              ),
               onPressed: () => _navigateTo(
                 AddGlassesTestScreen(
                   customer: widget.customer,
@@ -226,8 +263,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
               ),
             ),
             IconButton(
-              tooltip: 'Add New Lenses Test (Ctrl+Shift+L)',
-              icon: const Icon(Icons.add_circle),
+              tooltip: 'tooltip_add_lenses_test'.tr(),
+              icon: Image.asset(
+                'assets/icons/add_lenses.png',
+                width: 48,
+                height: 48,
+              ),
               onPressed: () => _navigateTo(
                 AddLensesTestScreen(
                   customer: widget.customer,
@@ -237,22 +278,27 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             ),
             const VerticalDivider(),
             IconButton(
-              tooltip: _isEditing ? 'Save (Ctrl+S)' : 'Edit (F2)',
+              tooltip: _isEditing ? 'tooltip_save'.tr() : 'tooltip_edit'.tr(),
               icon: Icon(_isEditing ? Icons.save : Icons.edit),
               onPressed: _isEditing ? _saveCustomer : _toggleEditMode,
             ),
           ],
         ),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _buildOtherDetailsGrid(),
-                const SizedBox(height: 20),
-                GlassesTestTable(glassesTest: _latestGlassesTest),
-              ],
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  _buildOtherDetailsGrid(),
+                  const SizedBox(height: 20),
+                  GlassesTestTable(glassesTest: _latestGlassesTest),
+                ],
+              ),
             ),
           ),
         ),
@@ -262,22 +308,22 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
 
   Widget _buildOtherDetailsGrid() {
     final fields = {
-      "SSN": "ssn",
-      "First Name": "fname",
-      "Last Name": "lname",
-      "Birth Date": "birth_date",
-      "Sex": "sex",
-      "Home Phone": "tel_home",
-      "Mobile Phone": "tel_mobile",
-      "Address": "address",
-      "Town": "town",
-      "Postal Code": "postal_code",
-      "Status": "status",
-      "Organization": "org",
-      "Occupation": "occupation",
-      "Hobbies": "hobbies",
-      "Referer": "referer",
-      "Notes": "notes",
+      'field_ssn': 'ssn',
+      'field_fname': 'fname',
+      'field_lname': 'lname',
+      'field_birth_date': 'birth_date',
+      'field_sex': 'sex',
+      'field_tel_home': 'tel_home',
+      'field_tel_mobile': 'tel_mobile',
+      'field_address': 'address',
+      'field_town': 'town',
+      'field_postal_code': 'postal_code',
+      'field_status': 'status',
+      'field_org': 'org',
+      'field_occupation': 'occupation',
+      'field_hobbies': 'hobbies',
+      'field_referer': 'referer',
+      'field_notes': 'notes',
     };
 
     return GridView.builder(
@@ -295,11 +341,18 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         return TextFormField(
           controller: _controllers[entry.value],
           enabled: _isEditing,
-          decoration: InputDecoration(labelText: entry.key, isDense: true),
+          style: TextStyle(
+            color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
+            fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
+          ),
+          decoration: InputDecoration(
+            labelText: entry.key.tr(),
+            isDense: true,
+          ),
           validator: (value) {
-            if (['SSN', 'First Name', 'Last Name'].contains(entry.key)) {
+            if (['field_ssn', 'field_fname', 'field_lname'].contains(entry.key)) {
               if (value == null || value.isEmpty) {
-                return 'Please enter a value';
+                return 'err_value'.tr();
               }
             }
             return null;
@@ -317,6 +370,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
 class SaveIntent extends Intent {}
 
 class EditIntent extends Intent {}
+
+class BackIntent extends Intent {}
 
 class ViewGlassesIntent extends Intent {}
 

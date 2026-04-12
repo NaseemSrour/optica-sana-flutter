@@ -1,6 +1,9 @@
+import 'dart:ui' as ui;
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../db_flutter/models.dart';
+import '../themes/app_theme.dart';
 
 class LensesTestTables extends StatelessWidget {
   final ContactLensesTest? lensesTest;
@@ -17,14 +20,10 @@ class LensesTestTables extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (lensesTest == null) {
-      return const Center(
-        child: Text("No contact lenses test data available."),
-      );
+      return Center(child: Text('msg_no_lenses_data'.tr()));
     }
 
-    final examDate = lensesTest!.examDate != null
-        ? DateFormat('dd/MM/yyyy').format(lensesTest!.examDate!)
-        : 'N/A';
+    final examDate = DateFormat('dd/MM/yyyy').format(lensesTest!.examDate);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +31,7 @@ class LensesTestTables extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
-            'Last Lenses Test - $examDate',
+            '${'label_last_lenses'.tr()} - $examDate',
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
@@ -47,27 +46,30 @@ class LensesTestTables extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Keratometry", style: Theme.of(context).textTheme.titleMedium),
-        Table(
-          border: TableBorder.all(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+        Text('section_keratometry'.tr(), style: Theme.of(context).textTheme.titleMedium),
+        Directionality(
+          textDirection: ui.TextDirection.ltr,
+          child: Table(
+            border: TableBorder.all(
+              color: AppColors.tableBorder,
+            ),
+            columnWidths: const {0: IntrinsicColumnWidth()},
+            children: [
+              _buildKeratometryHeaders(context),
+              _buildKeratometryRow(
+                context,
+                'R',
+                _getRightKeratometryData(),
+                _getRightKeratometryKeys(),
+              ),
+              _buildKeratometryRow(
+                context,
+                'L',
+                _getLeftKeratometryData(),
+                _getLeftKeratometryKeys(),
+              ),
+            ],
           ),
-          columnWidths: const {0: IntrinsicColumnWidth()},
-          children: [
-            _buildKeratometryHeaders(context),
-            _buildKeratometryRow(
-              context,
-              'R',
-              _getRightKeratometryData(),
-              _getRightKeratometryKeys(),
-            ),
-            _buildKeratometryRow(
-              context,
-              'L',
-              _getLeftKeratometryData(),
-              _getLeftKeratometryKeys(),
-            ),
-          ],
         ),
       ],
     );
@@ -89,7 +91,7 @@ class LensesTestTables extends StatelessWidget {
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
       children: [
         _headerCell(context, ''),
-        ...headers.map((h) => _headerCell(context, h)).toList(),
+        ...headers.map((h) => _headerCell(context, h)),
       ],
     );
   }
@@ -173,29 +175,32 @@ class LensesTestTables extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Contact Lens Prescription",
+          'section_lens_prescription'.tr(),
           style: Theme.of(context).textTheme.titleMedium,
         ),
-        Table(
-          border: TableBorder.all(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+        Directionality(
+          textDirection: ui.TextDirection.ltr,
+          child: Table(
+            border: TableBorder.all(
+              color: AppColors.tableBorder,
+            ),
+            columnWidths: const {0: IntrinsicColumnWidth()},
+            children: [
+              _buildPrescriptionHeaders(context),
+              _buildPrescriptionRow(
+                context,
+                'R',
+                _getRightPrescriptionData(),
+                _getRightPrescriptionKeys(),
+              ),
+              _buildPrescriptionRow(
+                context,
+                'L',
+                _getLeftPrescriptionData(),
+                _getLeftPrescriptionKeys(),
+              ),
+            ],
           ),
-          columnWidths: const {0: IntrinsicColumnWidth()},
-          children: [
-            _buildPrescriptionHeaders(context),
-            _buildPrescriptionRow(
-              context,
-              'R',
-              _getRightPrescriptionData(),
-              _getRightPrescriptionKeys(),
-            ),
-            _buildPrescriptionRow(
-              context,
-              'L',
-              _getLeftPrescriptionData(),
-              _getLeftPrescriptionKeys(),
-            ),
-          ],
         ),
       ],
     );
@@ -218,7 +223,7 @@ class LensesTestTables extends StatelessWidget {
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
       children: [
         _headerCell(context, ''),
-        ...headers.map((h) => _headerCell(context, h)).toList(),
+        ...headers.map((h) => _headerCell(context, h)),
       ],
     );
   }
@@ -311,9 +316,10 @@ class LensesTestTables extends StatelessWidget {
       child: Center(
         child: Text(
           text,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          style: TextStyle(
+            color: isRowHeader ? AppColors.label : AppColors.displayValue,
             fontWeight: FontWeight.bold,
-            color: isRowHeader ? null : Colors.white,
+            fontSize: 14,
           ),
         ),
       ),
@@ -322,7 +328,13 @@ class LensesTestTables extends StatelessWidget {
 
   Widget _dataCell(String text) {
     return Center(
-      child: Padding(padding: const EdgeInsets.all(8.0), child: Text(text)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          text,
+          style: const TextStyle(color: AppColors.displayValue),
+        ),
+      ),
     );
   }
 
@@ -331,11 +343,16 @@ class LensesTestTables extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: TextFormField(
         controller: controllers![fieldKey],
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: AppColors.inputValue,
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           isDense: true,
           border: OutlineInputBorder(),
+          filled: false,
         ),
-        textAlign: TextAlign.center,
       ),
     );
   }

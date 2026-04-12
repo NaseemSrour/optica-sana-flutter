@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../db_flutter/bootstrap.dart';
 import '../db_flutter/models.dart' as models;
@@ -14,6 +16,7 @@ class AddCustomerScreen extends StatefulWidget {
 
 class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _focusNode = FocusNode();
   final _ssnController = TextEditingController();
   final _fnameController = TextEditingController();
   final _lnameController = TextEditingController();
@@ -35,12 +38,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
     try {
-      // Parse with d/M/yyyy to allow for single-digit day/month
       final inputDate = DateFormat('d/M/yyyy').parse(date);
-      // Format to yyyy-MM-dd to ensure leading zeros for DB sorting
       return DateFormat('yyyy-MM-dd').format(inputDate);
     } catch (e) {
-      // If parsing fails, return original string.
       return date;
     }
   }
@@ -63,13 +63,14 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     _hobbiesController.dispose();
     _refererController.dispose();
     _notesController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   Future<void> _saveCustomer() async {
     if (_formKey.currentState!.validate()) {
       final newCustomer = models.Customer(
-        id: 0, // This is a dummy ID - it will be set by the database upon INSERTing.
+        id: 0,
         ssn: _ssnController.text,
         fname: _fnameController.text,
         lname: _lnameController.text,
@@ -93,15 +94,19 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         await widget.customerService.addCustomer(newCustomer);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Customer added successfully')),
+            SnackBar(content: Text('msg_customer_added'.tr())),
           );
           Navigator.pop(context);
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Failed to add customer: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'msg_customer_add_failed'.tr(namedArgs: {'error': e.toString()}),
+              ),
+            ),
+          );
         }
       }
     }
@@ -109,116 +114,145 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Add New Customer')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _fnameController,
-                  decoration: const InputDecoration(labelText: 'First Name'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a first name';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _lnameController,
-                  decoration: const InputDecoration(labelText: 'Last Name'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a last name';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _ssnController,
-                  decoration: const InputDecoration(labelText: 'SSN'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a SSN';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _birthDateController,
-                  decoration: const InputDecoration(
-                    labelText: 'Birth Date',
-                    hintText: 'DD/MM/YYYY',
+    return FocusableActionDetector(
+      autofocus: true,
+      focusNode: _focusNode,
+      shortcuts: {
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
+            SaveIntent(),
+        LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
+      },
+      actions: {
+        SaveIntent: CallbackAction<SaveIntent>(
+          onInvoke: (_) => _saveCustomer(),
+        ),
+        BackIntent: CallbackAction<BackIntent>(
+          onInvoke: (_) {
+            Navigator.pop(context);
+            return null;
+          },
+        ),
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('title_add_customer'.tr()),
+          actions: [
+            Tooltip(
+              message: 'shortcut_hint'.tr(),
+              child: const Icon(Icons.keyboard, color: Colors.white38, size: 18),
+            ),
+            const SizedBox(width: 8),
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _fnameController,
+                    decoration: InputDecoration(labelText: 'field_fname'.tr()),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'err_fname'.tr();
+                      }
+                      return null;
+                    },
                   ),
-                ),
-                TextFormField(
-                  controller: _sexController,
-                  decoration: const InputDecoration(labelText: 'Sex'),
-                ),
-                TextFormField(
-                  controller: _telHomeController,
-                  decoration: const InputDecoration(labelText: 'Home Phone'),
-                ),
-                TextFormField(
-                  controller: _telMobileController,
-                  decoration: const InputDecoration(labelText: 'Mobile Phone'),
-                ),
-                TextFormField(
-                  controller: _addressController,
-                  decoration: const InputDecoration(labelText: 'Address'),
-                ),
-                TextFormField(
-                  controller: _townController,
-                  decoration: const InputDecoration(labelText: 'Town'),
-                ),
-                TextFormField(
-                  controller: _postalCodeController,
-                  decoration: const InputDecoration(labelText: 'Postal Code'),
-                ),
-                TextFormField(
-                  controller: _statusController,
-                  decoration: const InputDecoration(labelText: 'Status'),
-                ),
-                TextFormField(
-                  controller: _orgController,
-                  decoration: const InputDecoration(labelText: 'Organization'),
-                ),
-                TextFormField(
-                  controller: _occupationController,
-                  decoration: const InputDecoration(labelText: 'Occupation'),
-                ),
-                TextFormField(
-                  controller: _hobbiesController,
-                  decoration: const InputDecoration(labelText: 'Hobbies'),
-                ),
-                TextFormField(
-                  controller: _refererController,
-                  decoration: const InputDecoration(labelText: 'Referer'),
-                ),
-                TextFormField(
-                  controller: _notesController,
-                  decoration: const InputDecoration(labelText: 'Notes'),
-                ),
-                CheckboxListTile(
-                  title: const Text('Mailing'),
-                  value: _mailing == 'true',
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _mailing = (value ?? false).toString();
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _saveCustomer,
-                  child: const Text('Save Customer'),
-                ),
-              ],
+                  TextFormField(
+                    controller: _lnameController,
+                    decoration: InputDecoration(labelText: 'field_lname'.tr()),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'err_lname'.tr();
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: _ssnController,
+                    decoration: InputDecoration(labelText: 'field_ssn'.tr()),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'err_ssn'.tr();
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: _birthDateController,
+                    decoration: InputDecoration(
+                      labelText: 'field_birth_date'.tr(),
+                      hintText: 'hint_date'.tr(),
+                    ),
+                  ),
+                  TextFormField(
+                    controller: _sexController,
+                    decoration: InputDecoration(labelText: 'field_sex'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _telHomeController,
+                    decoration: InputDecoration(labelText: 'field_tel_home'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _telMobileController,
+                    decoration: InputDecoration(labelText: 'field_tel_mobile'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _addressController,
+                    decoration: InputDecoration(labelText: 'field_address'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _townController,
+                    decoration: InputDecoration(labelText: 'field_town'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _postalCodeController,
+                    decoration: InputDecoration(labelText: 'field_postal_code'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _statusController,
+                    decoration: InputDecoration(labelText: 'field_status'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _orgController,
+                    decoration: InputDecoration(labelText: 'field_org'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _occupationController,
+                    decoration: InputDecoration(labelText: 'field_occupation'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _hobbiesController,
+                    decoration: InputDecoration(labelText: 'field_hobbies'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _refererController,
+                    decoration: InputDecoration(labelText: 'field_referer'.tr()),
+                  ),
+                  TextFormField(
+                    controller: _notesController,
+                    decoration: InputDecoration(labelText: 'field_notes'.tr()),
+                  ),
+                  CheckboxListTile(
+                    title: Text('field_mailing'.tr()),
+                    value: _mailing == 'true',
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _mailing = (value ?? false).toString();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _saveCustomer,
+                    child: Text('btn_save_customer'.tr()),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -226,3 +260,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     );
   }
 }
+
+class SaveIntent extends Intent {}
+
+class BackIntent extends Intent {}

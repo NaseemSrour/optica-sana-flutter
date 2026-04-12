@@ -1,7 +1,11 @@
+import 'dart:ui' as ui;
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
+import '../themes/app_theme.dart';
 
 class AddLensesTestScreen extends StatefulWidget {
   final Customer customer;
@@ -19,17 +23,15 @@ class AddLensesTestScreen extends StatefulWidget {
 
 class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _focusNode = FocusNode();
   final _controllers = <String, TextEditingController>{};
 
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
     try {
-      // Parse with d/M/yyyy to allow for single-digit day/month
       final inputDate = DateFormat('d/M/yyyy').parse(date);
-      // Format to yyyy-MM-dd to ensure leading zeros for DB sorting
       return DateFormat('yyyy-MM-dd').format(inputDate);
     } catch (e) {
-      // If parsing fails, return original string.
       return date;
     }
   }
@@ -39,7 +41,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     super.initState();
     final sampleTest = ContactLensesTest(
       id: 65454,
-      customerId: widget.customer.id!,
+      customerId: widget.customer.id,
       examDate: DateTime.now(),
     );
     sampleTest.toMap().forEach((key, value) {
@@ -56,6 +58,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   @override
   void dispose() {
     _controllers.forEach((_, controller) => controller.dispose());
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -75,46 +78,84 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
 
       try {
         final newTest = ContactLensesTest.fromMap(newMap);
-
         await widget.customerService.addContactLensesTest(newTest);
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('New contact lenses test saved successfully!'),
-          ),
-        );
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('msg_lenses_saved'.tr())),
+          );
+        }
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error saving test: $e')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'msg_lenses_save_error'.tr(namedArgs: {'error': e.toString()}),
+              ),
+            ),
+          );
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Add New Lenses Test for ${widget.customer.fname}'),
-        actions: [
-          IconButton(icon: const Icon(Icons.save), onPressed: _saveTest),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildNonTableFields(),
-              const SizedBox(height: 20),
-              _buildKeratometryTable(context),
-              const SizedBox(height: 20),
-              _buildPrescriptionTable(context),
-              const SizedBox(height: 20),
-              _buildNotesField(),
-            ],
+    return FocusableActionDetector(
+      autofocus: true,
+      focusNode: _focusNode,
+      shortcuts: {
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
+            SaveIntent(),
+        LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
+      },
+      actions: {
+        SaveIntent: CallbackAction<SaveIntent>(
+          onInvoke: (_) => _saveTest(),
+        ),
+        BackIntent: CallbackAction<BackIntent>(
+          onInvoke: (_) {
+            Navigator.pop(context);
+            return null;
+          },
+        ),
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'title_add_lenses'.tr(
+              namedArgs: {'name': widget.customer.fname},
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.save),
+              tooltip: 'tooltip_save'.tr(),
+              onPressed: _saveTest,
+            ),
+          ],
+        ),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildNonTableFields(),
+                  const SizedBox(height: 20),
+                  _buildKeratometryTable(context),
+                  const SizedBox(height: 20),
+                  _buildPrescriptionTable(context),
+                  const SizedBox(height: 20),
+                  _buildNotesField(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -123,6 +164,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
 
   Widget _buildNonTableFields() {
     final keys = ['exam_date', 'examiner'];
+    final labels = ['field_exam_date'.tr(), 'field_examiner'.tr()];
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -137,9 +179,13 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         final key = keys[index];
         return TextFormField(
           controller: _controllers[key],
+          style: const TextStyle(
+            color: AppColors.inputValue,
+            fontWeight: FontWeight.w600,
+          ),
           decoration: InputDecoration(
-            labelText: key.replaceAll('_', ' ').toUpperCase(),
-            hintText: key.contains('date') ? 'DD/MM/YYYY' : null,
+            labelText: labels[index],
+            hintText: key.contains('date') ? 'hint_date'.tr() : null,
             isDense: true,
           ),
         );
@@ -151,18 +197,20 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Keratometry", style: Theme.of(context).textTheme.titleMedium),
-        Table(
-          border: TableBorder.all(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+        Text('section_keratometry'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        Directionality(
+          textDirection: ui.TextDirection.ltr,
+          child: Table(
+            border: TableBorder.all(color: AppColors.tableBorder),
+            columnWidths: const {0: IntrinsicColumnWidth()},
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              _buildKeratometryHeaders(context),
+              _buildKeratometryRow(context, 'R', _getRightKeratometryKeys()),
+              _buildKeratometryRow(context, 'L', _getLeftKeratometryKeys()),
+            ],
           ),
-          columnWidths: const {0: IntrinsicColumnWidth()},
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: [
-            _buildKeratometryHeaders(context),
-            _buildKeratometryRow(context, 'R', _getRightKeratometryKeys()),
-            _buildKeratometryRow(context, 'L', _getLeftKeratometryKeys()),
-          ],
         ),
       ],
     );
@@ -170,62 +218,33 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
 
   TableRow _buildKeratometryHeaders(BuildContext context) {
     final headers = [
-      'rH',
-      'rV',
-      'Aver',
-      'Cylinder',
-      'AxH',
-      'rT',
-      'rN',
-      'rI',
-      'Rs',
+      'rH', 'rV', 'Aver', 'Cylinder', 'AxH', 'rT', 'rN', 'rI', 'Rs',
     ];
     return TableRow(
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
       children: [
         _headerCell(context, ''),
-        ...headers.map((h) => _headerCell(context, h)).toList(),
+        ...headers.map((h) => _headerCell(context, h)),
       ],
     );
   }
 
-  List<String> _getRightKeratometryKeys() {
-    return [
-      'r_rH',
-      'r_rV',
-      'r_aver',
-      'r_k_cyl',
-      'r_axH',
-      'r_rT',
-      'r_rN',
-      'r_rI',
-      'r_rS',
-    ];
-  }
+  List<String> _getRightKeratometryKeys() => [
+        'r_rH', 'r_rV', 'r_aver', 'r_k_cyl', 'r_axH',
+        'r_rT', 'r_rN', 'r_rI', 'r_rS',
+      ];
 
-  List<String> _getLeftKeratometryKeys() {
-    return [
-      'l_rH',
-      'l_rV',
-      'l_aver',
-      'l_k_cyl',
-      'l_axH',
-      'l_rT',
-      'l_rN',
-      'l_rI',
-      'l_rS',
-    ];
-  }
+  List<String> _getLeftKeratometryKeys() => [
+        'l_rH', 'l_rV', 'l_aver', 'l_k_cyl', 'l_axH',
+        'l_rT', 'l_rN', 'l_rI', 'l_rS',
+      ];
 
   TableRow _buildKeratometryRow(
-    BuildContext context,
-    String eye,
-    List<String> keys,
-  ) {
+      BuildContext context, String eye, List<String> keys) {
     return TableRow(
       children: [
         _headerCell(context, eye, isRowHeader: true),
-        ...keys.map((key) => _buildTextFormFieldCell(key)).toList(),
+        ...keys.map((key) => _buildTextFormFieldCell(key)),
       ],
     );
   }
@@ -234,21 +253,20 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Contact Lens Prescription",
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        Table(
-          border: TableBorder.all(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+        Text('section_lens_prescription'.tr(),
+            style: Theme.of(context).textTheme.titleMedium),
+        Directionality(
+          textDirection: ui.TextDirection.ltr,
+          child: Table(
+            border: TableBorder.all(color: AppColors.tableBorder),
+            columnWidths: const {0: IntrinsicColumnWidth()},
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              _buildPrescriptionHeaders(context),
+              _buildPrescriptionRow(context, 'R', _getRightPrescriptionKeys()),
+              _buildPrescriptionRow(context, 'L', _getLeftPrescriptionKeys()),
+            ],
           ),
-          columnWidths: const {0: IntrinsicColumnWidth()},
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: [
-            _buildPrescriptionHeaders(context),
-            _buildPrescriptionRow(context, 'R', _getRightPrescriptionKeys()),
-            _buildPrescriptionRow(context, 'L', _getLeftPrescriptionKeys()),
-          ],
         ),
       ],
     );
@@ -256,64 +274,34 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
 
   TableRow _buildPrescriptionHeaders(BuildContext context) {
     final headers = [
-      'Type',
-      'Manufacturer',
-      'Brand',
-      'Diam',
-      'B.C.',
-      'Sph',
-      'Cyl',
-      'Axis',
-      'Mat.',
-      'Tint',
-      'VA',
+      'Type', 'Manufacturer', 'Brand', 'Diam', 'B.C.',
+      'Sph', 'Cyl', 'Axis', 'Mat.', 'Tint', 'VA',
     ];
     return TableRow(
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
       children: [
         _headerCell(context, ''),
-        ...headers.map((h) => _headerCell(context, h)).toList(),
+        ...headers.map((h) => _headerCell(context, h)),
       ],
     );
   }
 
-  List<String> _getRightPrescriptionKeys() {
-    return [
-      'r_lens_type',
-      'r_manufacturer',
-      'r_brand',
-      'r_diameter',
-      'r_base_curve_numerator', // Special handling for BC
-      'r_lens_sph',
-      'r_lens_cyl',
-      'r_lens_axis',
-      'r_material',
-      'r_tint',
-      'r_lens_va_numerator', // Special handling for VA
-    ];
-  }
+  List<String> _getRightPrescriptionKeys() => [
+        'r_lens_type', 'r_manufacturer', 'r_brand', 'r_diameter',
+        'r_base_curve_numerator',
+        'r_lens_sph', 'r_lens_cyl', 'r_lens_axis', 'r_material', 'r_tint',
+        'r_lens_va_numerator',
+      ];
 
-  List<String> _getLeftPrescriptionKeys() {
-    return [
-      'l_lens_type',
-      'l_manufacturer',
-      'l_brand',
-      'l_diameter',
-      'l_base_curve_numerator', // Special handling for BC
-      'l_lens_sph',
-      'l_lens_cyl',
-      'l_lens_axis',
-      'l_material',
-      'l_tint',
-      'l_lens_va_numerator', // Special handling for VA
-    ];
-  }
+  List<String> _getLeftPrescriptionKeys() => [
+        'l_lens_type', 'l_manufacturer', 'l_brand', 'l_diameter',
+        'l_base_curve_numerator',
+        'l_lens_sph', 'l_lens_cyl', 'l_lens_axis', 'l_material', 'l_tint',
+        'l_lens_va_numerator',
+      ];
 
   TableRow _buildPrescriptionRow(
-    BuildContext context,
-    String eye,
-    List<String> keys,
-  ) {
+      BuildContext context, String eye, List<String> keys) {
     return TableRow(
       children: [
         _headerCell(context, eye, isRowHeader: true),
@@ -327,7 +315,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
             return _buildDoubleInputCell(key, denKey);
           }
           return _buildTextFormFieldCell(key);
-        }).toList(),
+        }),
       ],
     );
   }
@@ -335,24 +323,29 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   Widget _buildNotesField() {
     return TextFormField(
       controller: _controllers['notes'],
-      decoration: const InputDecoration(labelText: 'NOTES', isDense: true),
+      style: const TextStyle(
+        color: AppColors.inputValue,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: InputDecoration(
+        labelText: 'field_notes'.tr(),
+        isDense: true,
+      ),
       maxLines: 3,
     );
   }
 
-  Widget _headerCell(
-    BuildContext context,
-    String text, {
-    bool isRowHeader = false,
-  }) {
+  Widget _headerCell(BuildContext context, String text,
+      {bool isRowHeader = false}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Center(
         child: Text(
           text,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          style: TextStyle(
+            color: isRowHeader ? AppColors.label : AppColors.displayValue,
             fontWeight: FontWeight.bold,
-            color: isRowHeader ? null : Colors.white,
+            fontSize: 14,
           ),
         ),
       ),
@@ -365,8 +358,13 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
       child: TextFormField(
         controller: _controllers[key],
         textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: AppColors.inputValue,
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           border: InputBorder.none,
+          filled: false,
           isDense: true,
         ),
       ),
@@ -382,19 +380,29 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
             child: TextFormField(
               controller: _controllers[numKey],
               textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppColors.inputValue,
+                fontWeight: FontWeight.w600,
+              ),
               decoration: const InputDecoration(
                 border: InputBorder.none,
+                filled: false,
                 isDense: true,
               ),
             ),
           ),
-          const Text('/'),
+          const Text('/', style: TextStyle(color: AppColors.label)),
           Expanded(
             child: TextFormField(
               controller: _controllers[denKey],
               textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppColors.inputValue,
+                fontWeight: FontWeight.w600,
+              ),
               decoration: const InputDecoration(
                 border: InputBorder.none,
+                filled: false,
                 isDense: true,
               ),
             ),
@@ -404,3 +412,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     );
   }
 }
+
+class SaveIntent extends Intent {}
+
+class BackIntent extends Intent {}
