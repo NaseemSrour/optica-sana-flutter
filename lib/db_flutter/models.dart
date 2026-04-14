@@ -98,7 +98,7 @@ class Customer {
 
 class GlassesTest {
   int id;
-  int customerId; // Foreign key -> customers,id
+  int customerId; // Foreign key -> customers.id
 
   DateTime examDate; // When the test was performed
   String? examiner; // Who performed the glasses test
@@ -343,8 +343,8 @@ class GlassesTest {
 }
 
 class ContactLensesTest {
-  int id;
-  int customerId; // AUTOINCREMENT PK
+  int id; // AUTOINCREMENT PK
+  int customerId; // Foreign key -> customers.id
   DateTime
   examDate; // ISO date string // When FETCHED from DB, it is a String here in the ContactLensesTest object!
   String? examiner;

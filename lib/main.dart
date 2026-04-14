@@ -44,7 +44,11 @@ class MyApp extends StatelessWidget {
     final customerRepo = CustomerRepo();
     final glassesRepo = GlassesRepo();
     final lensesRepo = ContactLensesTestRepo();
-    final customerService = CustomerService(customerRepo, glassesRepo, lensesRepo);
+    final customerService = CustomerService(
+      customerRepo,
+      glassesRepo,
+      lensesRepo,
+    );
 
     return MaterialApp(
       title: 'app_title'.tr(),
@@ -66,7 +70,7 @@ class CustomerSearchScreen extends StatefulWidget {
   final CustomerService customerService;
 
   const CustomerSearchScreen({Key? key, required this.customerService})
-      : super(key: key);
+    : super(key: key);
 
   @override
   State<CustomerSearchScreen> createState() => _CustomerSearchScreenState();
@@ -122,11 +126,11 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
       widget.customerService
           .searchCustomersByNameOrSSN(_searchController.text)
           .then((customers) {
-        setState(() {
-          _customers = customers;
-          _selectedIndex = -1;
-        });
-      });
+            setState(() {
+              _customers = customers;
+              _selectedIndex = -1;
+            });
+          });
     });
   }
 
@@ -181,11 +185,17 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                     style: const TextStyle(color: AppColors.inputValue),
                     decoration: InputDecoration(
                       labelText: 'search_label'.tr(),
-                      prefixIcon: const Icon(Icons.search, color: AppColors.label),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: AppColors.label,
+                      ),
                       suffixIcon: value.text.isNotEmpty
                           ? IconButton(
                               tooltip: 'tooltip_clear_search'.tr(),
-                              icon: const Icon(Icons.clear, color: AppColors.label),
+                              icon: const Icon(
+                                Icons.clear,
+                                color: AppColors.label,
+                              ),
                               onPressed: () => _searchController.clear(),
                             )
                           : null,
@@ -201,7 +211,10 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
             ),
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 itemCount: _customers.length,
                 itemBuilder: (context, index) {
                   final customer = _customers[index];
@@ -214,18 +227,25 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                         side: isSelected
-                            ? const BorderSide(color: AppColors.primary, width: 1.5)
+                            ? const BorderSide(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              )
                             : BorderSide.none,
                       ),
                       title: Text(
                         '${customer.fname} ${customer.lname}',
                         style: TextStyle(
-                          color: isSelected ? AppColors.primary : AppColors.displayValue,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.displayValue,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       subtitle: Text(
-                        'ssn_prefix'.tr(namedArgs: {'value': customer.ssn.toString()}),
+                        'ssn_prefix'.tr(
+                          namedArgs: {'value': customer.ssn.toString()},
+                        ),
                         style: TextStyle(
                           color: isSelected
                               ? AppColors.primary.withValues(alpha: 0.8)
@@ -269,7 +289,9 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+            decoration: const BoxDecoration(
+              gradient: AppColors.backgroundGradient,
+            ),
             child: Align(
               alignment: Alignment.bottomLeft,
               child: Text(

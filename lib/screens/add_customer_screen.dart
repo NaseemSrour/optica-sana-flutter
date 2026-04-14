@@ -1,10 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
-import '../db_flutter/bootstrap.dart';
 import '../db_flutter/models.dart' as models;
 import '../flutter_services/customer_service.dart';
+import '../themes/app_theme.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   final CustomerService customerService;
@@ -33,7 +32,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _hobbiesController = TextEditingController();
   final _refererController = TextEditingController();
   final _notesController = TextEditingController();
-  String _mailing = 'false';
+  bool _mailing = false;
 
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
@@ -87,7 +86,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         hobbies: _hobbiesController.text,
         referer: _refererController.text,
         notes: _notesController.text,
-        mailing: _mailing,
+        mailing: _mailing.toString(),
       );
 
       try {
@@ -123,9 +122,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
       },
       actions: {
-        SaveIntent: CallbackAction<SaveIntent>(
-          onInvoke: (_) => _saveCustomer(),
-        ),
+        SaveIntent: CallbackAction<SaveIntent>(onInvoke: (_) => _saveCustomer()),
         BackIntent: CallbackAction<BackIntent>(
           onInvoke: (_) {
             Navigator.pop(context);
@@ -137,119 +134,37 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         appBar: AppBar(
           title: Text('title_add_customer'.tr()),
           actions: [
-            Tooltip(
-              message: 'shortcut_hint'.tr(),
-              child: const Icon(Icons.keyboard, color: Colors.white38, size: 18),
+            IconButton(
+              icon: const Icon(Icons.save),
+              tooltip: 'tooltip_save'.tr(),
+              onPressed: _saveCustomer,
             ),
-            const SizedBox(width: 8),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
+        body: Container(
+          decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TextFormField(
-                    controller: _fnameController,
-                    decoration: InputDecoration(labelText: 'field_fname'.tr()),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'err_fname'.tr();
-                      }
-                      return null;
-                    },
+                  // ── Two-column form ─────────────────────────────────────
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: _buildIdentityColumn()),
+                      const SizedBox(width: 24),
+                      Expanded(child: _buildAddressColumn()),
+                    ],
                   ),
-                  TextFormField(
-                    controller: _lnameController,
-                    decoration: InputDecoration(labelText: 'field_lname'.tr()),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'err_lname'.tr();
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _ssnController,
-                    decoration: InputDecoration(labelText: 'field_ssn'.tr()),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'err_ssn'.tr();
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _birthDateController,
-                    decoration: InputDecoration(
-                      labelText: 'field_birth_date'.tr(),
-                      hintText: 'hint_date'.tr(),
-                    ),
-                  ),
-                  TextFormField(
-                    controller: _sexController,
-                    decoration: InputDecoration(labelText: 'field_sex'.tr()),
-                  ),
-                  TextFormField(
-                    controller: _telHomeController,
-                    decoration: InputDecoration(labelText: 'field_tel_home'.tr()),
-                  ),
-                  TextFormField(
-                    controller: _telMobileController,
-                    decoration: InputDecoration(labelText: 'field_tel_mobile'.tr()),
-                  ),
-                  TextFormField(
-                    controller: _addressController,
-                    decoration: InputDecoration(labelText: 'field_address'.tr()),
-                  ),
-                  TextFormField(
-                    controller: _townController,
-                    decoration: InputDecoration(labelText: 'field_town'.tr()),
-                  ),
-                  TextFormField(
-                    controller: _postalCodeController,
-                    decoration: InputDecoration(labelText: 'field_postal_code'.tr()),
-                  ),
-                  TextFormField(
-                    controller: _statusController,
-                    decoration: InputDecoration(labelText: 'field_status'.tr()),
-                  ),
-                  TextFormField(
-                    controller: _orgController,
-                    decoration: InputDecoration(labelText: 'field_org'.tr()),
-                  ),
-                  TextFormField(
-                    controller: _occupationController,
-                    decoration: InputDecoration(labelText: 'field_occupation'.tr()),
-                  ),
-                  TextFormField(
-                    controller: _hobbiesController,
-                    decoration: InputDecoration(labelText: 'field_hobbies'.tr()),
-                  ),
-                  TextFormField(
-                    controller: _refererController,
-                    decoration: InputDecoration(labelText: 'field_referer'.tr()),
-                  ),
-                  TextFormField(
+                  const SizedBox(height: 16),
+                  // ── Notes (full width) ──────────────────────────────────
+                  _field(
                     controller: _notesController,
-                    decoration: InputDecoration(labelText: 'field_notes'.tr()),
-                  ),
-                  CheckboxListTile(
-                    title: Text('field_mailing'.tr()),
-                    value: _mailing == 'true',
-                    onChanged: (bool? value) {
-                      setState(() {
-                        _mailing = (value ?? false).toString();
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _saveCustomer,
-                    child: Text('btn_save_customer'.tr()),
+                    label: '📝  ${'field_notes'.tr()}',
+                    maxLines: 3,
                   ),
                 ],
               ),
@@ -257,6 +172,109 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // Left column: personal identity + contact numbers
+  Widget _buildIdentityColumn() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _field(
+                controller: _fnameController,
+                label: '👤  ${'field_fname'.tr()}',
+                validator: (v) => (v == null || v.isEmpty) ? 'err_fname'.tr() : null,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _field(
+                controller: _lnameController,
+                label: '👤  ${'field_lname'.tr()}',
+                validator: (v) => (v == null || v.isEmpty) ? 'err_lname'.tr() : null,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _field(
+          controller: _ssnController,
+          label: '🪪  ${'field_ssn'.tr()}',
+          keyboardType: TextInputType.number,
+          validator: (v) => (v == null || v.isEmpty) ? 'err_ssn'.tr() : null,
+        ),
+        const SizedBox(height: 12),
+        _field(
+          controller: _birthDateController,
+          label: '🎂  ${'field_birth_date'.tr()}',
+          hint: 'hint_date'.tr(),
+        ),
+        const SizedBox(height: 12),
+        _field(controller: _sexController, label: '⚧️  ${'field_sex'.tr()}'),
+        const SizedBox(height: 12),
+        _field(controller: _telHomeController, label: '📞  ${'field_tel_home'.tr()}'),
+        const SizedBox(height: 12),
+        _field(controller: _telMobileController, label: '📱  ${'field_tel_mobile'.tr()}'),
+      ],
+    );
+  }
+
+  // Right column: address + miscellaneous
+  Widget _buildAddressColumn() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _field(controller: _addressController, label: '🏠  ${'field_address'.tr()}'),
+        const SizedBox(height: 12),
+        _field(controller: _townController, label: '🏙️  ${'field_town'.tr()}'),
+        const SizedBox(height: 12),
+        _field(controller: _postalCodeController, label: '📮  ${'field_postal_code'.tr()}'),
+        const SizedBox(height: 12),
+        _field(controller: _statusController, label: '🏷️  ${'field_status'.tr()}'),
+        const SizedBox(height: 12),
+        _field(controller: _orgController, label: '🏢  ${'field_org'.tr()}'),
+        const SizedBox(height: 12),
+        _field(controller: _occupationController, label: '💼  ${'field_occupation'.tr()}'),
+        const SizedBox(height: 12),
+        _field(controller: _hobbiesController, label: '🎨  ${'field_hobbies'.tr()}'),
+        const SizedBox(height: 12),
+        _field(controller: _refererController, label: '🔗  ${'field_referer'.tr()}'),
+        const SizedBox(height: 4),
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text('✉️  ${'field_mailing'.tr()}'),
+          value: _mailing,
+          onChanged: (v) => setState(() => _mailing = v ?? false),
+        ),
+      ],
+    );
+  }
+
+  Widget _field({
+    required TextEditingController controller,
+    required String label,
+    String? hint,
+    TextInputType? keyboardType,
+    int? maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      style: const TextStyle(
+        color: AppColors.inputValue,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        isDense: true,
+      ),
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      validator: validator,
     );
   }
 }
