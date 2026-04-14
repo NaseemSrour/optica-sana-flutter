@@ -74,7 +74,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 520),
+                      constraints: const BoxConstraints(maxWidth: 1024),
                       child: Image.asset(
                         'assets/images/logo.png',
                         width: double.infinity,
