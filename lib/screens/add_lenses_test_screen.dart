@@ -197,8 +197,16 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('section_keratometry'.tr(),
-            style: Theme.of(context).textTheme.titleMedium),
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              left: BorderSide(color: AppColors.success, width: 3),
+            ),
+          ),
+          padding: const EdgeInsets.only(left: 8),
+          child: Text('section_keratometry'.tr(),
+              style: Theme.of(context).textTheme.titleMedium),
+        ),
         Directionality(
           textDirection: ui.TextDirection.ltr,
           child: Table(
@@ -253,8 +261,16 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('section_lens_prescription'.tr(),
-            style: Theme.of(context).textTheme.titleMedium),
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              left: BorderSide(color: AppColors.accentOrange, width: 3),
+            ),
+          ),
+          padding: const EdgeInsets.only(left: 8),
+          child: Text('section_lens_prescription'.tr(),
+              style: Theme.of(context).textTheme.titleMedium),
+        ),
         Directionality(
           textDirection: ui.TextDirection.ltr,
           child: Table(

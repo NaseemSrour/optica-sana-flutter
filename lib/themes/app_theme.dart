@@ -35,6 +35,16 @@ class AppColors {
   // ── Error ─────────────────────────────────────────────────────────────────
   static const Color error = Color(0xFFEF5350);
 
+  // ── Semantic state colors ─────────────────────────────────────────────────
+  static const Color success = Color(0xFF66BB6A);      // saved / confirmed
+  static const Color accentTeal = Color(0xFF26C6DA);   // section title accent (keratometry, identity)
+  static const Color accentIndigo = Color(0xFF7986CB); // section title accent (prescription, address)
+  static const Color accentOrange = Color(0xFFFF8A65); // section title accent (lens prescription)
+
+  // ── Table row tints (R eye / L eye) ───────────────────────────────────────
+  static const Color rowR = Color(0x0C4FC3F7); // faint sky-blue — right eye rows
+  static const Color rowL = Color(0x0C4CAF50); // faint green    — left eye rows
+
   // ── Gradients ─────────────────────────────────────────────────────────────
   static const LinearGradient backgroundGradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -42,10 +52,11 @@ class AppColors {
     colors: [bgDark, bgMid],
   );
 
+  // Richer deep-indigo → teal (was flat navy → blue)
   static const LinearGradient navHeaderGradient = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
-    colors: [primaryDeep, Color(0xFF1565C0)],
+    colors: [Color(0xFF283593), Color(0xFF00838F)],
   );
 }
 
@@ -59,10 +70,8 @@ class AppTheme {
       onPrimary: Color(0xFF0D1B2A),
       onSecondary: Color(0xFF0D1B2A),
       surface: AppColors.surface,
-      background: AppColors.bgDark,
       error: AppColors.error,
       onSurface: AppColors.displayValue,
-      onBackground: AppColors.displayValue,
       onError: Colors.white,
     ),
 

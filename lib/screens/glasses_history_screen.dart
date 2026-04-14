@@ -57,7 +57,9 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'msg_error_loading_history'.tr(namedArgs: {'error': e.toString()}),
+              'msg_error_loading_history'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
             ),
           ),
         );
@@ -111,9 +113,9 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
         _isEditing = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('msg_test_saved'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('msg_test_saved'.tr())));
       }
     } catch (e) {
       if (mounted) {
@@ -121,6 +123,61 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
           SnackBar(
             content: Text(
               'msg_test_save_error'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteCurrentTest() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'confirm_delete_title'.tr(),
+          style: TextStyle(color: Colors.red),
+        ),
+        content: Text('confirm_delete_test_body'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('btn_cancel'.tr()),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('btn_delete'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      final testId = _tests[_currentIndex].id;
+      await widget.customerService.deleteGlassesTest(testId);
+      setState(() {
+        _tests.removeAt(_currentIndex);
+        if (_tests.isNotEmpty) {
+          _currentIndex = _currentIndex.clamp(0, _tests.length - 1);
+          _updateControllersForCurrentTest();
+        }
+      });
+      if (mounted) {
+        if (_tests.isEmpty) {
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('msg_test_deleted'.tr())));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'msg_delete_error'.tr(namedArgs: {'error': e.toString()}),
             ),
           ),
         );
@@ -182,12 +239,40 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
                 : 'title_glasses_history'.tr(),
           ),
           actions: [
-            if (_tests.isNotEmpty)
+            if (_tests.isNotEmpty) ...[
               IconButton(
                 tooltip: _isEditing ? 'tooltip_save'.tr() : 'tooltip_edit'.tr(),
-                icon: Icon(_isEditing ? Icons.save : Icons.edit),
+                icon: Icon(
+                  _isEditing ? Icons.save : Icons.edit,
+                  color: _isEditing ? AppColors.inputValue : AppColors.primary,
+                ),
                 onPressed: _isEditing ? _saveTest : _toggleEditMode,
               ),
+              PopupMenuButton<String>(
+                tooltip: 'tooltip_more_options'.tr(),
+                onSelected: (value) {
+                  if (value == 'delete') _confirmDeleteCurrentTest();
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.delete_outline,
+                          color: AppColors.error,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'menu_delete'.tr(),
+                          style: const TextStyle(color: AppColors.error),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
         body: Container(
@@ -251,10 +336,12 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'nav_test'.tr(namedArgs: {
-              'current': (_tests.length - _currentIndex).toString(),
-              'total': _tests.length.toString(),
-            }),
+            'nav_test'.tr(
+              namedArgs: {
+                'current': (_tests.length - _currentIndex).toString(),
+                'total': _tests.length.toString(),
+              },
+            ),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -297,7 +384,10 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextField('dominant_eye', 'field_dominant_eye'.tr()),
+                    child: _buildTextField(
+                      'dominant_eye',
+                      'field_dominant_eye'.tr(),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(child: _buildTextField('r_iop', 'field_r_iop'.tr())),
@@ -313,11 +403,17 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextField('lenses_diameter_1', 'field_lenses_diam_1'.tr()),
+                    child: _buildTextField(
+                      'lenses_diameter_1',
+                      'field_lenses_diam_1'.tr(),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildTextField('lenses_diameter_2', 'field_lenses_diam_2'.tr()),
+                    child: _buildTextField(
+                      'lenses_diameter_2',
+                      'field_lenses_diam_2'.tr(),
+                    ),
                   ),
                 ],
               ),
@@ -350,7 +446,10 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
         Expanded(
           child: Column(
             children: [
-              _buildTextField('lenses_manufacturer', 'field_lenses_manufacturer'.tr()),
+              _buildTextField(
+                'lenses_manufacturer',
+                'field_lenses_manufacturer'.tr(),
+              ),
               const SizedBox(height: 16),
               _buildTextField('lenses_color', 'field_lenses_color'.tr()),
               const SizedBox(height: 16),
@@ -358,7 +457,10 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
               const SizedBox(height: 16),
               _buildTextField('catalog_num', 'field_catalog_num'.tr()),
               const SizedBox(height: 16),
-              _buildTextField('frame_manufacturer', 'field_frame_manufacturer'.tr()),
+              _buildTextField(
+                'frame_manufacturer',
+                'field_frame_manufacturer'.tr(),
+              ),
               const SizedBox(height: 16),
               _buildTextField('frame_supplier', 'field_frame_supplier'.tr()),
               const SizedBox(height: 16),
@@ -366,13 +468,26 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: _buildTextField('frame_size', 'field_frame_size'.tr())),
-                  const SizedBox(width: 16),
                   Expanded(
-                    child: _buildTextField('frame_bar_length', 'field_frame_bar_length'.tr()),
+                    child: _buildTextField(
+                      'frame_size',
+                      'field_frame_size'.tr(),
+                    ),
                   ),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildTextField('frame_color', 'field_frame_color'.tr())),
+                  Expanded(
+                    child: _buildTextField(
+                      'frame_bar_length',
+                      'field_frame_bar_length'.tr(),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      'frame_color',
+                      'field_frame_color'.tr(),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -400,7 +515,6 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
       ),
     );
   }
-
 }
 
 class EditIntent extends Intent {}

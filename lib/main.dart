@@ -143,7 +143,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
           customerService: widget.customerService,
         ),
       ),
-    );
+    ).then((_) => _onSearchChanged());
   }
 
   @override
@@ -221,43 +221,49 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                   final isSelected = index == _selectedIndex;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      selected: isSelected,
-                      selectedTileColor: AppColors.primaryDeep,
-                      shape: RoundedRectangleBorder(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: isSelected
+                              ? [AppColors.primaryDeep, AppColors.primaryDeep.withValues(alpha: 0.85)]
+                              : [AppColors.primaryDeep.withValues(alpha: 0.45), AppColors.surfaceVariant],
+                        ),
                         borderRadius: BorderRadius.circular(8),
-                        side: isSelected
-                            ? const BorderSide(
-                                color: AppColors.primary,
-                                width: 1.5,
-                              )
-                            : BorderSide.none,
+                        border: isSelected
+                            ? Border.all(color: AppColors.primary, width: 1.5)
+                            : Border.all(color: AppColors.borderDefault.withValues(alpha: 0.4)),
                       ),
-                      title: Text(
-                        '${customer.fname} ${customer.lname}',
-                        style: TextStyle(
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.displayValue,
-                          fontWeight: FontWeight.w600,
+                      child: ListTile(
+                        tileColor: Colors.transparent,
+                        selectedTileColor: Colors.transparent,
+                        selected: isSelected,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        title: Text(
+                          '${customer.fname} ${customer.lname}',
+                          style: TextStyle(
+                            color: isSelected ? AppColors.primary : AppColors.displayValue,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      subtitle: Text(
-                        'ssn_prefix'.tr(
-                          namedArgs: {'value': customer.ssn.toString()},
+                        subtitle: Text(
+                          'ssn_prefix'.tr(
+                            namedArgs: {'value': customer.ssn.toString()},
+                          ),
+                          style: TextStyle(
+                            color: isSelected
+                                ? AppColors.primary.withValues(alpha: 0.8)
+                                : AppColors.label,
+                            fontSize: 13,
+                          ),
                         ),
-                        style: TextStyle(
-                          color: isSelected
-                              ? AppColors.primary.withValues(alpha: 0.8)
-                              : AppColors.label,
-                          fontSize: 13,
+                        trailing: Icon(
+                          Icons.chevron_right,
+                          color: isSelected ? AppColors.primary : AppColors.label,
                         ),
+                        onTap: () => _openCustomer(customer),
                       ),
-                      trailing: Icon(
-                        Icons.chevron_right,
-                        color: isSelected ? AppColors.primary : AppColors.label,
-                      ),
-                      onTap: () => _openCustomer(customer),
                     ),
                   );
                 },
@@ -307,12 +313,25 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
           // — Language —
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text(
-              'drawer_language'.tr(),
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppColors.label,
-                letterSpacing: 0.8,
-              ),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.accentTeal,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'drawer_language'.tr(),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.label,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ],
             ),
           ),
           RadioGroup<Locale>(
@@ -349,12 +368,25 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
           // — Database —
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-            child: Text(
-              'Database',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppColors.label,
-                letterSpacing: 0.8,
-              ),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.accentIndigo,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Database',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.label,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ],
             ),
           ),
           ListTile(

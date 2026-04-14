@@ -279,8 +279,32 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             const VerticalDivider(),
             IconButton(
               tooltip: _isEditing ? 'tooltip_save'.tr() : 'tooltip_edit'.tr(),
-              icon: Icon(_isEditing ? Icons.save : Icons.edit),
+              icon: Icon(
+                _isEditing ? Icons.save : Icons.edit,
+                color: _isEditing ? AppColors.inputValue : AppColors.primary,
+              ),
               onPressed: _isEditing ? _saveCustomer : _toggleEditMode,
+            ),
+            PopupMenuButton<String>(
+              tooltip: 'tooltip_more_options'.tr(),
+              onSelected: (value) {
+                if (value == 'delete') _confirmDeleteCustomer();
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.delete_outline, color: AppColors.error),
+                      const SizedBox(width: 8),
+                      Text(
+                        'menu_delete'.tr(),
+                        style: const TextStyle(color: AppColors.error),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -360,6 +384,49 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         );
       },
     );
+  }
+
+  Future<void> _confirmDeleteCustomer() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('confirm_delete_title'.tr()),
+        content: Text(
+          'confirm_delete_customer_body'.tr(
+            namedArgs: {'name': '${widget.customer.fname} ${widget.customer.lname}'},
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('btn_cancel'.tr()),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('btn_delete'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await widget.customerService.deleteCustomer(widget.customer.id);
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('msg_customer_deleted'.tr())),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('msg_delete_error'.tr(namedArgs: {'error': e.toString()})),
+          ),
+        );
+      }
+    }
   }
 
   void _navigateTo(Widget screen) {

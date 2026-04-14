@@ -115,5 +115,16 @@
   "label_date": "Date",
   "label_last_glasses": "Last Glasses Test",
   "label_last_lenses": "Last Lenses Test",
-  "label_examiner_display": "Examiner: {value}"
+  "label_examiner_display": "Examiner: {value}",
+
+  "tooltip_more_options": "More options",
+  "menu_delete": "Delete",
+  "confirm_delete_title": "Confirm Deletion",
+  "confirm_delete_customer_body": "Are you sure you want to permanently delete {name}? All associated glasses and contact lenses test records will also be deleted. This action is irreversible!",
+  "confirm_delete_test_body": "Are you sure you want to permanently delete this test record? This action is irreversible!",
+  "btn_delete": "Delete",
+  "btn_cancel": "Cancel",
+  "msg_customer_deleted": "Customer deleted successfully.",
+  "msg_test_deleted": "Test record deleted.",
+  "msg_delete_error": "Failed to delete: {error}"
 }

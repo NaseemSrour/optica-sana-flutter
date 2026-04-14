@@ -115,5 +115,16 @@
   "label_date": "תאריך",
   "label_last_glasses": "בדיקת משקפיים אחרונה",
   "label_last_lenses": "בדיקת עדשות אחרונה",
-  "label_examiner_display": "בודק: {value}"
+  "label_examiner_display": "בודק: {value}",
+
+  "tooltip_more_options": "אפשרויות נוספות",
+  "menu_delete": "מחק",
+  "confirm_delete_title": "אישור מחיקה",
+  "confirm_delete_customer_body": "האם אתה בטוח שברצונך למחוק לצמיתות את {name}? כל בדיקות המשקפיים ועדשות המגע הקשורות יימחקו גם הן. פעולה זו אינה הפיכה!",
+  "confirm_delete_test_body": "האם אתה בטוח שברצונך למחוק לצמיתות את רשומת הבדיקה הזו? פעולה זו אינה הפיכה!",
+  "btn_delete": "מחק",
+  "btn_cancel": "ביטול",
+  "msg_customer_deleted": "הלקוח נמחק בהצלחה.",
+  "msg_test_deleted": "רשומת הבדיקה נמחקה.",
+  "msg_delete_error": "שגיאה במחיקה: {error}"
 }

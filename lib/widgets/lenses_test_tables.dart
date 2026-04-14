@@ -34,9 +34,17 @@ class LensesTestTables extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '${'label_last_lenses'.tr()} - $examDate',
-                style: Theme.of(context).textTheme.titleLarge,
+              Container(
+                decoration: const BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: AppColors.primary, width: 3),
+                  ),
+                ),
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(
+                  '${'label_last_lenses'.tr()} - $examDate',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
               if (isEditing)
                 SizedBox(
@@ -97,7 +105,15 @@ class LensesTestTables extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('section_keratometry'.tr(), style: Theme.of(context).textTheme.titleMedium),
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              left: BorderSide(color: AppColors.success, width: 3),
+            ),
+          ),
+          padding: const EdgeInsets.only(left: 8),
+          child: Text('section_keratometry'.tr(), style: Theme.of(context).textTheme.titleMedium),
+        ),
         Directionality(
           textDirection: ui.TextDirection.ltr,
           child: Table(
@@ -188,9 +204,17 @@ class LensesTestTables extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'section_lens_prescription'.tr(),
-          style: Theme.of(context).textTheme.titleMedium,
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              left: BorderSide(color: AppColors.accentOrange, width: 3),
+            ),
+          ),
+          padding: const EdgeInsets.only(left: 8),
+          child: Text(
+            'section_lens_prescription'.tr(),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ),
         Directionality(
           textDirection: ui.TextDirection.ltr,

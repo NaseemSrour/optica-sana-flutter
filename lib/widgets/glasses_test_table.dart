@@ -35,9 +35,17 @@ class GlassesTestTable extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '${'label_last_glasses'.tr()} - $examDate',
-                style: Theme.of(context).textTheme.titleLarge,
+              Container(
+                decoration: const BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: AppColors.primary, width: 3),
+                  ),
+                ),
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(
+                  '${'label_last_glasses'.tr()} - $examDate',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
               if (isEditing)
                 SizedBox(

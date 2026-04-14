@@ -57,7 +57,9 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'msg_error_loading_history'.tr(namedArgs: {'error': e.toString()}),
+              'msg_error_loading_history'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
             ),
           ),
         );
@@ -124,28 +126,32 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
     _controllers.forEach((key, controller) {
       if (key == 'r_base_curve') {
         final parts = controller.text.split('/');
-        updatedValues['r_base_curve_numerator'] =
-            parts.isNotEmpty ? parts[0] : '';
-        updatedValues['r_base_curve_denominator'] =
-            parts.length > 1 ? parts[1] : '';
+        updatedValues['r_base_curve_numerator'] = parts.isNotEmpty
+            ? parts[0]
+            : '';
+        updatedValues['r_base_curve_denominator'] = parts.length > 1
+            ? parts[1]
+            : '';
       } else if (key == 'r_lens_va') {
         final parts = controller.text.split('/');
-        updatedValues['r_lens_va_numerator'] =
-            parts.isNotEmpty ? parts[0] : '';
-        updatedValues['r_lens_va_denominator'] =
-            parts.length > 1 ? parts[1] : '';
+        updatedValues['r_lens_va_numerator'] = parts.isNotEmpty ? parts[0] : '';
+        updatedValues['r_lens_va_denominator'] = parts.length > 1
+            ? parts[1]
+            : '';
       } else if (key == 'l_base_curve') {
         final parts = controller.text.split('/');
-        updatedValues['l_base_curve_numerator'] =
-            parts.isNotEmpty ? parts[0] : '';
-        updatedValues['l_base_curve_denominator'] =
-            parts.length > 1 ? parts[1] : '';
+        updatedValues['l_base_curve_numerator'] = parts.isNotEmpty
+            ? parts[0]
+            : '';
+        updatedValues['l_base_curve_denominator'] = parts.length > 1
+            ? parts[1]
+            : '';
       } else if (key == 'l_lens_va') {
         final parts = controller.text.split('/');
-        updatedValues['l_lens_va_numerator'] =
-            parts.isNotEmpty ? parts[0] : '';
-        updatedValues['l_lens_va_denominator'] =
-            parts.length > 1 ? parts[1] : '';
+        updatedValues['l_lens_va_numerator'] = parts.isNotEmpty ? parts[0] : '';
+        updatedValues['l_lens_va_denominator'] = parts.length > 1
+            ? parts[1]
+            : '';
       } else {
         updatedValues[key] = controller.text;
       }
@@ -159,9 +165,9 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         _isEditing = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('msg_test_saved'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('msg_test_saved'.tr())));
       }
     } catch (e) {
       if (mounted) {
@@ -169,6 +175,61 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
           SnackBar(
             content: Text(
               'msg_test_save_error'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteCurrentTest() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'confirm_delete_title'.tr(),
+          style: TextStyle(color: Colors.red),
+        ),
+        content: Text('confirm_delete_test_body'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('btn_cancel'.tr()),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('btn_delete'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      final testId = _tests[_currentIndex].id;
+      await widget.customerService.deleteContactLensesTest(testId);
+      setState(() {
+        _tests.removeAt(_currentIndex);
+        if (_tests.isNotEmpty) {
+          _currentIndex = _currentIndex.clamp(0, _tests.length - 1);
+          _updateControllersForCurrentTest();
+        }
+      });
+      if (mounted) {
+        if (_tests.isEmpty) {
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('msg_test_deleted'.tr())));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'msg_delete_error'.tr(namedArgs: {'error': e.toString()}),
             ),
           ),
         );
@@ -230,12 +291,40 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
                 : 'title_lenses_history'.tr(),
           ),
           actions: [
-            if (_tests.isNotEmpty)
+            if (_tests.isNotEmpty) ...[
               IconButton(
                 tooltip: _isEditing ? 'tooltip_save'.tr() : 'tooltip_edit'.tr(),
-                icon: Icon(_isEditing ? Icons.save : Icons.edit),
+                icon: Icon(
+                  _isEditing ? Icons.save : Icons.edit,
+                  color: _isEditing ? AppColors.inputValue : AppColors.primary,
+                ),
                 onPressed: _isEditing ? _saveTest : _toggleEditMode,
               ),
+              PopupMenuButton<String>(
+                tooltip: 'tooltip_more_options'.tr(),
+                onSelected: (value) {
+                  if (value == 'delete') _confirmDeleteCurrentTest();
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.delete_outline,
+                          color: AppColors.error,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'menu_delete'.tr(),
+                          style: const TextStyle(color: AppColors.error),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
         body: Container(
@@ -299,10 +388,12 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'nav_test'.tr(namedArgs: {
-              'current': (_tests.length - _currentIndex).toString(),
-              'total': _tests.length.toString(),
-            }),
+            'nav_test'.tr(
+              namedArgs: {
+                'current': (_tests.length - _currentIndex).toString(),
+                'total': _tests.length.toString(),
+              },
+            ),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -311,10 +402,7 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
           ),
           Text(
             '${'label_date'.tr()}: ${DateFormat('dd/MM/yyyy').format(test.examDate)}',
-            style: const TextStyle(
-              color: AppColors.displayValue,
-              fontSize: 16,
-            ),
+            style: const TextStyle(color: AppColors.displayValue, fontSize: 16),
           ),
         ],
       ),

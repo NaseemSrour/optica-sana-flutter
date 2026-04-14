@@ -115,5 +115,16 @@
   "label_date": "التاريخ",
   "label_last_glasses": "آخر فحص نظارات",
   "label_last_lenses": "آخر فحص عدسات",
-  "label_examiner_display": "الفاحص: {value}"
+  "label_examiner_display": "الفاحص: {value}",
+
+  "tooltip_more_options": "خيارات إضافية",
+  "menu_delete": "حذف",
+  "confirm_delete_title": "تأكيد الحذف",
+  "confirm_delete_customer_body": "هل أنت متأكد أنك تريد حذف {name} نهائياً؟ ستُحذف أيضاً جميع سجلات فحوصات النظارات والعدسات اللاصقة المرتبطة. هذا الإجراء لا يمكن التراجع عنه!",
+  "confirm_delete_test_body": "هل أنت متأكد أنك تريد حذف سجل الفحص هذا نهائياً؟ هذا الإجراء لا يمكن التراجع عنه!",
+  "btn_delete": "حذف",
+  "btn_cancel": "إلغاء",
+  "msg_customer_deleted": "تم حذف العميل بنجاح.",
+  "msg_test_deleted": "تم حذف سجل الفحص.",
+  "msg_delete_error": "فشل الحذف: {error}"
 }
