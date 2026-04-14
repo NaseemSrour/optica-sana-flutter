@@ -98,9 +98,19 @@
 
   "tooltip_clear_search": "Clear search",
   "drawer_language": "Language",
+  "drawer_database": "Database",
+  "drawer_about": "About",
   "drawer_backup_db": "Backup Database",
   "drawer_restore_db": "Restore Database",
   "drawer_coming_soon": "Coming soon",
+
+  "welcome_tagline": "Your professional optometry management system",
+  "welcome_get_started": "Get Started",
+
+  "app_info_screen_title": "About Optica Sana",
+  "app_info_version": "Version {version}",
+  "app_info_description": "Optica Sana is a professional optometry practice management system for managing customer records, glasses prescriptions, and contact lens tests.",
+  "app_info_copyright": "© 2026 Optica Sana. All rights reserved.",
 
   "tooltip_view_glasses": "View Glasses History (Ctrl+G)",
   "tooltip_view_lenses": "View Lenses History (Ctrl+L)",
@@ -126,5 +136,23 @@
   "btn_cancel": "Cancel",
   "msg_customer_deleted": "Customer deleted successfully.",
   "msg_test_deleted": "Test record deleted.",
-  "msg_delete_error": "Failed to delete: {error}"
+  "msg_delete_error": "Failed to delete: {error}",
+
+  "drawer_backup_restore": "Backup & Restore",
+  "backup_screen_title": "Backup & Restore",
+  "backup_section_title": "Create Backup",
+  "backup_section_subtitle": "Save a snapshot of the current database. Up to 20 backups are kept automatically.",
+  "backup_create_btn": "Create Backup Now",
+  "backup_creating": "Creating backup…",
+  "backup_success": "Backup created successfully.",
+  "backup_error": "Backup failed: {error}",
+  "backup_list_title": "Saved Backups ({count})",
+  "backup_no_backups": "No backups found.",
+  "restore_confirm_title": "Restore Backup?",
+  "restore_confirm_body": "This will replace the current database with the backup from {date}. All data added since then will be lost. Continue?",
+  "restore_success": "Restored successfully. Restarting…",
+  "restore_error": "Restore failed: {error}",
+  "btn_restore": "Restore",
+  "backup_delete_confirm": "Delete this backup file? This cannot be undone.",
+  "backup_deleted": "Backup deleted."
 }

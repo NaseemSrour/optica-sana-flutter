@@ -98,9 +98,19 @@
 
   "tooltip_clear_search": "נקה חיפוש",
   "drawer_language": "שפה",
+  "drawer_database": "מסד נתונים",
+  "drawer_about": "אודות",
   "drawer_backup_db": "גיבוי מסד נתונים",
   "drawer_restore_db": "שחזור מסד נתונים",
   "drawer_coming_soon": "בקרוב",
+
+  "welcome_tagline": "מערכת ניהול מרפאת האופטומטריה המקצועית שלך",
+  "welcome_get_started": "בואו נתחיל",
+
+  "app_info_screen_title": "אודות אופטיקה סנאא",
+  "app_info_version": "גרסה {version}",
+  "app_info_description": "אופטיקה סנאא היא מערכת ניהול מרפאה מקצועית לאופטומטריה, לניהול רשומות לקוחות, מרשמי משקפיים ובדיקות עדשות מגע.",
+  "app_info_copyright": "© 2026 אופטיקה סנאא. כל הזכויות שמורות.",
 
   "tooltip_view_glasses": "היסטוריית משקפיים (Ctrl+G)",
   "tooltip_view_lenses": "היסטוריית עדשות (Ctrl+L)",
@@ -126,5 +136,23 @@
   "btn_cancel": "ביטול",
   "msg_customer_deleted": "הלקוח נמחק בהצלחה.",
   "msg_test_deleted": "רשומת הבדיקה נמחקה.",
-  "msg_delete_error": "שגיאה במחיקה: {error}"
+  "msg_delete_error": "שגיאה במחיקה: {error}",
+
+  "drawer_backup_restore": "גיבוי ושחזור",
+  "backup_screen_title": "גיבוי ושחזור",
+  "backup_section_title": "יצירת גיבוי",
+  "backup_section_subtitle": "שמור תמונת מצב של מסד הנתונים הנוכחי. עד 20 גיבויים נשמרים אוטומטית.",
+  "backup_create_btn": "צור גיבוי עכשיו",
+  "backup_creating": "יוצר גיבוי…",
+  "backup_success": "הגיבוי נוצר בהצלחה.",
+  "backup_error": "הגיבוי נכשל: {error}",
+  "backup_list_title": "גיבויים שמורים ({count})",
+  "backup_no_backups": "לא נמצאו גיבויים.",
+  "restore_confirm_title": "לשחזר גיבוי?",
+  "restore_confirm_body": "פעולה זו תחליף את מסד הנתונים הנוכחי בגיבוי מתאריך {date}. כל הנתונים שנוספו מאז יאבדו. להמשיך?",
+  "restore_success": "השחזור הצליח. מאתחל…",
+  "restore_error": "השחזור נכשל: {error}",
+  "btn_restore": "שחזר",
+  "backup_delete_confirm": "למחוק קובץ גיבוי זה? לא ניתן לבטל פעולה זו.",
+  "backup_deleted": "הגיבוי נמחק."
 }

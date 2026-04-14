@@ -98,9 +98,19 @@
 
   "tooltip_clear_search": "مسح البحث",
   "drawer_language": "اللغة",
+  "drawer_database": "قاعدة البيانات",
+  "drawer_about": "حول",
   "drawer_backup_db": "نسخ احتياطي لقاعدة البيانات",
   "drawer_restore_db": "استعادة قاعدة البيانات",
   "drawer_coming_soon": "قريباً",
+
+  "welcome_tagline": "نظام إدارة عيادة البصريات الاحترافي",
+  "welcome_get_started": "ابدأ الآن",
+
+  "app_info_screen_title": "حول أوبتيكا سناء",
+  "app_info_version": "الإصدار {version}",
+  "app_info_description": "أوبتيكا سناء هو نظام إدارة عيادة بصريات احترافي لإدارة سجلات العملاء ووصفات النظارات وفحوصات العدسات اللاصقة.",
+  "app_info_copyright": "© 2026 أوبتيكا سناء. جميع الحقوق محفوظة.",
 
   "tooltip_view_glasses": "سجل النظارات (Ctrl+G)",
   "tooltip_view_lenses": "سجل العدسات (Ctrl+L)",
@@ -126,5 +136,23 @@
   "btn_cancel": "إلغاء",
   "msg_customer_deleted": "تم حذف العميل بنجاح.",
   "msg_test_deleted": "تم حذف سجل الفحص.",
-  "msg_delete_error": "فشل الحذف: {error}"
+  "msg_delete_error": "فشل الحذف: {error}",
+
+  "drawer_backup_restore": "النسخ الاحتياطي والاستعادة",
+  "backup_screen_title": "النسخ الاحتياطي والاستعادة",
+  "backup_section_title": "إنشاء نسخة احتياطية",
+  "backup_section_subtitle": "احفظ لقطة من قاعدة البيانات الحالية. يتم الاحتفاظ بـ 20 نسخة احتياطية تلقائياً.",
+  "backup_create_btn": "إنشاء نسخة احتياطية الآن",
+  "backup_creating": "جارٍ الإنشاء…",
+  "backup_success": "تم إنشاء النسخة الاحتياطية بنجاح.",
+  "backup_error": "فشل النسخ الاحتياطي: {error}",
+  "backup_list_title": "النسخ الاحتياطية المحفوظة ({count})",
+  "backup_no_backups": "لم يتم العثور على نسخ احتياطية.",
+  "restore_confirm_title": "استعادة النسخة الاحتياطية؟",
+  "restore_confirm_body": "سيؤدي ذلك إلى استبدال قاعدة البيانات الحالية بالنسخة الاحتياطية من {date}. ستُفقد جميع البيانات المضافة منذ ذلك الحين. هل تريد المتابعة؟",
+  "restore_success": "تمت الاستعادة بنجاح. جارٍ إعادة التشغيل…",
+  "restore_error": "فشلت الاستعادة: {error}",
+  "btn_restore": "استعادة",
+  "backup_delete_confirm": "هل تريد حذف ملف النسخة الاحتياطية هذا؟ لا يمكن التراجع عن هذا الإجراء.",
+  "backup_deleted": "تم حذف النسخة الاحتياطية."
 }
