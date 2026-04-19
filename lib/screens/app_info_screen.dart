@@ -27,7 +27,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('app_info_screen_title'.tr())),
       body: Container(
-        color: Colors.white,
+        color: const Color.fromARGB(255, 4, 132, 136),
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 40),

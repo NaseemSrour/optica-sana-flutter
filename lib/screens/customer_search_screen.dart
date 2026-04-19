@@ -220,7 +220,9 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                         ),
                         trailing: Icon(
                           Icons.chevron_right,
-                          color: isSelected ? AppColors.primary : AppColors.label,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.label,
                         ),
                         onTap: () => _openCustomer(customer),
                       ),
@@ -285,61 +287,6 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
               ],
             ),
           ),
-
-          // ── Language ───────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: AppColors.accentTeal,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'drawer_language'.tr(),
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: AppColors.label,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          RadioGroup<Locale>(
-            groupValue: currentLocale,
-            onChanged: (locale) {
-              if (locale != null) {
-                context.setLocale(locale);
-                Navigator.pop(context);
-              }
-            },
-            child: Column(
-              children: [
-                RadioListTile<Locale>(
-                  dense: true,
-                  title: Text('lang_en'.tr()),
-                  value: const Locale('en'),
-                ),
-                RadioListTile<Locale>(
-                  dense: true,
-                  title: Text('lang_he'.tr()),
-                  value: const Locale('he'),
-                ),
-                RadioListTile<Locale>(
-                  dense: true,
-                  title: Text('lang_ar'.tr()),
-                  value: const Locale('ar'),
-                ),
-              ],
-            ),
-          ),
-
-          const Divider(height: 32),
 
           // ── Database ───────────────────────────────────────────────────────
           Padding(
@@ -414,15 +361,65 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
               Navigator.pop(context);
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const AppInfoScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const AppInfoScreen()),
               );
             },
+          ),
+
+          // ── Language ───────────────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.accentTeal,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'drawer_language'.tr(),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.label,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          RadioGroup<Locale>(
+            groupValue: currentLocale,
+            onChanged: (locale) {
+              if (locale != null) {
+                context.setLocale(locale);
+                Navigator.pop(context);
+              }
+            },
+            child: Column(
+              children: [
+                RadioListTile<Locale>(
+                  dense: true,
+                  title: Text('lang_en'.tr()),
+                  value: const Locale('en'),
+                ),
+                RadioListTile<Locale>(
+                  dense: true,
+                  title: Text('lang_he'.tr()),
+                  value: const Locale('he'),
+                ),
+                RadioListTile<Locale>(
+                  dense: true,
+                  title: Text('lang_ar'.tr()),
+                  value: const Locale('ar'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
-
 }
