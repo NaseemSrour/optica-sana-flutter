@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
+import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
+import '../widgets/app_notification.dart';
 import '../widgets/glasses_test_table.dart';
 
 class GlassesHistoryScreen extends StatefulWidget {
@@ -29,12 +31,20 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
 
   final FocusNode _focusNode = FocusNode();
   late final Map<String, TextEditingController> _controllers;
+  final _dropdownOptions = <String, List<String>>{};
+
+  static const _tableDropdownKeys = {'r_base', 'l_base'};
 
   @override
   void initState() {
     super.initState();
     _controllers = {};
     _loadHistory();
+    for (final key in _tableDropdownKeys) {
+      DropdownOptionsService.instance.getOptions(key).then((opts) {
+        if (mounted) setState(() => _dropdownOptions[key] = opts);
+      });
+    }
   }
 
   Future<void> _loadHistory() async {
@@ -54,14 +64,10 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'msg_error_loading_history'.tr(
-                namedArgs: {'error': e.toString()},
-              ),
-            ),
-          ),
+        AppNotification.show(
+          context,
+          'msg_error_loading_history'.tr(namedArgs: {'error': e.toString()}),
+          type: NotificationType.error,
         );
       }
     }
@@ -113,18 +119,18 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
         _isEditing = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(
+        AppNotification.show(
           context,
-        ).showSnackBar(SnackBar(content: Text('msg_test_saved'.tr())));
+          'msg_test_saved'.tr(),
+          type: NotificationType.success,
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'msg_test_save_error'.tr(namedArgs: {'error': e.toString()}),
-            ),
-          ),
+        AppNotification.show(
+          context,
+          'msg_test_save_error'.tr(namedArgs: {'error': e.toString()}),
+          type: NotificationType.error,
         );
       }
     }
@@ -167,19 +173,19 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
         if (_tests.isEmpty) {
           Navigator.pop(context);
         } else {
-          ScaffoldMessenger.of(
+          AppNotification.show(
             context,
-          ).showSnackBar(SnackBar(content: Text('msg_test_deleted'.tr())));
+            'msg_test_deleted'.tr(),
+            type: NotificationType.success,
+          );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'msg_delete_error'.tr(namedArgs: {'error': e.toString()}),
-            ),
-          ),
+        AppNotification.show(
+          context,
+          'msg_delete_error'.tr(namedArgs: {'error': e.toString()}),
+          type: NotificationType.error,
         );
       }
     }
@@ -204,10 +210,15 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
             SaveIntent(),
         LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
-        LogicalKeySet(LogicalKeyboardKey.add): NextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.numpadAdd): NextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.minus): PreviousIntent(),
-        LogicalKeySet(LogicalKeyboardKey.numpadSubtract): PreviousIntent(),
+        // Navigation shortcuts are disabled while editing so that - and +
+        // are not swallowed before reaching the focused text fields.
+        if (!_isEditing) LogicalKeySet(LogicalKeyboardKey.add): NextIntent(),
+        if (!_isEditing)
+          LogicalKeySet(LogicalKeyboardKey.numpadAdd): NextIntent(),
+        if (!_isEditing)
+          LogicalKeySet(LogicalKeyboardKey.minus): PreviousIntent(),
+        if (!_isEditing)
+          LogicalKeySet(LogicalKeyboardKey.numpadSubtract): PreviousIntent(),
       },
       actions: {
         EditIntent: CallbackAction<EditIntent>(
@@ -295,6 +306,22 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
     );
   }
 
+  String _formatBirthDate(String? raw) {
+    if (raw == null || raw.isEmpty) return 'label_na'.tr();
+    try {
+      final date = DateFormat('yyyy-MM-dd').parse(raw);
+      final now = DateTime.now();
+      int age = now.year - date.year;
+      if (now.month < date.month ||
+          (now.month == date.month && now.day < date.day)) {
+        age--;
+      }
+      return '${DateFormat('dd/MM/yyyy').format(date)} ($age)';
+    } catch (_) {
+      return raw;
+    }
+  }
+
   Widget _buildCustomerHeader() {
     return Padding(
       padding: const EdgeInsets.all(12.0),
@@ -310,7 +337,7 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
           _buildHeaderInfo('label_id'.tr(), widget.customer.id.toString()),
           _buildHeaderInfo(
             'label_birth_date'.tr(),
-            widget.customer.birthDate ?? 'label_na'.tr(),
+            _formatBirthDate(widget.customer.birthDate),
           ),
         ],
       ),
@@ -366,6 +393,7 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
             glassesTest: test,
             isEditing: _isEditing,
             controllers: _controllers,
+            dropdownOptions: _dropdownOptions,
           ),
           const SizedBox(height: 20),
           _buildAdditionalInfo(test),

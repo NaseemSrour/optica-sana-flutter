@@ -5,7 +5,7 @@ import 'schema.dart';
 
 class DatabaseHelper {
   static final _databaseName = "OpticaSana.db";
-  static final _databaseVersion = 1;
+  static final _databaseVersion = 2;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -37,6 +37,7 @@ class DatabaseHelper {
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
       onOpen: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -44,11 +45,57 @@ class DatabaseHelper {
   }
 
   Future _onCreate(Database db, int version) async {
+    await db.execute(dropdownOptionsSql);
     List<String> statements = schemaSql.split(';');
     for (String statement in statements) {
       if (statement.trim().isNotEmpty) {
         await db.execute(statement);
       }
+    }
+    await _seedDropdownOptions(db);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute(dropdownOptionsSql);
+      await _seedDropdownOptions(db);
+    }
+  }
+
+  Future<void> _seedDropdownOptions(Database db) async {
+    const seeds = [
+      ('sex', 'M', 1),
+      ('sex', 'F', 2),
+      ('r_base', 'UP', 1),
+      ('r_base', 'DOWN', 2),
+      ('r_base', 'IN', 3),
+      ('r_base', 'OUT', 4),
+      ('l_base', 'UP', 1),
+      ('l_base', 'DOWN', 2),
+      ('l_base', 'IN', 3),
+      ('l_base', 'OUT', 4),
+      ('dominant_eye', 'right', 1),
+      ('dominant_eye', 'left', 2),
+      ('glasses_role', 'רחוק', 1),
+      ('glasses_role', 'קרוב', 2),
+      ('glasses_role', 'ביניים / מחשב', 3),
+      ('glasses_role', 'Multi focal', 4),
+      ('glasses_role', 'Bi-focal', 5),
+      ('glasses_role', 'אופטי שמש', 6),
+      ('glasses_role', 'משקפי מגן', 7),
+      ('lenses_material', 'CR1.5', 1),
+      ('segment_diameter', '28', 1),
+      ('lenses_manufacturer', 'Tommy Hilfiger', 1),
+      ('lenses_manufacturer', 'RayBan', 2),
+      ('lenses_coated', 'DVP', 1),
+      ('lenses_coated', 'MVP', 2),
+    ];
+    for (final (fieldKey, value, sortOrder) in seeds) {
+      await db.insert(
+        'dropdown_options',
+        {'field_key': fieldKey, 'value': value, 'sort_order': sortOrder},
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
     }
   }
 }

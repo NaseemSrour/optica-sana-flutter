@@ -7,7 +7,10 @@ import 'package:optica_sana/screens/add_glasses_test_screen.dart';
 import 'package:optica_sana/screens/add_lenses_test_screen.dart';
 import 'package:optica_sana/screens/lenses_history_screen.dart';
 import '../flutter_services/customer_service.dart';
+import '../flutter_services/dropdown_options_service.dart';
 import 'package:optica_sana/db_flutter/models.dart';
+import '../widgets/app_notification.dart';
+import '../widgets/dropdown_field.dart';
 import '../widgets/glasses_test_table.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
@@ -30,6 +33,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
   late final Map<String, TextEditingController> _controllers;
   final FocusNode _focusNode = FocusNode();
   GlassesTest? _latestGlassesTest;
+  List<String> _sexOptions = [];
 
   @override
   void initState() {
@@ -53,6 +57,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       'notes': TextEditingController(text: widget.customer.notes),
     };
     _fetchLatestGlassesTest();
+    DropdownOptionsService.instance.getOptions('sex').then((opts) {
+      if (mounted) setState(() => _sexOptions = opts);
+    });
   }
 
   Future<void> _fetchLatestGlassesTest() async {
@@ -67,12 +74,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'msg_glasses_fetched_error'.tr(namedArgs: {'error': e.toString()}),
-            ),
-          ),
+        AppNotification.show(
+          context,
+          'msg_glasses_fetched_error'.tr(namedArgs: {'error': e.toString()}),
+          type: NotificationType.error,
         );
       }
     }
@@ -114,17 +119,21 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       try {
         await widget.customerService.updateCustomer(updatedCustomer);
         _toggleEditMode();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('msg_customer_saved'.tr())),
-        );
+        if (mounted) {
+          AppNotification.show(
+            context,
+            'msg_customer_saved'.tr(),
+            type: NotificationType.success,
+          );
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'msg_customer_save_error'.tr(namedArgs: {'error': e.toString()}),
-            ),
-          ),
-        );
+        if (mounted) {
+          AppNotification.show(
+            context,
+            'msg_customer_save_error'.tr(namedArgs: {'error': e.toString()}),
+            type: NotificationType.error,
+          );
+        }
       }
     }
   }
@@ -213,10 +222,29 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            _isEditing
-                ? 'title_customer_details_editing'.tr()
-                : 'title_customer_details'.tr(),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _isEditing
+                    ? 'title_customer_details_editing'.tr()
+                    : 'title_customer_details'.tr(),
+              ),
+              Text(
+                () {
+                  final age = _customerAge();
+                  final name =
+                      '${widget.customer.fname} ${widget.customer.lname}';
+                  return age != null ? '$name  ·  $age' : name;
+                }(),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.white.withValues(alpha: 0.75),
+                ),
+              ),
+            ],
           ),
           actions: [
             IconButton(
@@ -362,6 +390,17 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       itemCount: fields.length,
       itemBuilder: (context, index) {
         final entry = fields.entries.elementAt(index);
+        if (entry.value == 'sex' && _isEditing) {
+          return DropdownField(
+            label: entry.key.tr(),
+            options: _sexOptions,
+            value: _controllers['sex']!.text.isEmpty
+                ? null
+                : _controllers['sex']!.text,
+            onChanged: (v) =>
+                setState(() => _controllers['sex']!.text = v ?? ''),
+          );
+        }
         return TextFormField(
           controller: _controllers[entry.value],
           enabled: _isEditing,
@@ -414,18 +453,37 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       await widget.customerService.deleteCustomer(widget.customer.id);
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('msg_customer_deleted'.tr())),
+        AppNotification.show(
+          context,
+          'msg_customer_deleted'.tr(),
+          type: NotificationType.success,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('msg_delete_error'.tr(namedArgs: {'error': e.toString()})),
-          ),
+        AppNotification.show(
+          context,
+          'msg_delete_error'.tr(namedArgs: {'error': e.toString()}),
+          type: NotificationType.error,
         );
       }
+    }
+  }
+
+  String? _customerAge() {
+    final raw = widget.customer.birthDate;
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final date = DateFormat('yyyy-MM-dd').parse(raw);
+      final now = DateTime.now();
+      int age = now.year - date.year;
+      if (now.month < date.month ||
+          (now.month == date.month && now.day < date.day)) {
+        age--;
+      }
+      return '$age';
+    } catch (_) {
+      return null;
     }
   }
 

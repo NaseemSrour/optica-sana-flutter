@@ -1,3 +1,13 @@
+const String dropdownOptionsSql = """
+CREATE TABLE IF NOT EXISTS dropdown_options (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  field_key  TEXT    NOT NULL,
+  value      TEXT    NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  UNIQUE(field_key, value)
+);
+""";
+
 const String schemaSql = """
 CREATE TABLE IF NOT EXISTS customers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

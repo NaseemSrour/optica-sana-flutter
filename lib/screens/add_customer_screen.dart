@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../db_flutter/models.dart' as models;
 import '../flutter_services/customer_service.dart';
+import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
+import '../widgets/app_notification.dart';
+import '../widgets/dropdown_field.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   final CustomerService customerService;
@@ -20,7 +23,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _fnameController = TextEditingController();
   final _lnameController = TextEditingController();
   final _birthDateController = TextEditingController();
-  final _sexController = TextEditingController();
+  String? _selectedSex;
+  List<String> _sexOptions = [];
   final _telHomeController = TextEditingController();
   final _telMobileController = TextEditingController();
   final _addressController = TextEditingController();
@@ -33,6 +37,14 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _refererController = TextEditingController();
   final _notesController = TextEditingController();
   bool _mailing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    DropdownOptionsService.instance.getOptions('sex').then((opts) {
+      if (mounted) setState(() => _sexOptions = opts);
+    });
+  }
 
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
@@ -50,7 +62,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     _fnameController.dispose();
     _lnameController.dispose();
     _birthDateController.dispose();
-    _sexController.dispose();
     _telHomeController.dispose();
     _telMobileController.dispose();
     _addressController.dispose();
@@ -74,7 +85,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         fname: _fnameController.text,
         lname: _lnameController.text,
         birthDate: _formatDateForDb(_birthDateController.text),
-        sex: _sexController.text,
+        sex: _selectedSex ?? '',
         telHome: _telHomeController.text,
         telMobile: _telMobileController.text,
         address: _addressController.text,
@@ -92,19 +103,19 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       try {
         await widget.customerService.addCustomer(newCustomer);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('msg_customer_added'.tr())),
+          AppNotification.show(
+            context,
+            'msg_customer_added'.tr(),
+            type: NotificationType.success,
           );
           Navigator.pop(context);
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'msg_customer_add_failed'.tr(namedArgs: {'error': e.toString()}),
-              ),
-            ),
+          AppNotification.show(
+            context,
+            'msg_customer_add_failed'.tr(namedArgs: {'error': e.toString()}),
+            type: NotificationType.error,
           );
         }
       }
@@ -213,7 +224,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           hint: 'hint_date'.tr(),
         ),
         const SizedBox(height: 12),
-        _field(controller: _sexController, label: '⚧️  ${'field_sex'.tr()}'),
+        DropdownField(
+          label: '⚧️  ${'field_sex'.tr()}',
+          options: _sexOptions,
+          value: _selectedSex,
+          onChanged: (v) => setState(() => _selectedSex = v),
+        ),
         const SizedBox(height: 12),
         _field(controller: _telHomeController, label: '📞  ${'field_tel_home'.tr()}'),
         const SizedBox(height: 12),
