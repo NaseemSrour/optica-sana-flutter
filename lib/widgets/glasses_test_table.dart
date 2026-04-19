@@ -1,6 +1,9 @@
+import 'dart:ui' as ui;
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../db_flutter/models.dart';
+import '../themes/app_theme.dart';
 
 class GlassesTestTable extends StatelessWidget {
   final GlassesTest? glassesTest;
@@ -17,12 +20,12 @@ class GlassesTestTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (glassesTest == null) {
-      return const Center(child: Text("No glasses test data available."));
+      return Center(child: Text('msg_no_glasses_data'.tr()));
     }
 
     final examDate = glassesTest!.examDate != null
         ? DateFormat('dd/MM/yyyy').format(glassesTest!.examDate!)
-        : 'N/A';
+        : 'label_na'.tr();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,65 +35,80 @@ class GlassesTestTable extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Last Glasses Test - $examDate',
-                style: Theme.of(context).textTheme.titleLarge,
+              Container(
+                decoration: const BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: AppColors.primary, width: 3),
+                  ),
+                ),
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(
+                  '${'label_last_glasses'.tr()} - $examDate',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
               if (isEditing)
                 SizedBox(
                   width: 200,
                   child: TextFormField(
                     controller: controllers!['examiner'],
-                    decoration: const InputDecoration(
-                      labelText: 'Examiner',
+                    decoration: InputDecoration(
+                      labelText: 'field_examiner'.tr(),
                       isDense: true,
                     ),
                   ),
                 )
               else
                 Text(
-                  'Examiner: ${glassesTest!.examiner ?? 'N/A'}',
+                  'label_examiner_display'.tr(namedArgs: {'value': glassesTest!.examiner ?? 'label_na'.tr()}),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
             ],
           ),
         ),
-        Table(
-          border: TableBorder.all(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+        Directionality(
+          textDirection: ui.TextDirection.ltr,
+          child: Table(
+            border: TableBorder.all(color: AppColors.tableBorder),
+            columnWidths: const {
+              0: IntrinsicColumnWidth(),
+              // Addition column (index 8) contains 4 sub-columns; give it 4× the
+              // flex weight so each sub-column is as wide as any other column.
+              8: FlexColumnWidth(4),
+            },
+            children: [
+              _buildHeaders(context),
+              _buildEyeDataRow(
+                context,
+                'R',
+                _getRightEyeData(),
+                _getRightEyeKeys(),
+              ),
+              _buildEyeDataRow(
+                context,
+                'L',
+                _getLeftEyeData(),
+                _getLeftEyeKeys(),
+              ),
+            ],
           ),
-          columnWidths: const {0: IntrinsicColumnWidth()},
-          children: [
-            _buildHeaders(context),
-            _buildEyeDataRow(
-              context,
-              'R',
-              _getRightEyeData(),
-              _getRightEyeKeys(),
-            ),
-            _buildEyeDataRow(
-              context,
-              'L',
-              _getLeftEyeData(),
-              _getLeftEyeKeys(),
-            ),
-          ],
         ),
         const SizedBox(height: 20),
-        if (isEditing)
-          TextFormField(
-            controller: controllers!['notes'],
-            decoration: const InputDecoration(
-              labelText: 'Notes',
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 3,
-          )
-        else
-          Text(
-            'Notes: ${glassesTest!.notes ?? 'N/A'}',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
+        // The notes field is now displayed in the main screen
+        // if (isEditing)
+        //   TextFormField(
+        //     controller: controllers!['notes'],
+        //     decoration: const InputDecoration(
+        //       labelText: 'Notes',
+        //       border: OutlineInputBorder(),
+        //     ),
+        //     maxLines: 3,
+        //   )
+        // else
+        //   Text(
+        //     'Notes: ${glassesTest!.notes ?? 'N/A'}',
+        //     style: Theme.of(context).textTheme.bodyLarge,
+        //   ),
       ],
     );
   }
@@ -150,10 +168,10 @@ class GlassesTestTable extends StatelessWidget {
       child: Center(
         child: Text(
           text,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          style: TextStyle(
+            color: AppColors.displayValue,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontSize: isSubHeader ? 12 : null,
+            fontSize: isSubHeader ? 12 : 14,
           ),
         ),
       ),
@@ -247,23 +265,23 @@ class GlassesTestTable extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               eye,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: AppColors.label,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
           ),
         ),
-        ...data
-            .take(7)
-            .map(
-              (d) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(d),
-                ),
-              ),
-            )
-            .toList(),
+        // FV, Sphere, Cylinder, Axis, Prism, Base (indices 0–5)
+        ...List.generate(6, (index) {
+          return isEditing
+              ? _editableCell(keys[index])
+              : _dataCell(data[index]);
+        }),
+        // VA column (index 6): r_va + both_va stacked for R; l_va only for L
+        _buildVaCell(eye, data[6], keys[6]),
+        // Addition sub-columns (indices 7–10)
         TableCell(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -277,19 +295,60 @@ class GlassesTestTable extends StatelessWidget {
             }),
           ),
         ),
-        ...List.generate(2, (index) {
-          final dataIndex = index + 11;
-          return isEditing
-              ? _editableCell(keys[dataIndex])
-              : _dataCell(data[dataIndex]);
-        }),
+        // High column (index 11)
+        isEditing ? _editableCell(keys[11]) : _dataCell(data[11]),
+        // PD column: sum_pd / near_pd for R; empty for L
+        _buildPdCell(eye),
       ],
+    );
+  }
+
+  Widget _buildVaCell(String eye, String vaData, String vaKey) {
+    if (eye != 'R') {
+      return isEditing ? _editableCell(vaKey) : _dataCell(vaData);
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        isEditing ? _editableCell(vaKey) : _dataCell(vaData),
+        Container(height: 1, color: AppColors.tableBorder),
+        isEditing
+            ? _editableCell('both_va')
+            : _dataCell(glassesTest?.bothVa ?? ''),
+      ],
+    );
+  }
+
+  Widget _buildPdCell(String eye) {
+    if (eye != 'R') return _dataCell('');
+    if (isEditing) {
+      return Row(
+        children: [
+          Expanded(child: _editableCell('sum_pd')),
+          const Text(
+            '/',
+            style: TextStyle(color: AppColors.label, fontSize: 12),
+          ),
+          Expanded(child: _editableCell('near_pd')),
+        ],
+      );
+    }
+    final sumPd = glassesTest?.sumPd ?? '';
+    final nearPd = glassesTest?.nearPd ?? '';
+    return _dataCell(
+      (sumPd.isNotEmpty || nearPd.isNotEmpty) ? '$sumPd / $nearPd' : '',
     );
   }
 
   Widget _dataCell(String text) {
     return Center(
-      child: Padding(padding: const EdgeInsets.all(8.0), child: Text(text)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          text,
+          style: const TextStyle(color: AppColors.displayValue),
+        ),
+      ),
     );
   }
 
@@ -299,8 +358,13 @@ class GlassesTestTable extends StatelessWidget {
       child: TextFormField(
         controller: controllers![fieldKey],
         textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: AppColors.inputValue,
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           border: InputBorder.none,
+          filled: false,
           isDense: true,
         ),
       ),

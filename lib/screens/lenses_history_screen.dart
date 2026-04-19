@@ -1,9 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
+import '../themes/app_theme.dart';
 import '../widgets/lenses_test_tables.dart';
 
 class LensesHistoryScreen extends StatefulWidget {
@@ -52,9 +53,17 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error loading history: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'msg_error_loading_history'.tr(
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -68,7 +77,6 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
       _controllers[key] = TextEditingController(text: value?.toString() ?? '');
     });
 
-    // Handle composite fields
     _controllers['r_base_curve'] = TextEditingController(
       text:
           '${currentTest.rBaseCurveNumerator ?? ''}/${currentTest.rBaseCurveDenominator ?? ''}',
@@ -156,13 +164,76 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         _tests[_currentIndex] = updatedTest;
         _isEditing = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Test saved successfully!')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('msg_test_saved'.tr())));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error saving test: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'msg_test_save_error'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteCurrentTest() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'confirm_delete_title'.tr(),
+          style: TextStyle(color: Colors.red),
+        ),
+        content: Text('confirm_delete_test_body'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('btn_cancel'.tr()),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('btn_delete'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      final testId = _tests[_currentIndex].id;
+      await widget.customerService.deleteContactLensesTest(testId);
+      setState(() {
+        _tests.removeAt(_currentIndex);
+        if (_tests.isNotEmpty) {
+          _currentIndex = _currentIndex.clamp(0, _tests.length - 1);
+          _updateControllersForCurrentTest();
+        }
+      });
+      if (mounted) {
+        if (_tests.isEmpty) {
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('msg_test_deleted'.tr())));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'msg_delete_error'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -184,6 +255,7 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         LogicalKeySet(LogicalKeyboardKey.f2): EditIntent(),
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
             SaveIntent(),
+        LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
         LogicalKeySet(LogicalKeyboardKey.add): NextIntent(),
         LogicalKeySet(LogicalKeyboardKey.numpadAdd): NextIntent(),
         LogicalKeySet(LogicalKeyboardKey.minus): PreviousIntent(),
@@ -194,6 +266,16 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
           onInvoke: (_) => _toggleEditMode(),
         ),
         SaveIntent: CallbackAction<SaveIntent>(onInvoke: (_) => _saveTest()),
+        BackIntent: CallbackAction<BackIntent>(
+          onInvoke: (_) {
+            if (_isEditing) {
+              _toggleEditMode();
+            } else {
+              Navigator.pop(context);
+            }
+            return null;
+          },
+        ),
         NextIntent: CallbackAction<NextIntent>(
           onInvoke: (_) => _navigateTests(-1),
         ),
@@ -204,32 +286,63 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'Contact Lenses History${_isEditing ? " (Editing)" : ""}',
+            _isEditing
+                ? 'title_lenses_history_editing'.tr()
+                : 'title_lenses_history'.tr(),
           ),
           actions: [
-            if (_tests.isNotEmpty)
+            if (_tests.isNotEmpty) ...[
               IconButton(
-                tooltip: _isEditing ? 'Save (Ctrl+S)' : 'Edit (F2)',
-                icon: Icon(_isEditing ? Icons.save : Icons.edit),
+                tooltip: _isEditing ? 'tooltip_save'.tr() : 'tooltip_edit'.tr(),
+                icon: Icon(
+                  _isEditing ? Icons.save : Icons.edit,
+                  color: _isEditing ? AppColors.inputValue : AppColors.primary,
+                ),
                 onPressed: _isEditing ? _saveTest : _toggleEditMode,
               ),
-          ],
-        ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _tests.isEmpty
-            ? const Center(
-                child: Text(
-                  'No contact lenses history found for this customer.',
-                ),
-              )
-            : Column(
-                children: [
-                  _buildCustomerHeader(),
-                  _buildTestNavigationHeader(currentTest),
-                  Expanded(child: _buildTestDataForm(currentTest!)),
+              PopupMenuButton<String>(
+                tooltip: 'tooltip_more_options'.tr(),
+                onSelected: (value) {
+                  if (value == 'delete') _confirmDeleteCurrentTest();
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.delete_outline,
+                          color: AppColors.error,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'menu_delete'.tr(),
+                          style: const TextStyle(color: AppColors.error),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
+            ],
+          ],
+        ),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _tests.isEmpty
+              ? Center(child: Text('msg_no_lenses_history'.tr()))
+              : Column(
+                  children: [
+                    _buildCustomerHeader(),
+                    _buildTestNavigationHeader(currentTest),
+                    Expanded(child: _buildTestDataForm(currentTest!)),
+                  ],
+                ),
+        ),
       ),
     );
   }
@@ -242,12 +355,15 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         runSpacing: 8,
         children: [
           _buildHeaderInfo(
-            'Name',
+            'label_name'.tr(),
             '${widget.customer.fname} ${widget.customer.lname}',
           ),
-          _buildHeaderInfo('SSN', widget.customer.ssn.toString()),
-          _buildHeaderInfo('ID', widget.customer.id.toString()),
-          _buildHeaderInfo('Birth Date', widget.customer.birthDate ?? 'N/A'),
+          _buildHeaderInfo('label_ssn'.tr(), widget.customer.ssn.toString()),
+          _buildHeaderInfo('label_id'.tr(), widget.customer.id.toString()),
+          _buildHeaderInfo(
+            'label_birth_date'.tr(),
+            widget.customer.birthDate ?? 'label_na'.tr(),
+          ),
         ],
       ),
     );
@@ -266,24 +382,27 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
   Widget _buildTestNavigationHeader(ContactLensesTest? test) {
     if (test == null) return const SizedBox.shrink();
     return Container(
-      color: Theme.of(context).colorScheme.primary,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: const BoxDecoration(gradient: AppColors.navHeaderGradient),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Test ${_tests.length - _currentIndex} of ${_tests.length}',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            'nav_test'.tr(
+              namedArgs: {
+                'current': (_tests.length - _currentIndex).toString(),
+                'total': _tests.length.toString(),
+              },
+            ),
+            style: const TextStyle(
+              color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 16,
-              color: Colors.white,
             ),
           ),
           Text(
-            'Date: ${DateFormat('dd/MM/yyyy').format(test.examDate)}',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontSize: 16, color: Colors.white),
+            '${'label_date'.tr()}: ${DateFormat('dd/MM/yyyy').format(test.examDate)}',
+            style: const TextStyle(color: AppColors.displayValue, fontSize: 16),
           ),
         ],
       ),
@@ -305,6 +424,8 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
 class EditIntent extends Intent {}
 
 class SaveIntent extends Intent {}
+
+class BackIntent extends Intent {}
 
 class NextIntent extends Intent {}
 

@@ -1,7 +1,11 @@
+import 'dart:ui' as ui;
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
+import '../themes/app_theme.dart';
 
 class AddGlassesTestScreen extends StatefulWidget {
   final Customer customer;
@@ -19,17 +23,15 @@ class AddGlassesTestScreen extends StatefulWidget {
 
 class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _focusNode = FocusNode();
   final _controllers = <String, TextEditingController>{};
 
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
     try {
-      // Parse with d/M/yyyy to allow for single-digit day/month
       final inputDate = DateFormat('d/M/yyyy').parse(date);
-      // Format to yyyy-MM-dd to ensure leading zeros for DB sorting
       return DateFormat('yyyy-MM-dd').format(inputDate);
     } catch (e) {
-      // If parsing fails, return original string.
       return date;
     }
   }
@@ -37,10 +39,9 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize controllers for all fields of GlassesTest
     final sampleTest = GlassesTest(
       id: 465,
-      customerId: widget.customer.id!,
+      customerId: widget.customer.id,
       examDate: DateTime.now(),
     );
     sampleTest.toMap().forEach((key, value) {
@@ -57,6 +58,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
   @override
   void dispose() {
     _controllers.forEach((_, controller) => controller.dispose());
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -77,43 +79,110 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       try {
         final newTest = GlassesTest.fromMap(newMap);
         await widget.customerService.addGlassesTest(newTest);
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('New glasses test saved successfully!')),
-        );
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('msg_glasses_saved'.tr())),
+          );
+        }
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error saving test: $e')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'msg_glasses_save_error'.tr(namedArgs: {'error': e.toString()}),
+              ),
+            ),
+          );
+        }
       }
     }
   }
 
+  String _labelFor(String key) {
+    const map = {
+      'dominant_eye': 'field_dominant_eye',
+      'glasses_role': 'field_glasses_role',
+      'lenses_material': 'field_lenses_material',
+      'lenses_diameter_1': 'field_lenses_diam_1',
+      'lenses_diameter_2': 'field_lenses_diam_2',
+      'lenses_diameter_decentration_horizontal': 'field_lenses_dia_dec_h',
+      'lenses_diameter_decentration_vertical': 'field_lenses_dia_dec_v',
+      'segment_diameter': 'field_segment_diam',
+      'diagnosis': 'field_diagnosis',
+      'lenses_manufacturer': 'field_lenses_manufacturer',
+      'lenses_color': 'field_lenses_color',
+      'lenses_coated': 'field_lenses_coated',
+      'catalog_num': 'field_catalog_num',
+      'frame_manufacturer': 'field_frame_manufacturer',
+      'frame_supplier': 'field_frame_supplier',
+      'frame_model': 'field_frame_model',
+      'frame_size': 'field_frame_size',
+      'frame_bar_length': 'field_frame_bar_length',
+      'frame_color': 'field_frame_color',
+    };
+    final trKey = map[key];
+    return trKey != null ? trKey.tr() : key.replaceAll('_', ' ').toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Add New Glasses Test for ${widget.customer.fname} ${widget.customer.lname}',
+    return FocusableActionDetector(
+      autofocus: true,
+      focusNode: _focusNode,
+      shortcuts: {
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
+            SaveIntent(),
+        LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
+      },
+      actions: {
+        SaveIntent: CallbackAction<SaveIntent>(
+          onInvoke: (_) => _saveTest(),
         ),
-        actions: [
-          IconButton(icon: const Icon(Icons.save), onPressed: _saveTest),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              _buildTopFields(),
-              const SizedBox(height: 20),
-              _buildEyeDataTable(),
-              const SizedBox(height: 20),
-              _buildNonEyeDataFields(),
-              const SizedBox(height: 20),
-              _buildNotesField(),
-            ],
+        BackIntent: CallbackAction<BackIntent>(
+          onInvoke: (_) {
+            Navigator.pop(context);
+            return null;
+          },
+        ),
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'title_add_glasses'.tr(
+              namedArgs: {
+                'name': '${widget.customer.fname} ${widget.customer.lname}',
+              },
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.save),
+              tooltip: 'tooltip_save'.tr(),
+              onPressed: _saveTest,
+            ),
+          ],
+        ),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  _buildTopFields(),
+                  const SizedBox(height: 20),
+                  _buildEyeDataTable(),
+                  const SizedBox(height: 20),
+                  _buildNonEyeDataFields(),
+                  const SizedBox(height: 20),
+                  _buildNotesField(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -122,6 +191,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
 
   Widget _buildTopFields() {
     final keys = ['exam_date', 'examiner'];
+    final labels = ['field_exam_date'.tr(), 'field_examiner'.tr()];
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -136,9 +206,13 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         final key = keys[index];
         return TextFormField(
           controller: _controllers[key],
+          style: const TextStyle(
+            color: AppColors.inputValue,
+            fontWeight: FontWeight.w600,
+          ),
           decoration: InputDecoration(
-            labelText: key.replaceAll('_', ' ').toUpperCase(),
-            hintText: key.contains('date') ? 'DD/MM/YYYY' : null,
+            labelText: labels[index],
+            hintText: key.contains('date') ? 'hint_date'.tr() : null,
             isDense: true,
           ),
         );
@@ -149,7 +223,14 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
   Widget _buildNotesField() {
     return TextFormField(
       controller: _controllers['notes'],
-      decoration: const InputDecoration(labelText: 'NOTES', isDense: true),
+      style: const TextStyle(
+        color: AppColors.inputValue,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: InputDecoration(
+        labelText: 'field_notes'.tr(),
+        isDense: true,
+      ),
       maxLines: 3,
     );
   }
@@ -162,7 +243,10 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
               !k.startsWith('l_') &&
               k != 'exam_date' &&
               k != 'examiner' &&
-              k != 'notes',
+              k != 'notes' &&
+              k != 'both_va' &&
+              k != 'sum_pd' &&
+              k != 'near_pd',
         )
         .toList();
 
@@ -175,16 +259,18 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
-      itemCount: nonEyeDataKeys.length, // +1 for exam_date
+      itemCount: nonEyeDataKeys.length,
       itemBuilder: (context, index) {
-        final String key;
-        key = nonEyeDataKeys[index];
-
+        final key = nonEyeDataKeys[index];
         return TextFormField(
           controller: _controllers[key],
+          style: const TextStyle(
+            color: AppColors.inputValue,
+            fontWeight: FontWeight.w600,
+          ),
           decoration: InputDecoration(
-            labelText: key.replaceAll('_', ' ').toUpperCase(),
-            hintText: key.contains('date') ? 'DD/MM/YYYY' : null,
+            labelText: _labelFor(key),
+            hintText: key.contains('date') ? 'hint_date'.tr() : null,
             isDense: true,
           ),
         );
@@ -193,17 +279,21 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
   }
 
   Widget _buildEyeDataTable() {
-    return Table(
-      border: TableBorder.all(
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+    return Directionality(
+      textDirection: ui.TextDirection.ltr,
+      child: Table(
+        border: TableBorder.all(color: AppColors.tableBorder),
+        columnWidths: const {
+          0: IntrinsicColumnWidth(),
+          8: FlexColumnWidth(4),
+        },
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        children: [
+          _buildHeaders(context),
+          _buildEyeDataRow('R', _getRightEyeKeys()),
+          _buildEyeDataRow('L', _getLeftEyeKeys()),
+        ],
       ),
-      columnWidths: const {0: IntrinsicColumnWidth()},
-      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-      children: [
-        _buildHeaders(context),
-        _buildEyeDataRow('R', _getRightEyeKeys()),
-        _buildEyeDataRow('L', _getLeftEyeKeys()),
-      ],
     );
   }
 
@@ -316,13 +406,21 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               eye,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: AppColors.label,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
           ),
         ),
-        ...keys.take(7).map((key) => _buildTextFormFieldCell(key)).toList(),
+        // FV, Sphere, Cylinder, Axis, Prism, Base (indices 0–5)
+        ...keys.take(6).map((key) => _buildTextFormFieldCell(key)),
+        // VA column (index 6): r_va + both_va stacked for R; l_va only for L
+        eye == 'R'
+            ? _buildStackedVaCell(keys[6])
+            : _buildTextFormFieldCell(keys[6]),
+        // Addition sub-columns (indices 7–10)
         TableCell(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -332,7 +430,34 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
                 .toList(),
           ),
         ),
-        ...keys.sublist(11).map((key) => _buildTextFormFieldCell(key)).toList(),
+        // High column (index 11)
+        _buildTextFormFieldCell(keys[11]),
+        // PD column: sum_pd / near_pd for R; empty for L
+        eye == 'R' ? _buildPdCell() : const SizedBox(),
+      ],
+    );
+  }
+
+  Widget _buildStackedVaCell(String vaKey) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildTextFormFieldCell(vaKey),
+        Container(height: 1, color: AppColors.tableBorder),
+        _buildTextFormFieldCell('both_va'),
+      ],
+    );
+  }
+
+  Widget _buildPdCell() {
+    return Row(
+      children: [
+        Expanded(child: _buildTextFormFieldCell('sum_pd')),
+        const Text(
+          '/',
+          style: TextStyle(color: AppColors.label, fontSize: 12),
+        ),
+        Expanded(child: _buildTextFormFieldCell('near_pd')),
       ],
     );
   }
@@ -343,11 +468,20 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       child: TextFormField(
         controller: _controllers[key],
         textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: AppColors.inputValue,
+          fontWeight: FontWeight.w600,
+        ),
         decoration: const InputDecoration(
           border: InputBorder.none,
+          filled: false,
           isDense: true,
         ),
       ),
     );
   }
 }
+
+class SaveIntent extends Intent {}
+
+class BackIntent extends Intent {}
