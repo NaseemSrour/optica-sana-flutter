@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
+import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
 import '../widgets/lenses_test_tables.dart';
@@ -30,12 +31,16 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
 
   final FocusNode _focusNode = FocusNode();
   late final Map<String, TextEditingController> _controllers;
+  final _dropdownOptions = <String, List<String>>{};
 
   @override
   void initState() {
     super.initState();
     _controllers = {};
     _loadHistory();
+    DropdownOptionsService.instance.getOptions('examiner').then((opts) {
+      if (mounted) setState(() => _dropdownOptions['examiner'] = opts);
+    });
   }
 
   Future<void> _loadHistory() async {
@@ -434,6 +439,7 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         lensesTest: test,
         isEditing: _isEditing,
         controllers: _controllers,
+        dropdownOptions: _dropdownOptions,
       ),
     );
   }

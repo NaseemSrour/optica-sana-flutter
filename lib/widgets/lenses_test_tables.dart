@@ -4,17 +4,20 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../db_flutter/models.dart';
 import '../themes/app_theme.dart';
+import 'dropdown_field.dart';
 
 class LensesTestTables extends StatelessWidget {
   final ContactLensesTest? lensesTest;
   final bool isEditing;
   final Map<String, TextEditingController>? controllers;
+  final Map<String, List<String>> dropdownOptions;
 
   const LensesTestTables({
     super.key,
     this.lensesTest,
     this.isEditing = false,
     this.controllers,
+    this.dropdownOptions = const {},
   });
 
   @override
@@ -49,16 +52,10 @@ class LensesTestTables extends StatelessWidget {
               if (isEditing)
                 SizedBox(
                   width: 220,
-                  child: TextFormField(
+                  child: DropdownField(
+                    label: 'field_examiner'.tr(),
                     controller: controllers!['examiner'],
-                    decoration: InputDecoration(
-                      labelText: 'field_examiner'.tr(),
-                      isDense: true,
-                    ),
-                    style: const TextStyle(
-                      color: AppColors.inputValue,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    options: dropdownOptions['examiner'] ?? [],
                   ),
                 )
               else

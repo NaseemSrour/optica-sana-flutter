@@ -38,6 +38,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
     'segment_diameter',
     'lenses_manufacturer',
     'lenses_coated',
+    'examiner',
   };
 
   String _domEyeDisplay(String v) => 'dominant_eye_$v'.tr();
@@ -229,6 +230,13 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       itemCount: keys.length,
       itemBuilder: (context, index) {
         final key = keys[index];
+        if (key == 'examiner') {
+          return DropdownField(
+            label: labels[index],
+            controller: _controllers['examiner'],
+            options: _dropdownOptions['examiner'] ?? [],
+          );
+        }
         return TextFormField(
           controller: _controllers[key],
           style: const TextStyle(
@@ -510,20 +518,44 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         onChanged: (v) => setState(() => _controllers[key]!.text = v ?? ''),
       );
     }
+
+    final isFv = key == 'r_fv' || key == 'l_fv';
+
+    final field = TextFormField(
+      controller: _controllers[key],
+      textAlign: TextAlign.center,
+      style: const TextStyle(
+        color: AppColors.inputValue,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        filled: false,
+        isDense: true,
+      ),
+    );
+
+    if (!isFv) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: field,
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: TextFormField(
-        controller: _controllers[key],
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: AppColors.inputValue,
-          fontWeight: FontWeight.w600,
-        ),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          filled: false,
-          isDense: true,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '6/',
+            style: TextStyle(
+              color: Colors.white70,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Expanded(child: field),
+        ],
       ),
     );
   }

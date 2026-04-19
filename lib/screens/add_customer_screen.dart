@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +8,7 @@ import '../flutter_services/customer_service.dart';
 import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
+import '../widgets/date_mask_formatter.dart';
 import '../widgets/dropdown_field.dart';
 
 class AddCustomerScreen extends StatefulWidget {
@@ -23,6 +26,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _fnameController = TextEditingController();
   final _lnameController = TextEditingController();
   final _birthDateController = TextEditingController();
+  final _birthDateFocusNode = FocusNode();
   String? _selectedSex;
   List<String> _sexOptions = [];
   final _telHomeController = TextEditingController();
@@ -41,18 +45,36 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   @override
   void initState() {
     super.initState();
+    _birthDateFocusNode.addListener(_onBirthDateFocus);
     DropdownOptionsService.instance.getOptions('sex').then((opts) {
       if (mounted) setState(() => _sexOptions = opts);
     });
   }
 
+  void _onBirthDateFocus() {
+    if (_birthDateFocusNode.hasFocus) {
+      if (_birthDateController.text.isEmpty) {
+        _birthDateController.value = const TextEditingValue(
+          text: '__/__/____',
+          selection: TextSelection.collapsed(offset: 0),
+        );
+      }
+    } else {
+      // If no digits were entered, clear back to empty
+      final digits = _birthDateController.text.replaceAll(RegExp(r'[^\d]'), '');
+      if (digits.isEmpty) _birthDateController.clear();
+    }
+  }
+
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
+    // Reject incomplete masks (less than 8 digits entered)
+    final digits = date.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.length < 8) return '';
     try {
-      final inputDate = DateFormat('d/M/yyyy').parse(date);
-      return DateFormat('yyyy-MM-dd').format(inputDate);
-    } catch (e) {
-      return date;
+      return DateFormat('yyyy-MM-dd').format(DateFormat('dd/MM/yyyy').parse(date));
+    } catch (_) {
+      return '';
     }
   }
 
@@ -62,6 +84,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     _fnameController.dispose();
     _lnameController.dispose();
     _birthDateController.dispose();
+    _birthDateFocusNode.dispose();
     _telHomeController.dispose();
     _telMobileController.dispose();
     _addressController.dispose();
@@ -220,8 +243,11 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         const SizedBox(height: 12),
         _field(
           controller: _birthDateController,
+          focusNode: _birthDateFocusNode,
           label: '🎂  ${'field_birth_date'.tr()}',
-          hint: 'hint_date'.tr(),
+          keyboardType: TextInputType.number,
+          inputFormatters: [DateMaskFormatter()],
+          textDirection: ui.TextDirection.ltr,
         ),
         const SizedBox(height: 12),
         DropdownField(
@@ -272,13 +298,18 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   Widget _field({
     required TextEditingController controller,
     required String label,
+    FocusNode? focusNode,
     String? hint,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    ui.TextDirection? textDirection,
     int? maxLines = 1,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
+      textDirection: textDirection,
       style: const TextStyle(
         color: AppColors.inputValue,
         fontWeight: FontWeight.w600,
@@ -289,6 +320,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         isDense: true,
       ),
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       maxLines: maxLines,
       validator: validator,
     );
@@ -298,3 +330,4 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 class SaveIntent extends Intent {}
 
 class BackIntent extends Intent {}
+

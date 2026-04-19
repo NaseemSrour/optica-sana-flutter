@@ -16,6 +16,10 @@ class DropdownField extends StatefulWidget {
   /// Optional mapper: converts stored value to display text (e.g. dominant_eye).
   final String Function(String)? displayMapper;
 
+  /// When provided, the parent owns this controller and free-text input is
+  /// captured automatically. [value] and [onChanged] are then not required.
+  final TextEditingController? controller;
+
   const DropdownField({
     super.key,
     required this.options,
@@ -25,6 +29,7 @@ class DropdownField extends StatefulWidget {
     this.compact = false,
     this.width,
     this.displayMapper,
+    this.controller,
   });
 
   @override
@@ -32,19 +37,25 @@ class DropdownField extends StatefulWidget {
 }
 
 class _DropdownFieldState extends State<DropdownField> {
-  late final TextEditingController _controller;
+  TextEditingController? _ownedController;
+
+  // Returns the external controller if provided, otherwise the one we created.
+  TextEditingController get _controller =>
+      widget.controller ?? _ownedController!;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(
-      text: _display(widget.value),
-    );
+    if (widget.controller == null) {
+      _ownedController = TextEditingController(text: _display(widget.value));
+    }
   }
 
   @override
   void didUpdateWidget(DropdownField oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Only sync if we own the controller — if the parent owns it, they manage it.
+    if (widget.controller != null) return;
     if (oldWidget.value != widget.value) {
       final displayed = _display(widget.value);
       if (_controller.text != displayed) {
@@ -55,7 +66,7 @@ class _DropdownFieldState extends State<DropdownField> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _ownedController?.dispose(); // never dispose an external controller
     super.dispose();
   }
 
@@ -82,7 +93,10 @@ class _DropdownFieldState extends State<DropdownField> {
           controller: _controller,
           width: widget.width ?? 90,
           dropdownMenuEntries: entries,
-          initialSelection: widget.value,
+          initialSelection: widget.value ??
+              (widget.controller?.text.isNotEmpty == true
+                  ? widget.controller!.text
+                  : null),
           onSelected: (v) => widget.onChanged?.call(v),
           menuStyle: const MenuStyle(
             padding: WidgetStatePropertyAll(EdgeInsets.zero),
@@ -110,7 +124,10 @@ class _DropdownFieldState extends State<DropdownField> {
           width: w.isFinite ? w : 200,
           label: widget.label != null ? Text(widget.label!) : null,
           dropdownMenuEntries: entries,
-          initialSelection: widget.value,
+          initialSelection: widget.value ??
+              (widget.controller?.text.isNotEmpty == true
+                  ? widget.controller!.text
+                  : null),
           onSelected: (v) {
             widget.onChanged?.call(v);
           },

@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
+import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
+import '../widgets/dropdown_field.dart';
 
 class AddLensesTestScreen extends StatefulWidget {
   final Customer customer;
@@ -26,6 +28,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   final _formKey = GlobalKey<FormState>();
   final _focusNode = FocusNode();
   final _controllers = <String, TextEditingController>{};
+  final _dropdownOptions = <String, List<String>>{};
 
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
@@ -40,6 +43,9 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   @override
   void initState() {
     super.initState();
+    DropdownOptionsService.instance.getOptions('examiner').then((opts) {
+      if (mounted) setState(() => _dropdownOptions['examiner'] = opts);
+    });
     final sampleTest = ContactLensesTest(
       id: 65454,
       customerId: widget.customer.id,
@@ -178,6 +184,13 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
       itemCount: keys.length,
       itemBuilder: (context, index) {
         final key = keys[index];
+        if (key == 'examiner') {
+          return DropdownField(
+            label: labels[index],
+            controller: _controllers['examiner'],
+            options: _dropdownOptions['examiner'] ?? [],
+          );
+        }
         return TextFormField(
           controller: _controllers[key],
           style: const TextStyle(

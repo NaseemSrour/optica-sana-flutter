@@ -53,12 +53,10 @@ class GlassesTestTable extends StatelessWidget {
               if (isEditing)
                 SizedBox(
                   width: 200,
-                  child: TextFormField(
+                  child: DropdownField(
+                    label: 'field_examiner'.tr(),
                     controller: controllers!['examiner'],
-                    decoration: InputDecoration(
-                      labelText: 'field_examiner'.tr(),
-                      isDense: true,
-                    ),
+                    options: dropdownOptions['examiner'] ?? [],
                   ),
                 )
               else
@@ -280,7 +278,7 @@ class GlassesTestTable extends StatelessWidget {
         ...List.generate(6, (index) {
           return isEditing
               ? _editableCell(keys[index])
-              : _dataCell(data[index]);
+              : _dataCell(data[index], isFv: index == 0);
         }),
         // VA column (index 6): r_va + both_va stacked for R; l_va only for L
         _buildVaCell(eye, data[6], keys[6]),
@@ -343,14 +341,31 @@ class GlassesTestTable extends StatelessWidget {
     );
   }
 
-  Widget _dataCell(String text) {
+  Widget _dataCell(String text, {bool isFv = false}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Text(
-          text,
-          style: const TextStyle(color: AppColors.displayValue),
-        ),
+        child: isFv
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    '6/',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    text,
+                    style: const TextStyle(color: AppColors.displayValue),
+                  ),
+                ],
+              )
+            : Text(
+                text,
+                style: const TextStyle(color: AppColors.displayValue),
+              ),
       ),
     );
   }
@@ -366,20 +381,44 @@ class GlassesTestTable extends StatelessWidget {
         onChanged: (v) => ctrl?.text = v ?? '',
       );
     }
+
+    final isFv = fieldKey == 'r_fv' || fieldKey == 'l_fv';
+
+    final field = TextFormField(
+      controller: controllers![fieldKey],
+      textAlign: TextAlign.center,
+      style: const TextStyle(
+        color: AppColors.inputValue,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        filled: false,
+        isDense: true,
+      ),
+    );
+
+    if (!isFv) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: field,
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: TextFormField(
-        controller: controllers![fieldKey],
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: AppColors.inputValue,
-          fontWeight: FontWeight.w600,
-        ),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          filled: false,
-          isDense: true,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '6/',
+            style: TextStyle(
+              color: Colors.white70,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Expanded(child: field),
+        ],
       ),
     );
   }

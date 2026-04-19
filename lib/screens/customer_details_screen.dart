@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +12,7 @@ import '../flutter_services/customer_service.dart';
 import '../flutter_services/dropdown_options_service.dart';
 import 'package:optica_sana/db_flutter/models.dart';
 import '../widgets/app_notification.dart';
+import '../widgets/date_mask_formatter.dart';
 import '../widgets/dropdown_field.dart';
 import '../widgets/glasses_test_table.dart';
 
@@ -32,17 +35,61 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
   late final Map<String, TextEditingController> _controllers;
   final FocusNode _focusNode = FocusNode();
+  final FocusNode _birthDateFocusNode = FocusNode();
   GlassesTest? _latestGlassesTest;
   List<String> _sexOptions = [];
+
+  // ── Date helpers ─────────────────────────────────────────────────────────────
+
+  /// YYYY-MM-DD → DD/MM/YYYY (for display / edit)
+  static String _toDisplayDate(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    try {
+      return DateFormat('dd/MM/yyyy')
+          .format(DateFormat('yyyy-MM-dd').parse(raw));
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /// DD/MM/YYYY → YYYY-MM-DD (for DB save)
+  static String _toDbDate(String display) {
+    if (display.isEmpty) return '';
+    final digits = display.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.length < 8) return '';
+    try {
+      return DateFormat('yyyy-MM-dd')
+          .format(DateFormat('dd/MM/yyyy').parse(display));
+    } catch (_) {
+      return '';
+    }
+  }
+
+  void _onBirthDateFocus() {
+    if (_birthDateFocusNode.hasFocus) {
+      if (_controllers['birth_date']!.text.isEmpty) {
+        _controllers['birth_date']!.value = const TextEditingValue(
+          text: '__/__/____',
+          selection: TextSelection.collapsed(offset: 0),
+        );
+      }
+    } else {
+      final digits = _controllers['birth_date']!.text
+          .replaceAll(RegExp(r'[^\d]'), '');
+      if (digits.isEmpty) _controllers['birth_date']!.clear();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _birthDateFocusNode.addListener(_onBirthDateFocus);
     _controllers = {
       'ssn': TextEditingController(text: widget.customer.ssn.toString()),
       'fname': TextEditingController(text: widget.customer.fname),
       'lname': TextEditingController(text: widget.customer.lname),
-      'birth_date': TextEditingController(text: widget.customer.birthDate),
+      'birth_date': TextEditingController(
+          text: _toDisplayDate(widget.customer.birthDate)),
       'sex': TextEditingController(text: widget.customer.sex),
       'tel_home': TextEditingController(text: widget.customer.telHome),
       'tel_mobile': TextEditingController(text: widget.customer.telMobile),
@@ -98,7 +145,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         ssn: _controllers['ssn']!.text,
         fname: _controllers['fname']!.text,
         lname: _controllers['lname']!.text,
-        birthDate: _controllers['birth_date']!.text,
+        birthDate: _toDbDate(_controllers['birth_date']!.text),
         sex: _controllers['sex']!.text,
         telHome: _controllers['tel_home']!.text,
         telMobile: _controllers['tel_mobile']!.text,
@@ -142,6 +189,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
   void dispose() {
     _controllers.forEach((_, controller) => controller.dispose());
     _focusNode.dispose();
+    _birthDateFocusNode.dispose();
     super.dispose();
   }
 
@@ -390,6 +438,23 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       itemCount: fields.length,
       itemBuilder: (context, index) {
         final entry = fields.entries.elementAt(index);
+        if (entry.value == 'birth_date' && _isEditing) {
+          return TextFormField(
+            controller: _controllers['birth_date'],
+            focusNode: _birthDateFocusNode,
+            keyboardType: TextInputType.number,
+            inputFormatters: [DateMaskFormatter()],
+            textDirection: ui.TextDirection.ltr,
+            style: const TextStyle(
+              color: AppColors.inputValue,
+              fontWeight: FontWeight.w600,
+            ),
+            decoration: InputDecoration(
+              labelText: entry.key.tr(),
+              isDense: true,
+            ),
+          );
+        }
         if (entry.value == 'sex' && _isEditing) {
           return DropdownField(
             label: entry.key.tr(),
@@ -404,6 +469,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         return TextFormField(
           controller: _controllers[entry.value],
           enabled: _isEditing,
+          textDirection: entry.value == 'birth_date'
+              ? ui.TextDirection.ltr
+              : null,
           style: TextStyle(
             color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
             fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,

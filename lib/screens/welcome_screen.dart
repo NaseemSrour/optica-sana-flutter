@@ -59,16 +59,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: Center(
-          child: FadeTransition(
-            opacity: _fadeAnim,
-            child: SlideTransition(
-              position: _slideAnim,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Center(
+                child: FadeTransition(
+                  opacity: _fadeAnim,
+                  child: SlideTransition(
+                    position: _slideAnim,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1024),
                       child: Image.asset(
@@ -120,7 +125,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             ),
           ),
         ),
+          ),
+        ),
       ),
-    );
+    ),
+  );
   }
 }

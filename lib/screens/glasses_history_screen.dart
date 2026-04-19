@@ -33,7 +33,7 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
   late final Map<String, TextEditingController> _controllers;
   final _dropdownOptions = <String, List<String>>{};
 
-  static const _tableDropdownKeys = {'r_base', 'l_base'};
+  static const _tableDropdownKeys = {'r_base', 'l_base', 'examiner'};
 
   @override
   void initState() {
