@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../db_flutter/bootstrap.dart';
 import '../themes/app_theme.dart';
+import '../widgets/app_notification.dart';
 import '../widgets/restart_widget.dart';
 
 class BackupRestoreScreen extends StatefulWidget {
@@ -67,16 +68,18 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
       await _loadBackups();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('backup_success'.tr())),
+        AppNotification.show(
+          context,
+          'backup_success'.tr(),
+          type: NotificationType.success,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('backup_error'.tr(namedArgs: {'error': e.toString()})),
-          ),
+        AppNotification.show(
+          context,
+          'backup_error'.tr(namedArgs: {'error': e.toString()}),
+          type: NotificationType.error,
         );
       }
     } finally {
@@ -160,8 +163,10 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
 
       // 3. Brief success message, then soft-restart the app
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('restore_success'.tr())),
+        AppNotification.show(
+          context,
+          'restore_success'.tr(),
+          type: NotificationType.success,
         );
         await Future.delayed(const Duration(milliseconds: 800));
         if (mounted) RestartWidget.restartApp(context);
@@ -169,12 +174,10 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isRestoring = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'restore_error'.tr(namedArgs: {'error': e.toString()}),
-            ),
-          ),
+        AppNotification.show(
+          context,
+          'restore_error'.tr(namedArgs: {'error': e.toString()}),
+          type: NotificationType.error,
         );
       }
     }
@@ -205,8 +208,10 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     await backupFile.delete();
     await _loadBackups();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('backup_deleted'.tr())),
+      AppNotification.show(
+        context,
+        'backup_deleted'.tr(),
+        type: NotificationType.success,
       );
     }
   }

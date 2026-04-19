@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
+import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
+import '../widgets/app_notification.dart';
+import '../widgets/dropdown_field.dart';
 
 class AddGlassesTestScreen extends StatefulWidget {
   final Customer customer;
@@ -25,6 +28,19 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
   final _formKey = GlobalKey<FormState>();
   final _focusNode = FocusNode();
   final _controllers = <String, TextEditingController>{};
+  final _dropdownOptions = <String, List<String>>{};
+
+  static const _tableDropdownKeys = {'r_base', 'l_base'};
+  static const _gridDropdownKeys = {
+    'dominant_eye',
+    'glasses_role',
+    'lenses_material',
+    'segment_diameter',
+    'lenses_manufacturer',
+    'lenses_coated',
+  };
+
+  String _domEyeDisplay(String v) => 'dominant_eye_$v'.tr();
 
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
@@ -53,6 +69,15 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         );
       }
     });
+    _loadDropdownOptions();
+  }
+
+  void _loadDropdownOptions() {
+    for (final key in {..._tableDropdownKeys, ..._gridDropdownKeys}) {
+      DropdownOptionsService.instance.getOptions(key).then((opts) {
+        if (mounted) setState(() => _dropdownOptions[key] = opts);
+      });
+    }
   }
 
   @override
@@ -81,18 +106,18 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         await widget.customerService.addGlassesTest(newTest);
         if (mounted) {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('msg_glasses_saved'.tr())),
+          AppNotification.show(
+            context,
+            'msg_glasses_saved'.tr(),
+            type: NotificationType.success,
           );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'msg_glasses_save_error'.tr(namedArgs: {'error': e.toString()}),
-              ),
-            ),
+          AppNotification.show(
+            context,
+            'msg_glasses_save_error'.tr(namedArgs: {'error': e.toString()}),
+            type: NotificationType.error,
           );
         }
       }
@@ -262,6 +287,18 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       itemCount: nonEyeDataKeys.length,
       itemBuilder: (context, index) {
         final key = nonEyeDataKeys[index];
+        if (_gridDropdownKeys.contains(key)) {
+          return DropdownField(
+            label: _labelFor(key),
+            options: _dropdownOptions[key] ?? [],
+            value: _controllers[key]?.text.isEmpty ?? true
+                ? null
+                : _controllers[key]!.text,
+            onChanged: (v) => setState(() => _controllers[key]!.text = v ?? ''),
+            displayMapper:
+                key == 'dominant_eye' ? _domEyeDisplay : null,
+          );
+        }
         return TextFormField(
           controller: _controllers[key],
           style: const TextStyle(
@@ -463,6 +500,16 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
   }
 
   Widget _buildTextFormFieldCell(String key) {
+    if (_tableDropdownKeys.contains(key)) {
+      return DropdownField(
+        compact: true,
+        options: _dropdownOptions[key] ?? [],
+        value: _controllers[key]?.text.isEmpty ?? true
+            ? null
+            : _controllers[key]!.text,
+        onChanged: (v) => setState(() => _controllers[key]!.text = v ?? ''),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: TextFormField(

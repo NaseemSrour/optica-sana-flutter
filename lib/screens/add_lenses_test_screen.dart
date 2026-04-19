@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
 import '../themes/app_theme.dart';
+import '../widgets/app_notification.dart';
 
 class AddLensesTestScreen extends StatefulWidget {
   final Customer customer;
@@ -81,18 +82,18 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         await widget.customerService.addContactLensesTest(newTest);
         if (mounted) {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('msg_lenses_saved'.tr())),
+          AppNotification.show(
+            context,
+            'msg_lenses_saved'.tr(),
+            type: NotificationType.success,
           );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'msg_lenses_save_error'.tr(namedArgs: {'error': e.toString()}),
-              ),
-            ),
+          AppNotification.show(
+            context,
+            'msg_lenses_save_error'.tr(namedArgs: {'error': e.toString()}),
+            type: NotificationType.error,
           );
         }
       }

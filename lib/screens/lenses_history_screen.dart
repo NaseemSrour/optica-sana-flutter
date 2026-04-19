@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
 import '../themes/app_theme.dart';
+import '../widgets/app_notification.dart';
 import '../widgets/lenses_test_tables.dart';
 
 class LensesHistoryScreen extends StatefulWidget {
@@ -54,14 +55,10 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'msg_error_loading_history'.tr(
-                namedArgs: {'error': e.toString()},
-              ),
-            ),
-          ),
+        AppNotification.show(
+          context,
+          'msg_error_loading_history'.tr(namedArgs: {'error': e.toString()}),
+          type: NotificationType.error,
         );
       }
     }
@@ -165,18 +162,18 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         _isEditing = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(
+        AppNotification.show(
           context,
-        ).showSnackBar(SnackBar(content: Text('msg_test_saved'.tr())));
+          'msg_test_saved'.tr(),
+          type: NotificationType.success,
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'msg_test_save_error'.tr(namedArgs: {'error': e.toString()}),
-            ),
-          ),
+        AppNotification.show(
+          context,
+          'msg_test_save_error'.tr(namedArgs: {'error': e.toString()}),
+          type: NotificationType.error,
         );
       }
     }
@@ -219,19 +216,19 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         if (_tests.isEmpty) {
           Navigator.pop(context);
         } else {
-          ScaffoldMessenger.of(
+          AppNotification.show(
             context,
-          ).showSnackBar(SnackBar(content: Text('msg_test_deleted'.tr())));
+            'msg_test_deleted'.tr(),
+            type: NotificationType.success,
+          );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'msg_delete_error'.tr(namedArgs: {'error': e.toString()}),
-            ),
-          ),
+        AppNotification.show(
+          context,
+          'msg_delete_error'.tr(namedArgs: {'error': e.toString()}),
+          type: NotificationType.error,
         );
       }
     }
@@ -256,10 +253,15 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
             SaveIntent(),
         LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
-        LogicalKeySet(LogicalKeyboardKey.add): NextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.numpadAdd): NextIntent(),
-        LogicalKeySet(LogicalKeyboardKey.minus): PreviousIntent(),
-        LogicalKeySet(LogicalKeyboardKey.numpadSubtract): PreviousIntent(),
+        // Navigation shortcuts are disabled while editing so that - and +
+        // are not swallowed before reaching the focused text fields.
+        if (!_isEditing) LogicalKeySet(LogicalKeyboardKey.add): NextIntent(),
+        if (!_isEditing)
+          LogicalKeySet(LogicalKeyboardKey.numpadAdd): NextIntent(),
+        if (!_isEditing)
+          LogicalKeySet(LogicalKeyboardKey.minus): PreviousIntent(),
+        if (!_isEditing)
+          LogicalKeySet(LogicalKeyboardKey.numpadSubtract): PreviousIntent(),
       },
       actions: {
         EditIntent: CallbackAction<EditIntent>(
@@ -347,6 +349,22 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
     );
   }
 
+  String _formatBirthDate(String? raw) {
+    if (raw == null || raw.isEmpty) return 'label_na'.tr();
+    try {
+      final date = DateFormat('yyyy-MM-dd').parse(raw);
+      final now = DateTime.now();
+      int age = now.year - date.year;
+      if (now.month < date.month ||
+          (now.month == date.month && now.day < date.day)) {
+        age--;
+      }
+      return '${DateFormat('dd/MM/yyyy').format(date)} ($age)';
+    } catch (_) {
+      return raw;
+    }
+  }
+
   Widget _buildCustomerHeader() {
     return Padding(
       padding: const EdgeInsets.all(12.0),
@@ -362,7 +380,7 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
           _buildHeaderInfo('label_id'.tr(), widget.customer.id.toString()),
           _buildHeaderInfo(
             'label_birth_date'.tr(),
-            widget.customer.birthDate ?? 'label_na'.tr(),
+            _formatBirthDate(widget.customer.birthDate),
           ),
         ],
       ),

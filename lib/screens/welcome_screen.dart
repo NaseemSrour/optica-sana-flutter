@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:optica_sana/flutter_services/customer_service.dart';
 import 'package:optica_sana/screens/customer_search_screen.dart';
@@ -36,10 +35,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     _controller.forward();
   }
 
-  Future<void> _getStarted() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('welcome_seen', true);
-    if (!mounted) return;
+  void _getStarted() {
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(

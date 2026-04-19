@@ -9,6 +9,9 @@ import 'package:optica_sana/flutter_services/customer_service.dart';
 import 'package:optica_sana/screens/add_customer_screen.dart';
 import 'package:optica_sana/screens/app_info_screen.dart';
 import 'package:optica_sana/screens/backup_restore_screen.dart';
+import 'package:optica_sana/screens/manage_lists_screen.dart';
+import 'package:optica_sana/screens/stats_screen.dart';
+import 'package:optica_sana/screens/birthday_search_screen.dart';
 import 'package:optica_sana/screens/customer_details_screen.dart';
 import 'package:optica_sana/themes/app_theme.dart';
 
@@ -322,6 +325,50 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const BackupRestoreScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.list_alt_outlined),
+            title: Text('drawer_manage_lists'.tr()),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ManageListsScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.bar_chart_outlined),
+            title: Text('drawer_stats'.tr()),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const StatsScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.cake_outlined),
+            title: Text('drawer_birthdays'.tr()),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BirthdaySearchScreen(
+                    customerService: widget.customerService,
+                  ),
                 ),
               );
             },

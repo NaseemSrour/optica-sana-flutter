@@ -4,17 +4,20 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../db_flutter/models.dart';
 import '../themes/app_theme.dart';
+import 'dropdown_field.dart';
 
 class GlassesTestTable extends StatelessWidget {
   final GlassesTest? glassesTest;
   final bool isEditing;
   final Map<String, TextEditingController>? controllers;
+  final Map<String, List<String>> dropdownOptions;
 
   const GlassesTestTable({
     super.key,
     this.glassesTest,
     this.isEditing = false,
     this.controllers,
+    this.dropdownOptions = const {},
   });
 
   @override
@@ -353,6 +356,16 @@ class GlassesTestTable extends StatelessWidget {
   }
 
   Widget _editableCell(String fieldKey) {
+    final opts = dropdownOptions[fieldKey];
+    if (opts != null) {
+      final ctrl = controllers![fieldKey];
+      return DropdownField(
+        compact: true,
+        options: opts,
+        value: (ctrl?.text.isEmpty ?? true) ? null : ctrl!.text,
+        onChanged: (v) => ctrl?.text = v ?? '',
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: TextFormField(
