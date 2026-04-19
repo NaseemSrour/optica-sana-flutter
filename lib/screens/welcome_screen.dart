@@ -58,7 +58,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        color: Colors.white,
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
             child: ConstrainedBox(
@@ -91,7 +91,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     const Text(
                       'Optica Sana',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.primaryDeep,
                         fontSize: 42,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2,
@@ -101,8 +101,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     Text(
                       'welcome_tagline'.tr(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.label.withValues(alpha: 0.9),
+                      style: const TextStyle(
+                        color: AppColors.primary,
                         fontSize: 15,
                         height: 1.5,
                       ),

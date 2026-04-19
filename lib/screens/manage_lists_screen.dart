@@ -17,6 +17,7 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
   /// Ordered list of (fieldKey, labelTranslationKey) pairs.
   static const _fields = [
     ('sex', 'field_sex'),
+    ('examiner', 'field_examiner'),
     ('r_base', 'field_r_base'),
     ('l_base', 'field_l_base'),
     ('dominant_eye', 'field_dominant_eye'),

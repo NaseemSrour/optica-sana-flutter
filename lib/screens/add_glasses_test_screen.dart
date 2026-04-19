@@ -272,14 +272,16 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
     final nonEyeDataKeys = _controllers.keys
         .where(
           (k) =>
-              !k.startsWith('r_') &&
-              !k.startsWith('l_') &&
+              // r_iop is re-included below even though it starts with r_
+              (!k.startsWith('r_') && !k.startsWith('l_') || k == 'r_iop') &&
               k != 'exam_date' &&
               k != 'examiner' &&
               k != 'notes' &&
               k != 'both_va' &&
               k != 'sum_pd' &&
-              k != 'near_pd',
+              k != 'near_pd' &&
+              k != 'lenses_diameter_2' && // combined into lenses_diameter_1 cell
+              k != 'lenses_diameter_decentration_vertical', // combined into decentration_h cell
         )
         .toList();
 
@@ -295,10 +297,22 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       itemCount: nonEyeDataKeys.length,
       itemBuilder: (context, index) {
         final key = nonEyeDataKeys[index];
+        if (key == 'lenses_diameter_1') {
+          return _buildDiameterCombinedCell();
+        }
+        if (key == 'r_iop') {
+          return _buildIopCombinedCell();
+        }
+        if (key == 'lenses_diameter_decentration_horizontal') {
+          return _buildDecentrationCombinedCell();
+        }
         if (_gridDropdownKeys.contains(key)) {
           return DropdownField(
             label: _labelFor(key),
             options: _dropdownOptions[key] ?? [],
+            // dominant_eye uses displayMapper (stored value ≠ display text),
+            // so the parent cannot own the controller for it.
+            controller: key != 'dominant_eye' ? _controllers[key] : null,
             value: _controllers[key]?.text.isEmpty ?? true
                 ? null
                 : _controllers[key]!.text,
@@ -330,7 +344,10 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         border: TableBorder.all(color: AppColors.tableBorder),
         columnWidths: const {
           0: IntrinsicColumnWidth(),
+          6: FlexColumnWidth(1.5), // Base column wider for UP/DOWN/IN/OUT dropdown
+          7: FlexColumnWidth(2),   // VA column wider to fit staggered r_va/both_va/l_va
           8: FlexColumnWidth(4),
+          10: FlexColumnWidth(2.5), // PD column wider to fit sum/near stagger
         },
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         children: [
@@ -461,10 +478,10 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         ),
         // FV, Sphere, Cylinder, Axis, Prism, Base (indices 0–5)
         ...keys.take(6).map((key) => _buildTextFormFieldCell(key)),
-        // VA column (index 6): r_va + both_va stacked for R; l_va only for L
+        // VA column (index 6): r_va only for R; l_va + both_va stacked for L
         eye == 'R'
-            ? _buildStackedVaCell(keys[6])
-            : _buildTextFormFieldCell(keys[6]),
+            ? _buildTextFormFieldCell(keys[6])
+            : _buildStackedVaCell(keys[6]),
         // Addition sub-columns (indices 7–10)
         TableCell(
           child: Row(
@@ -477,33 +494,184 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         ),
         // High column (index 11)
         _buildTextFormFieldCell(keys[11]),
-        // PD column: sum_pd / near_pd for R; empty for L
-        eye == 'R' ? _buildPdCell() : const SizedBox(),
+        // PD column: r_pd for R; staggered sum_pd/near_pd + l_pd for L
+        _buildPdCell(eye, keys[12]),
       ],
     );
   }
 
   Widget _buildStackedVaCell(String vaKey) {
+    // both_va top-right, l_va bottom-left (mirroring the DOS UI layout)
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildTextFormFieldCell(vaKey),
+        Row(
+          children: [
+            const Spacer(),
+            Expanded(child: _buildTextFormFieldCell('both_va')),
+          ],
+        ),
         Container(height: 1, color: AppColors.tableBorder),
-        _buildTextFormFieldCell('both_va'),
+        Row(
+          children: [
+            Expanded(child: _buildTextFormFieldCell(vaKey)),
+            const Spacer(),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildPdCell() {
+  Widget _buildPdCell(String eye, String pdKey) {
+    if (eye == 'R') {
+      // r_pd on the left half
+      return Row(
+        children: [
+          Expanded(child: _buildTextFormFieldCell(pdKey)),
+          const Spacer(),
+        ],
+      );
+    }
+    // L row: sum_pd/near_pd top-right, l_pd bottom-left
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            const Spacer(),
+            Expanded(child: _buildSumNearPdCell()),
+          ],
+        ),
+        Container(height: 1, color: AppColors.tableBorder),
+        Row(
+          children: [
+            Expanded(child: _buildTextFormFieldCell(pdKey)),
+            const Spacer(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSumNearPdCell() {
     return Row(
       children: [
         Expanded(child: _buildTextFormFieldCell('sum_pd')),
-        const Text(
-          '/',
-          style: TextStyle(color: AppColors.label, fontSize: 12),
-        ),
+        const Text('/', style: TextStyle(color: AppColors.label, fontSize: 12)),
         Expanded(child: _buildTextFormFieldCell('near_pd')),
       ],
+    );
+  }
+
+  Widget _buildDiameterCombinedCell() {
+    return Row(
+      children: [
+        Expanded(
+          child: TextFormField(
+            controller: _controllers['lenses_diameter_1'],
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.inputValue,
+              fontWeight: FontWeight.w600,
+            ),
+            decoration: InputDecoration(
+              labelText: 'field_lenses_diam_1'.tr(),
+              isDense: true,
+            ),
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            '/',
+            style: TextStyle(color: AppColors.label, fontSize: 16),
+          ),
+        ),
+        Expanded(
+          child: TextFormField(
+            controller: _controllers['lenses_diameter_2'],
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.inputValue,
+              fontWeight: FontWeight.w600,
+            ),
+            decoration: InputDecoration(
+              labelText: 'field_lenses_diam_2'.tr(),
+              isDense: true,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInlineField(String key) {
+    return TextFormField(
+      controller: _controllers[key],
+      style: const TextStyle(
+        color: AppColors.inputValue,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        isDense: true,
+        contentPadding: EdgeInsets.zero,
+        filled: false,
+      ),
+    );
+  }
+
+  Widget _buildIopCombinedCell() {
+    return InputDecorator(
+      isEmpty: false,
+      decoration: InputDecoration(
+        labelText: 'field_iop'.tr(),
+        border: const OutlineInputBorder(),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      child: Row(
+        children: [
+          const Text('R:',
+              style: TextStyle(
+                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          Expanded(child: _buildInlineField('r_iop')),
+          const SizedBox(width: 16),
+          const Text('L:',
+              style: TextStyle(
+                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          Expanded(child: _buildInlineField('l_iop')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDecentrationCombinedCell() {
+    return InputDecorator(
+      isEmpty: false,
+      decoration: InputDecoration(
+        labelText: 'field_lenses_dia_dec'.tr(),
+        border: const OutlineInputBorder(),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      child: Row(
+        children: [
+          const Text('H:',
+              style: TextStyle(
+                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          Expanded(
+              child: _buildInlineField('lenses_diameter_decentration_horizontal')),
+          const SizedBox(width: 16),
+          const Text('V:',
+              style: TextStyle(
+                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          Expanded(
+              child: _buildInlineField('lenses_diameter_decentration_vertical')),
+        ],
+      ),
     );
   }
 
@@ -512,6 +680,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       return DropdownField(
         compact: true,
         options: _dropdownOptions[key] ?? [],
+        controller: _controllers[key],
         value: _controllers[key]?.text.isEmpty ?? true
             ? null
             : _controllers[key]!.text,
@@ -519,7 +688,8 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       );
     }
 
-    final isFv = key == 'r_fv' || key == 'l_fv';
+    final isFv = key == 'r_fv' || key == 'l_fv' ||
+        key == 'r_va' || key == 'l_va' || key == 'both_va';
 
     final field = TextFormField(
       controller: _controllers[key],

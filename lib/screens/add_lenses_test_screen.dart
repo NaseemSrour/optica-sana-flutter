@@ -320,14 +320,14 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         'r_lens_type', 'r_manufacturer', 'r_brand', 'r_diameter',
         'r_base_curve_numerator',
         'r_lens_sph', 'r_lens_cyl', 'r_lens_axis', 'r_material', 'r_tint',
-        'r_lens_va_numerator',
+        'r_va',
       ];
 
   List<String> _getLeftPrescriptionKeys() => [
         'l_lens_type', 'l_manufacturer', 'l_brand', 'l_diameter',
         'l_base_curve_numerator',
         'l_lens_sph', 'l_lens_cyl', 'l_lens_axis', 'l_material', 'l_tint',
-        'l_lens_va_numerator',
+        'l_va',
       ];
 
   TableRow _buildPrescriptionRow(
@@ -340,12 +340,32 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
             final denKey = key.replaceFirst('numerator', 'denominator');
             return _buildDoubleInputCell(key, denKey);
           }
-          if (key.contains('lens_va')) {
-            final denKey = key.replaceFirst('numerator', 'denominator');
-            return _buildDoubleInputCell(key, denKey);
-          }
+          if (key == 'r_va') return _buildTextFormFieldCell('r_va');
+          if (key == 'l_va') return _buildLensesVaCell();
           return _buildTextFormFieldCell(key);
         }),
+      ],
+    );
+  }
+
+  // L row VA cell: both_va top-right, l_va bottom-left
+  Widget _buildLensesVaCell() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            const Spacer(),
+            Expanded(child: _buildTextFormFieldCell('both_va')),
+          ],
+        ),
+        Container(height: 1, color: AppColors.tableBorder),
+        Row(
+          children: [
+            Expanded(child: _buildTextFormFieldCell('l_va')),
+            const Spacer(),
+          ],
+        ),
       ],
     );
   }
@@ -383,20 +403,40 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   }
 
   Widget _buildTextFormFieldCell(String key) {
+    final hasSixPrefix =
+        key == 'r_va' || key == 'l_va' || key == 'both_va';
+
+    final field = TextFormField(
+      controller: _controllers[key],
+      textAlign: TextAlign.center,
+      style: const TextStyle(
+        color: AppColors.inputValue,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        filled: false,
+        isDense: true,
+      ),
+    );
+
+    if (!hasSixPrefix) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: field,
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: TextFormField(
-        controller: _controllers[key],
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: AppColors.inputValue,
-          fontWeight: FontWeight.w600,
-        ),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          filled: false,
-          isDense: true,
-        ),
+      child: Row(
+        children: [
+          const Text(
+            '6/',
+            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+          ),
+          Expanded(child: field),
+        ],
       ),
     );
   }

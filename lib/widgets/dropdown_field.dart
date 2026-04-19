@@ -87,32 +87,34 @@ class _DropdownFieldState extends State<DropdownField> {
         .toList();
 
     if (widget.compact) {
-      return SizedBox(
-        width: widget.width ?? 90,
-        child: DropdownMenu<String>(
-          controller: _controller,
-          width: widget.width ?? 90,
-          dropdownMenuEntries: entries,
-          initialSelection: widget.value ??
-              (widget.controller?.text.isNotEmpty == true
-                  ? widget.controller!.text
-                  : null),
-          onSelected: (v) => widget.onChanged?.call(v),
-          menuStyle: const MenuStyle(
-            padding: WidgetStatePropertyAll(EdgeInsets.zero),
-          ),
-          inputDecorationTheme: const InputDecorationTheme(
-            isDense: true,
-            contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-          ),
-          textStyle: const TextStyle(
-            fontSize: 12,
-            color: AppColors.inputValue,
-          ),
-        ),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final w = widget.width ?? constraints.maxWidth;
+          return DropdownMenu<String>(
+            controller: _controller,
+            width: w.isFinite ? w : 90.0,
+            dropdownMenuEntries: entries,
+            initialSelection: widget.value ??
+                (widget.controller?.text.isNotEmpty == true
+                    ? widget.controller!.text
+                    : null),
+            onSelected: (v) => widget.onChanged?.call(v),
+            menuStyle: const MenuStyle(
+              padding: WidgetStatePropertyAll(EdgeInsets.zero),
+            ),
+            inputDecorationTheme: const InputDecorationTheme(
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+            ),
+            textStyle: const TextStyle(
+              fontSize: 12,
+              color: AppColors.inputValue,
+            ),
+          );
+        },
       );
     }
 

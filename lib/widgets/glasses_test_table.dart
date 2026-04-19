@@ -73,9 +73,16 @@ class GlassesTestTable extends StatelessWidget {
             border: TableBorder.all(color: AppColors.tableBorder),
             columnWidths: const {
               0: IntrinsicColumnWidth(),
+              // Base column (index 6) wider for UP/DOWN/IN/OUT dropdown text.
+              6: FlexColumnWidth(1.5),
+              // VA column (index 7) wider to fit the staggered r_va/both_va/l_va layout.
+              7: FlexColumnWidth(2),
               // Addition column (index 8) contains 4 sub-columns; give it 4× the
               // flex weight so each sub-column is as wide as any other column.
               8: FlexColumnWidth(4),
+              // PD column (index 10) contains a staggered sum/near pair; wider so
+              // the two sub-fields are readable.
+              10: FlexColumnWidth(2.5),
             },
             children: [
               _buildHeaders(context),
@@ -280,7 +287,7 @@ class GlassesTestTable extends StatelessWidget {
               ? _editableCell(keys[index])
               : _dataCell(data[index], isFv: index == 0);
         }),
-        // VA column (index 6): r_va + both_va stacked for R; l_va only for L
+        // VA column (index 6): r_va only for R; l_va + both_va stacked for L
         _buildVaCell(eye, data[6], keys[6]),
         // Addition sub-columns (indices 7–10)
         TableCell(
@@ -298,38 +305,138 @@ class GlassesTestTable extends StatelessWidget {
         ),
         // High column (index 11)
         isEditing ? _editableCell(keys[11]) : _dataCell(data[11]),
-        // PD column: sum_pd / near_pd for R; empty for L
-        _buildPdCell(eye),
+        // PD column: r_pd for R; staggered sum_pd/near_pd + l_pd for L
+        _buildPdCell(eye, data[12], keys[12]),
       ],
     );
   }
 
   Widget _buildVaCell(String eye, String vaData, String vaKey) {
-    if (eye != 'R') {
-      return isEditing ? _editableCell(vaKey) : _dataCell(vaData);
+    if (eye == 'R') {
+      // R row: r_va on the left half so its width matches both_va/l_va in edit mode.
+      if (isEditing) {
+        return Row(
+          children: [
+            Expanded(child: _vaHalfCell(vaKey, vaData)),
+            const Spacer(),
+          ],
+        );
+      }
+      return _vaHalfCell(vaKey, vaData);
     }
+    // L row: both_va top-right, l_va bottom-left (mirroring the DOS UI layout)
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        isEditing ? _editableCell(vaKey) : _dataCell(vaData),
+        Row(
+          children: [
+            const Spacer(),
+            Expanded(child: _vaHalfCell('both_va', glassesTest?.bothVa ?? '')),
+          ],
+        ),
         Container(height: 1, color: AppColors.tableBorder),
-        isEditing
-            ? _editableCell('both_va')
-            : _dataCell(glassesTest?.bothVa ?? ''),
+        Row(
+          children: [
+            Expanded(child: _vaHalfCell(vaKey, vaData)),
+            const Spacer(),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildPdCell(String eye) {
-    if (eye != 'R') return _dataCell('');
+  Widget _vaHalfCell(String key, String displayText) {
+    if (isEditing) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: Row(
+          children: [
+            const Text(
+              '6/',
+              style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+            ),
+            Expanded(
+              child: TextFormField(
+                controller: controllers![key],
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: AppColors.inputValue,
+                  fontWeight: FontWeight.w600,
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  filled: false,
+                  isDense: true,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '6/',
+            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+          ),
+          Text(displayText, style: const TextStyle(color: AppColors.displayValue)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPdCell(String eye, String pdData, String pdKey) {
+    if (eye == 'R') {
+      // r_pd on the left half
+      return Row(
+        children: [
+          Expanded(
+            child: isEditing ? _editableCell(pdKey) : _pdHalfCell(pdData),
+          ),
+          const Spacer(),
+        ],
+      );
+    }
+    // L row: sum_pd/near_pd top-right, l_pd bottom-left
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            const Spacer(),
+            Expanded(child: _buildSumNearPdCell()),
+          ],
+        ),
+        Container(height: 1, color: AppColors.tableBorder),
+        Row(
+          children: [
+            Expanded(
+              child: isEditing ? _editableCell(pdKey) : _pdHalfCell(pdData),
+            ),
+            const Spacer(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _pdHalfCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+      child: Text(text, style: const TextStyle(color: AppColors.displayValue)),
+    );
+  }
+
+  Widget _buildSumNearPdCell() {
     if (isEditing) {
       return Row(
         children: [
           Expanded(child: _editableCell('sum_pd')),
-          const Text(
-            '/',
-            style: TextStyle(color: AppColors.label, fontSize: 12),
-          ),
+          const Text('/', style: TextStyle(color: AppColors.label, fontSize: 12)),
           Expanded(child: _editableCell('near_pd')),
         ],
       );
@@ -377,12 +484,14 @@ class GlassesTestTable extends StatelessWidget {
       return DropdownField(
         compact: true,
         options: opts,
+        controller: ctrl,
         value: (ctrl?.text.isEmpty ?? true) ? null : ctrl!.text,
         onChanged: (v) => ctrl?.text = v ?? '',
       );
     }
 
-    final isFv = fieldKey == 'r_fv' || fieldKey == 'l_fv';
+    final isFv = fieldKey == 'r_fv' || fieldKey == 'l_fv' ||
+        fieldKey == 'r_va' || fieldKey == 'l_va' || fieldKey == 'both_va';
 
     final field = TextFormField(
       controller: controllers![fieldKey],

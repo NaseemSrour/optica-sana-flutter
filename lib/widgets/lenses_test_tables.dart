@@ -262,16 +262,14 @@ class LensesTestTables extends StatelessWidget {
     lensesTest!.rLensAxis ?? '',
     lensesTest!.rMaterial ?? '',
     lensesTest!.rTint ?? '',
-    '${lensesTest!.rLensVaNumerator ?? ''}/${lensesTest!.rLensVaDenominator ?? ''}',
+    lensesTest!.rVa ?? '',
   ];
 
-  // Keys must match ContactLensesTest.toMap() exactly (or the composite
-  // controller keys set up in lenses_history_screen.dart for base_curve/va)
   List<String> _getRightPrescriptionKeys() => [
     'r_lens_type', 'r_manufacturer', 'r_brand', 'r_diameter',
     'r_base_curve',
     'r_lens_sph', 'r_lens_cyl', 'r_lens_axis', 'r_material', 'r_tint',
-    'r_lens_va',
+    'r_va',
   ];
 
   List<String> _getLeftPrescriptionData() => [
@@ -285,14 +283,14 @@ class LensesTestTables extends StatelessWidget {
     lensesTest!.lLensAxis ?? '',
     lensesTest!.lMaterial ?? '',
     lensesTest!.lTint ?? '',
-    '${lensesTest!.lLensVaNumerator ?? ''}/${lensesTest!.lLensVaDenominator ?? ''}',
+    lensesTest!.lVa ?? '',
   ];
 
   List<String> _getLeftPrescriptionKeys() => [
     'l_lens_type', 'l_manufacturer', 'l_brand', 'l_diameter',
     'l_base_curve',
     'l_lens_sph', 'l_lens_cyl', 'l_lens_axis', 'l_material', 'l_tint',
-    'l_lens_va',
+    'l_va',
   ];
 
   TableRow _buildPrescriptionRow(
@@ -301,13 +299,85 @@ class LensesTestTables extends StatelessWidget {
     List<String> data,
     List<String> keys,
   ) {
+    final vaIndex = data.length - 1; // VA is always the last column
     return TableRow(
       children: [
         _headerCell(context, eye, isRowHeader: true),
-        ...List.generate(data.length, (i) =>
-          isEditing ? _editableCell(keys[i]) : _dataCell(data[i]),
+        ...List.generate(data.length, (i) {
+          if (i == vaIndex) return _buildVaCell(eye, data[i], keys[i]);
+          return isEditing ? _editableCell(keys[i]) : _dataCell(data[i]);
+        }),
+      ],
+    );
+  }
+
+  // R row: r_va left-aligned with 6/ prefix.
+  // L row: both_va top-right, l_va bottom-left (staggered, DOS-style).
+  Widget _buildVaCell(String eye, String vaData, String vaKey) {
+    if (eye == 'R') {
+      return _vaHalfCell(vaKey, vaData);
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            const Spacer(),
+            Expanded(child: _vaHalfCell('both_va', lensesTest?.bothVa ?? '')),
+          ],
+        ),
+        Container(height: 1, color: AppColors.tableBorder),
+        Row(
+          children: [
+            Expanded(child: _vaHalfCell(vaKey, vaData)),
+            const Spacer(),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _vaHalfCell(String key, String displayText) {
+    if (isEditing) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: Row(
+          children: [
+            const Text(
+              '6/',
+              style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+            ),
+            Expanded(
+              child: TextFormField(
+                controller: controllers![key],
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: AppColors.inputValue,
+                  fontWeight: FontWeight.w600,
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  filled: false,
+                  isDense: true,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '6/',
+            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+          ),
+          Text(displayText, style: const TextStyle(color: AppColors.displayValue)),
+        ],
+      ),
     );
   }
 

@@ -7,6 +7,7 @@ import '../flutter_services/customer_service.dart';
 import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
+import '../widgets/dropdown_field.dart';
 import '../widgets/glasses_test_table.dart';
 
 class GlassesHistoryScreen extends StatefulWidget {
@@ -34,13 +35,21 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
   final _dropdownOptions = <String, List<String>>{};
 
   static const _tableDropdownKeys = {'r_base', 'l_base', 'examiner'};
+  // Non-eye-data fields that have predefined options (no displayMapper).
+  static const _gridDropdownKeys = {
+    'glasses_role',
+    'lenses_material',
+    'segment_diameter',
+    'lenses_manufacturer',
+    'lenses_coated',
+  };
 
   @override
   void initState() {
     super.initState();
     _controllers = {};
     _loadHistory();
-    for (final key in _tableDropdownKeys) {
+    for (final key in {..._tableDropdownKeys, ..._gridDropdownKeys}) {
       DropdownOptionsService.instance.getOptions(key).then((opts) {
         if (mounted) setState(() => _dropdownOptions[key] = opts);
       });
@@ -406,124 +415,190 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Each column is its own FocusTraversalGroup so Tab exhausts all
+        // fields in the left column before jumping to the right column.
         Expanded(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      'dominant_eye',
-                      'field_dominant_eye'.tr(),
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Column(
+              children: [
+                _buildTextField('dominant_eye', 'field_dominant_eye'.tr()),
+                const SizedBox(height: 16),
+                _buildPrefixPairField(
+                  label: 'field_iop'.tr(),
+                  prefixA: 'R:',
+                  keyA: 'r_iop',
+                  prefixB: 'L:',
+                  keyB: 'l_iop',
+                ),
+                const SizedBox(height: 16),
+                _buildDropdownOrTextField('glasses_role', 'field_glasses_role'.tr()),
+                const SizedBox(height: 16),
+                _buildDropdownOrTextField('lenses_material', 'field_lenses_material'.tr()),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        'lenses_diameter_1',
+                        'field_lenses_diam_1'.tr(),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildTextField('r_iop', 'field_r_iop'.tr())),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildTextField('l_iop', 'field_l_iop'.tr())),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildTextField('glasses_role', 'field_glasses_role'.tr()),
-              const SizedBox(height: 16),
-              _buildTextField('lenses_material', 'field_lenses_material'.tr()),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      'lenses_diameter_1',
-                      'field_lenses_diam_1'.tr(),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '/',
+                        style: TextStyle(
+                          color: AppColors.label,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      'lenses_diameter_2',
-                      'field_lenses_diam_2'.tr(),
+                    Expanded(
+                      child: _buildTextField(
+                        'lenses_diameter_2',
+                        'field_lenses_diam_2'.tr(),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      'lenses_diameter_decentration_horizontal',
-                      'field_lenses_dia_dec_h'.tr(),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      'lenses_diameter_decentration_vertical',
-                      'field_lenses_dia_dec_v'.tr(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildTextField('segment_diameter', 'field_segment_diam'.tr()),
-              const SizedBox(height: 16),
-              _buildTextField('diagnosis', 'field_diagnosis'.tr()),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildPrefixPairField(
+                  label: 'field_lenses_dia_dec'.tr(),
+                  prefixA: 'H:',
+                  keyA: 'lenses_diameter_decentration_horizontal',
+                  prefixB: 'V:',
+                  keyB: 'lenses_diameter_decentration_vertical',
+                ),
+                const SizedBox(height: 16),
+                _buildDropdownOrTextField('segment_diameter', 'field_segment_diam'.tr()),
+                const SizedBox(height: 16),
+                _buildTextField('diagnosis', 'field_diagnosis'.tr()),
+              ],
+            ),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: Column(
-            children: [
-              _buildTextField(
-                'lenses_manufacturer',
-                'field_lenses_manufacturer'.tr(),
-              ),
-              const SizedBox(height: 16),
-              _buildTextField('lenses_color', 'field_lenses_color'.tr()),
-              const SizedBox(height: 16),
-              _buildTextField('lenses_coated', 'field_lenses_coated'.tr()),
-              const SizedBox(height: 16),
-              _buildTextField('catalog_num', 'field_catalog_num'.tr()),
-              const SizedBox(height: 16),
-              _buildTextField(
-                'frame_manufacturer',
-                'field_frame_manufacturer'.tr(),
-              ),
-              const SizedBox(height: 16),
-              _buildTextField('frame_supplier', 'field_frame_supplier'.tr()),
-              const SizedBox(height: 16),
-              _buildTextField('frame_model', 'field_frame_model'.tr()),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      'frame_size',
-                      'field_frame_size'.tr(),
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Column(
+              children: [
+                _buildDropdownOrTextField(
+                  'lenses_manufacturer',
+                  'field_lenses_manufacturer'.tr(),
+                ),
+                const SizedBox(height: 16),
+                _buildTextField('lenses_color', 'field_lenses_color'.tr()),
+                const SizedBox(height: 16),
+                _buildDropdownOrTextField('lenses_coated', 'field_lenses_coated'.tr()),
+                const SizedBox(height: 16),
+                _buildTextField('catalog_num', 'field_catalog_num'.tr()),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  'frame_manufacturer',
+                  'field_frame_manufacturer'.tr(),
+                ),
+                const SizedBox(height: 16),
+                _buildTextField('frame_supplier', 'field_frame_supplier'.tr()),
+                const SizedBox(height: 16),
+                _buildTextField('frame_model', 'field_frame_model'.tr()),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        'frame_size',
+                        'field_frame_size'.tr(),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      'frame_bar_length',
-                      'field_frame_bar_length'.tr(),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildTextField(
+                        'frame_bar_length',
+                        'field_frame_bar_length'.tr(),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      'frame_color',
-                      'field_frame_color'.tr(),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildTextField(
+                        'frame_color',
+                        'field_frame_color'.tr(),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildTextField('notes', 'field_notes'.tr(), maxLines: 5),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildTextField('notes', 'field_notes'.tr(), maxLines: 5),
+              ],
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  /// Shows a DropdownField in edit mode (if options are loaded) or falls back
+  /// to the regular text field. Passes the external controller so free-typed
+  /// values are always saved, not just values selected from the list.
+  Widget _buildDropdownOrTextField(String key, String label) {
+    if (_isEditing && (_dropdownOptions[key]?.isNotEmpty ?? false)) {
+      return DropdownField(
+        label: label,
+        options: _dropdownOptions[key]!,
+        controller: _controllers[key],
+      );
+    }
+    return _buildTextField(key, label);
+  }
+
+  Widget _buildPrefixPairField({
+    required String label,
+    required String prefixA,
+    required String keyA,
+    required String prefixB,
+    required String keyB,
+  }) {
+    Widget inlineField(String key) => TextFormField(
+          controller: _controllers[key],
+          enabled: _isEditing,
+          style: TextStyle(
+            color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
+            fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
+          ),
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            disabledBorder: InputBorder.none,
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
+            filled: false,
+          ),
+        );
+
+    return InputDecorator(
+      isEmpty: false,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      child: Row(
+        children: [
+          Text(prefixA,
+              style: const TextStyle(
+                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          Expanded(child: inlineField(keyA)),
+          const SizedBox(width: 16),
+          Text(prefixB,
+              style: const TextStyle(
+                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          Expanded(child: inlineField(keyB)),
+        ],
+      ),
     );
   }
 

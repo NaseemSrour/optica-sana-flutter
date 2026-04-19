@@ -83,17 +83,9 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
       text:
           '${currentTest.rBaseCurveNumerator ?? ''}/${currentTest.rBaseCurveDenominator ?? ''}',
     );
-    _controllers['r_lens_va'] = TextEditingController(
-      text:
-          '${currentTest.rLensVaNumerator ?? ''}/${currentTest.rLensVaDenominator ?? ''}',
-    );
     _controllers['l_base_curve'] = TextEditingController(
       text:
           '${currentTest.lBaseCurveNumerator ?? ''}/${currentTest.lBaseCurveDenominator ?? ''}',
-    );
-    _controllers['l_lens_va'] = TextEditingController(
-      text:
-          '${currentTest.lLensVaNumerator ?? ''}/${currentTest.lLensVaDenominator ?? ''}',
     );
   }
 
@@ -128,32 +120,12 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
     _controllers.forEach((key, controller) {
       if (key == 'r_base_curve') {
         final parts = controller.text.split('/');
-        updatedValues['r_base_curve_numerator'] = parts.isNotEmpty
-            ? parts[0]
-            : '';
-        updatedValues['r_base_curve_denominator'] = parts.length > 1
-            ? parts[1]
-            : '';
-      } else if (key == 'r_lens_va') {
-        final parts = controller.text.split('/');
-        updatedValues['r_lens_va_numerator'] = parts.isNotEmpty ? parts[0] : '';
-        updatedValues['r_lens_va_denominator'] = parts.length > 1
-            ? parts[1]
-            : '';
+        updatedValues['r_base_curve_numerator'] = parts.isNotEmpty ? parts[0] : '';
+        updatedValues['r_base_curve_denominator'] = parts.length > 1 ? parts[1] : '';
       } else if (key == 'l_base_curve') {
         final parts = controller.text.split('/');
-        updatedValues['l_base_curve_numerator'] = parts.isNotEmpty
-            ? parts[0]
-            : '';
-        updatedValues['l_base_curve_denominator'] = parts.length > 1
-            ? parts[1]
-            : '';
-      } else if (key == 'l_lens_va') {
-        final parts = controller.text.split('/');
-        updatedValues['l_lens_va_numerator'] = parts.isNotEmpty ? parts[0] : '';
-        updatedValues['l_lens_va_denominator'] = parts.length > 1
-            ? parts[1]
-            : '';
+        updatedValues['l_base_curve_numerator'] = parts.isNotEmpty ? parts[0] : '';
+        updatedValues['l_base_curve_denominator'] = parts.length > 1 ? parts[1] : '';
       } else {
         updatedValues[key] = controller.text;
       }
