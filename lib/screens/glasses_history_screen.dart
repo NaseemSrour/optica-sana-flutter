@@ -35,8 +35,8 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
   final _dropdownOptions = <String, List<String>>{};
 
   static const _tableDropdownKeys = {'r_base', 'l_base', 'examiner'};
-  // Non-eye-data fields that have predefined options (no displayMapper).
   static const _gridDropdownKeys = {
+    'dominant_eye',
     'glasses_role',
     'lenses_material',
     'segment_diameter',
@@ -422,7 +422,10 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
             policy: ReadingOrderTraversalPolicy(),
             child: Column(
               children: [
-                _buildTextField('dominant_eye', 'field_dominant_eye'.tr()),
+                _buildDropdownOrTextField(
+                  'dominant_eye',
+                  'field_dominant_eye'.tr(),
+                ),
                 const SizedBox(height: 16),
                 _buildPrefixPairField(
                   label: 'field_iop'.tr(),
@@ -543,8 +546,27 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
   /// Shows a DropdownField in edit mode (if options are loaded) or falls back
   /// to the regular text field. Passes the external controller so free-typed
   /// values are always saved, not just values selected from the list.
-  Widget _buildDropdownOrTextField(String key, String label) {
+  ///
+  /// When [displayMapper] is provided the dropdown uses value+onChanged
+  /// instead of an external controller (stored value ≠ display text).
+  Widget _buildDropdownOrTextField(
+    String key,
+    String label, {
+    String Function(String)? displayMapper,
+  }) {
     if (_isEditing && (_dropdownOptions[key]?.isNotEmpty ?? false)) {
+      if (displayMapper != null) {
+        return DropdownField(
+          label: label,
+          options: _dropdownOptions[key]!,
+          value: _controllers[key]?.text.isEmpty ?? true
+              ? null
+              : _controllers[key]!.text,
+          onChanged: (v) =>
+              setState(() => _controllers[key]!.text = v ?? ''),
+          displayMapper: displayMapper,
+        );
+      }
       return DropdownField(
         label: label,
         options: _dropdownOptions[key]!,

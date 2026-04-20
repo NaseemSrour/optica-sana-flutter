@@ -41,8 +41,6 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
     'examiner',
   };
 
-  String _domEyeDisplay(String v) => 'dominant_eye_$v'.tr();
-
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
     try {
@@ -310,15 +308,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
           return DropdownField(
             label: _labelFor(key),
             options: _dropdownOptions[key] ?? [],
-            // dominant_eye uses displayMapper (stored value ≠ display text),
-            // so the parent cannot own the controller for it.
-            controller: key != 'dominant_eye' ? _controllers[key] : null,
-            value: _controllers[key]?.text.isEmpty ?? true
-                ? null
-                : _controllers[key]!.text,
-            onChanged: (v) => setState(() => _controllers[key]!.text = v ?? ''),
-            displayMapper:
-                key == 'dominant_eye' ? _domEyeDisplay : null,
+            controller: _controllers[key],
           );
         }
         return TextFormField(
