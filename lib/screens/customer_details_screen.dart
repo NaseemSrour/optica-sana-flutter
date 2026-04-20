@@ -395,6 +395,24 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
               child: Column(
                 children: [
                   _buildOtherDetailsGrid(),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _controllers['notes'],
+                    enabled: _isEditing,
+                    maxLines: _isEditing ? 5 : null,
+                    style: TextStyle(
+                      color: _isEditing
+                          ? AppColors.inputValue
+                          : AppColors.displayValue,
+                      fontWeight: _isEditing
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'field_notes'.tr(),
+                      isDense: true,
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   GlassesTestTable(glassesTest: _latestGlassesTest),
                 ],
@@ -423,7 +441,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       'field_occupation': 'occupation',
       'field_hobbies': 'hobbies',
       'field_referer': 'referer',
-      'field_notes': 'notes',
     };
 
     return GridView.builder(
