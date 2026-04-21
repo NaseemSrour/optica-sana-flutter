@@ -5,7 +5,7 @@ import 'schema.dart';
 
 class DatabaseHelper {
   static final _databaseName = "OpticaSana.db";
-  static final _databaseVersion = 3;
+  static final _databaseVersion = 1;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -37,7 +37,6 @@ class DatabaseHelper {
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
       onOpen: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -53,22 +52,6 @@ class DatabaseHelper {
       }
     }
     await _seedDropdownOptions(db);
-  }
-
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await db.execute(dropdownOptionsSql);
-      await _seedDropdownOptions(db);
-    }
-    if (oldVersion < 3) {
-      // v3: add a second mobile number for customers and a `solution` free
-      // text column on contact-lens tests. Both are nullable TEXT columns,
-      // so the migration is non-destructive.
-      await db.execute('ALTER TABLE customers ADD COLUMN tel_mobile_2 TEXT');
-      await db.execute(
-        'ALTER TABLE contact_lenses_tests ADD COLUMN solution TEXT',
-      );
-    }
   }
 
   Future<void> _seedDropdownOptions(Database db) async {

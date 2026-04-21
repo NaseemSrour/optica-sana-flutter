@@ -547,24 +547,39 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
   }
 
   Widget _buildStackedVaCell(String vaKey) {
-    // both_va top-right, l_va bottom-left (mirroring the DOS UI layout)
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            const Spacer(),
-            Expanded(child: _buildTextFormFieldCell('both_va')),
-          ],
-        ),
-        Container(height: 1, color: AppColors.tableBorder),
-        Row(
-          children: [
-            Expanded(child: _buildTextFormFieldCell(vaKey)),
-            const Spacer(),
-          ],
-        ),
-      ],
+    // both_va top-right, l_va bottom-left (mirroring the DOS UI layout).
+    // Focus traversal enters the cell on l_va (left-side field in the row)
+    // and then moves up to both_va before leaving the cell.
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Spacer(),
+              Expanded(
+                child: FocusTraversalOrder(
+                  order: const NumericFocusOrder(2),
+                  child: _buildTextFormFieldCell('both_va'),
+                ),
+              ),
+            ],
+          ),
+          Container(height: 1, color: AppColors.tableBorder),
+          Row(
+            children: [
+              Expanded(
+                child: FocusTraversalOrder(
+                  order: const NumericFocusOrder(1),
+                  child: _buildTextFormFieldCell(vaKey),
+                ),
+              ),
+              const Spacer(),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -578,33 +593,52 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         ],
       );
     }
-    // L row: sum_pd/near_pd top-right, l_pd bottom-left
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            const Spacer(),
-            Expanded(child: _buildSumNearPdCell()),
-          ],
-        ),
-        Container(height: 1, color: AppColors.tableBorder),
-        Row(
-          children: [
-            Expanded(child: _buildTextFormFieldCell(pdKey)),
-            const Spacer(),
-          ],
-        ),
-      ],
+    // L row: sum_pd/near_pd top-right, l_pd bottom-left. Tab order enters
+    // on l_pd, then sum_pd, then near_pd before leaving the cell.
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Spacer(),
+              Expanded(child: _buildSumNearPdCell()),
+            ],
+          ),
+          Container(height: 1, color: AppColors.tableBorder),
+          Row(
+            children: [
+              Expanded(
+                child: FocusTraversalOrder(
+                  order: const NumericFocusOrder(1),
+                  child: _buildTextFormFieldCell(pdKey),
+                ),
+              ),
+              const Spacer(),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildSumNearPdCell() {
     return Row(
       children: [
-        Expanded(child: _buildTextFormFieldCell('sum_pd')),
+        Expanded(
+          child: FocusTraversalOrder(
+            order: const NumericFocusOrder(2),
+            child: _buildTextFormFieldCell('sum_pd'),
+          ),
+        ),
         const Text('/', style: TextStyle(color: AppColors.label, fontSize: 12)),
-        Expanded(child: _buildTextFormFieldCell('near_pd')),
+        Expanded(
+          child: FocusTraversalOrder(
+            order: const NumericFocusOrder(3),
+            child: _buildTextFormFieldCell('near_pd'),
+          ),
+        ),
       ],
     );
   }
