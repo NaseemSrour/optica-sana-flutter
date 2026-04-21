@@ -10,6 +10,7 @@ import 'package:optica_sana/db_flutter/repositories/contact_lenses_repo.dart';
 import 'package:optica_sana/db_flutter/repositories/customer_repo.dart';
 import 'package:optica_sana/db_flutter/repositories/glasses_repo.dart';
 import 'package:optica_sana/flutter_services/app_settings.dart';
+import 'package:optica_sana/flutter_services/auth_service.dart';
 import 'package:optica_sana/flutter_services/customer_service.dart';
 import 'package:optica_sana/flutter_services/sound_service.dart';
 import 'package:optica_sana/screens/welcome_screen.dart';
@@ -28,6 +29,7 @@ void main() async {
   await DatabaseHelper.instance.database;
   await SoundService.instance.init();
   await AppSettings.instance.init();
+  await AuthService.instance.init();
 
   runApp(
     EasyLocalization(
