@@ -152,7 +152,7 @@ All relevant checkmarks must be green for your target platform(s) before proceed
 
 ```powershell
 # 1. Clone
-git clone https://github.com/<your-org>/optica-sana-flutter.git
+git clone https://github.com/NaseemSrour/optica-sana-flutter.git
 cd optica-sana-flutter
 
 # 2. Fetch dependencies
