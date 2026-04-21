@@ -9,6 +9,7 @@ import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
 import '../widgets/field_validation.dart';
 import '../widgets/lenses_test_tables.dart';
+import '../widgets/numeric_mask_formatter.dart';
 
 class LensesHistoryScreen extends StatefulWidget {
   final Customer customer;
@@ -36,31 +37,120 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
 
   late final Map<String, FieldAction> _blurActions = {
     'r_rH': composeActions([
+      padFractionalZerosAction(fieldKey: 'r_rH', fracDigits: 2),
       averageAction(aKey: 'r_rH', bKey: 'r_rV', targetKey: 'r_aver'),
       keratometryCylAction(hKey: 'r_rH', vKey: 'r_rV', targetKey: 'r_k_cyl'),
     ]),
     'r_rV': composeActions([
+      padFractionalZerosAction(fieldKey: 'r_rV', fracDigits: 2),
       averageAction(aKey: 'r_rH', bKey: 'r_rV', targetKey: 'r_aver'),
       keratometryCylAction(hKey: 'r_rH', vKey: 'r_rV', targetKey: 'r_k_cyl'),
     ]),
     'l_rH': composeActions([
+      padFractionalZerosAction(fieldKey: 'l_rH', fracDigits: 2),
       averageAction(aKey: 'l_rH', bKey: 'l_rV', targetKey: 'l_aver'),
       keratometryCylAction(hKey: 'l_rH', vKey: 'l_rV', targetKey: 'l_k_cyl'),
     ]),
     'l_rV': composeActions([
+      padFractionalZerosAction(fieldKey: 'l_rV', fracDigits: 2),
       averageAction(aKey: 'l_rH', bKey: 'l_rV', targetKey: 'l_aver'),
       keratometryCylAction(hKey: 'l_rH', vKey: 'l_rV', targetKey: 'l_k_cyl'),
     ]),
+    'r_diameter': padFractionalZerosAction(
+      fieldKey: 'r_diameter',
+      fracDigits: 2,
+    ),
+    'l_diameter': padFractionalZerosAction(
+      fieldKey: 'l_diameter',
+      fracDigits: 2,
+    ),
+    'r_lens_sph': padFractionalZerosAction(
+      fieldKey: 'r_lens_sph',
+      fracDigits: 2,
+    ),
+    'l_lens_sph': padFractionalZerosAction(
+      fieldKey: 'l_lens_sph',
+      fracDigits: 2,
+    ),
+    'r_lens_cyl': padFractionalZerosAction(
+      fieldKey: 'r_lens_cyl',
+      fracDigits: 2,
+    ),
+    'l_lens_cyl': padFractionalZerosAction(
+      fieldKey: 'l_lens_cyl',
+      fracDigits: 2,
+    ),
   };
+
+  /// Input formatters for numeric fields with fixed digit shapes.
+  /// Kept as fields (not getters) so the list identity is stable across
+  /// rebuilds.
+  static final _oneDotTwoMask = [
+    NumericMaskFormatter(intDigits: 1, fracDigits: 2),
+  ];
+  static final _signedThreeDotTwoMask = [
+    NumericMaskFormatter(intDigits: 3, fracDigits: 2, allowSign: true),
+  ];
+  static final _twoDotTwoMask = [
+    NumericMaskFormatter(intDigits: 2, fracDigits: 2),
+  ];
+
+  late final Map<String, List<TextInputFormatter>> _inputFormatters = {
+    'r_rH': _oneDotTwoMask,
+    'r_rV': _oneDotTwoMask,
+    'l_rH': _oneDotTwoMask,
+    'l_rV': _oneDotTwoMask,
+    'r_diameter': _oneDotTwoMask,
+    'l_diameter': _oneDotTwoMask,
+    'r_lens_sph': _signedThreeDotTwoMask,
+    'l_lens_sph': _signedThreeDotTwoMask,
+    'r_lens_cyl': _twoDotTwoMask,
+    'l_lens_cyl': _twoDotTwoMask,
+  };
+
+  /// Maps field controller keys to the dropdown list key that supplies
+  /// their suggestions. Free text is still allowed; suggestions come from
+  /// user-managed lists.
+  static const _fieldToListKey = {
+    'r_lens_type': 'contact_lens_type',
+    'l_lens_type': 'contact_lens_type',
+    'r_manufacturer': 'contact_lens_manufacturer',
+    'l_manufacturer': 'contact_lens_manufacturer',
+    'r_brand': 'contact_lens_brand',
+    'l_brand': 'contact_lens_brand',
+  };
+
+  /// Effective map passed to the table: each field’s options looked up by
+  /// the corresponding list key. Rebuilds naturally because it reads from
+  /// _dropdownOptions which is mutated inside setState.
+  Map<String, List<String>> get _tableDropdownOptions {
+    final out = <String, List<String>>{};
+    _fieldToListKey.forEach((fieldKey, listKey) {
+      final opts = _dropdownOptions[listKey];
+      if (opts != null && opts.isNotEmpty) out[fieldKey] = opts;
+    });
+    // Examiner uses its own list key directly.
+    final examiner = _dropdownOptions['examiner'];
+    if (examiner != null) out['examiner'] = examiner;
+    return out;
+  }
 
   @override
   void initState() {
     super.initState();
     _controllers = {};
     _loadHistory();
-    DropdownOptionsService.instance.getOptions('examiner').then((opts) {
-      if (mounted) setState(() => _dropdownOptions['examiner'] = opts);
-    });
+    const listKeys = {
+      'examiner',
+      'contact_lens_type',
+      'contact_lens_manufacturer',
+      'contact_lens_brand',
+    };
+    for (final key in listKeys) {
+      DropdownOptionsService.instance.getOptions(key).then((opts) {
+        if (mounted) setState(() => _dropdownOptions[key] = opts);
+      });
+    }
   }
 
   Future<void> _loadHistory() async {
@@ -138,8 +228,13 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
     };
 
     _controllers.forEach((key, controller) {
+      // Masked fields may still contain placeholder `_`s at save time if
+      // the user hit Ctrl+S without ever blurring the field.
+      final raw = _inputFormatters.containsKey(key)
+          ? stripNumericMask(controller.text)
+          : controller.text;
       if (key == 'r_base_curve') {
-        final parts = controller.text.split('/');
+        final parts = raw.split('/');
         updatedValues['r_base_curve_numerator'] = parts.isNotEmpty
             ? parts[0]
             : '';
@@ -147,7 +242,7 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
             ? parts[1]
             : '';
       } else if (key == 'l_base_curve') {
-        final parts = controller.text.split('/');
+        final parts = raw.split('/');
         updatedValues['l_base_curve_numerator'] = parts.isNotEmpty
             ? parts[0]
             : '';
@@ -155,7 +250,7 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
             ? parts[1]
             : '';
       } else {
-        updatedValues[key] = controller.text;
+        updatedValues[key] = raw;
       }
     });
 
@@ -439,8 +534,9 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         lensesTest: test,
         isEditing: _isEditing,
         controllers: _controllers,
-        dropdownOptions: _dropdownOptions,
+        dropdownOptions: _tableDropdownOptions,
         blurActions: _isEditing ? _blurActions : const {},
+        inputFormatters: _isEditing ? _inputFormatters : const {},
       ),
     );
   }

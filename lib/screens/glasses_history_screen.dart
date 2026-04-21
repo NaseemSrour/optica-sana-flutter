@@ -10,6 +10,7 @@ import '../widgets/app_notification.dart';
 import '../widgets/dropdown_field.dart';
 import '../widgets/field_validation.dart';
 import '../widgets/glasses_test_table.dart';
+import '../widgets/numeric_mask_formatter.dart';
 
 class GlassesHistoryScreen extends StatefulWidget {
   final Customer customer;
@@ -56,11 +57,73 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
       axisKey: 'l_axis',
       cylinderKey: 'l_cylinder',
     ),
+    'r_add_read': quarterStepCheck(fieldKey: 'r_add_read'),
+    'r_add_int': quarterStepCheck(fieldKey: 'r_add_int'),
+    'r_add_bif': quarterStepCheck(fieldKey: 'r_add_bif'),
+    'r_add_mul': quarterStepCheck(fieldKey: 'r_add_mul'),
+    'l_add_read': quarterStepCheck(fieldKey: 'l_add_read'),
+    'l_add_int': quarterStepCheck(fieldKey: 'l_add_int'),
+    'l_add_bif': quarterStepCheck(fieldKey: 'l_add_bif'),
+    'l_add_mul': quarterStepCheck(fieldKey: 'l_add_mul'),
   };
 
   late final Map<String, FieldAction> _blurActions = {
     'r_pd': sumOrDoubleAction(aKey: 'r_pd', bKey: 'l_pd', targetKey: 'sum_pd'),
     'l_pd': sumOrDoubleAction(aKey: 'r_pd', bKey: 'l_pd', targetKey: 'sum_pd'),
+    'r_sphere': padFractionalZerosAction(fieldKey: 'r_sphere', fracDigits: 2),
+    'l_sphere': padFractionalZerosAction(fieldKey: 'l_sphere', fracDigits: 2),
+    'r_cylinder': padFractionalZerosAction(
+      fieldKey: 'r_cylinder',
+      fracDigits: 2,
+    ),
+    'l_cylinder': padFractionalZerosAction(
+      fieldKey: 'l_cylinder',
+      fracDigits: 2,
+    ),
+    'r_prism': padFractionalZerosAction(fieldKey: 'r_prism', fracDigits: 2),
+    'l_prism': padFractionalZerosAction(fieldKey: 'l_prism', fracDigits: 2),
+    'r_add_read': padFractionalZerosAction(
+      fieldKey: 'r_add_read',
+      fracDigits: 2,
+    ),
+    'r_add_int': padFractionalZerosAction(fieldKey: 'r_add_int', fracDigits: 2),
+    'r_add_bif': padFractionalZerosAction(fieldKey: 'r_add_bif', fracDigits: 2),
+    'r_add_mul': padFractionalZerosAction(fieldKey: 'r_add_mul', fracDigits: 2),
+    'l_add_read': padFractionalZerosAction(
+      fieldKey: 'l_add_read',
+      fracDigits: 2,
+    ),
+    'l_add_int': padFractionalZerosAction(fieldKey: 'l_add_int', fracDigits: 2),
+    'l_add_bif': padFractionalZerosAction(fieldKey: 'l_add_bif', fracDigits: 2),
+    'l_add_mul': padFractionalZerosAction(fieldKey: 'l_add_mul', fracDigits: 2),
+  };
+
+  /// Shared instances so widget identity stays stable across rebuilds.
+  static final _signedThreeDotTwoMask = [
+    NumericMaskFormatter(intDigits: 3, fracDigits: 2, allowSign: true),
+  ];
+  static final _twoDotTwoMask = [
+    NumericMaskFormatter(intDigits: 2, fracDigits: 2),
+  ];
+  static final _oneDotTwoMask = [
+    NumericMaskFormatter(intDigits: 1, fracDigits: 2),
+  ];
+
+  late final Map<String, List<TextInputFormatter>> _inputFormatters = {
+    'r_sphere': _signedThreeDotTwoMask,
+    'l_sphere': _signedThreeDotTwoMask,
+    'r_cylinder': _signedThreeDotTwoMask,
+    'l_cylinder': _signedThreeDotTwoMask,
+    'r_prism': _twoDotTwoMask,
+    'l_prism': _twoDotTwoMask,
+    'r_add_read': _oneDotTwoMask,
+    'r_add_int': _oneDotTwoMask,
+    'r_add_bif': _oneDotTwoMask,
+    'r_add_mul': _oneDotTwoMask,
+    'l_add_read': _oneDotTwoMask,
+    'l_add_int': _oneDotTwoMask,
+    'l_add_bif': _oneDotTwoMask,
+    'l_add_mul': _oneDotTwoMask,
   };
 
   @override
@@ -143,7 +206,11 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
     };
 
     _controllers.forEach((key, controller) {
-      updatedValues[key] = controller.text;
+      // Masked fields may still contain placeholder `_`s at save time if
+      // the user hit Ctrl+S without ever blurring the field.
+      updatedValues[key] = _inputFormatters.containsKey(key)
+          ? stripNumericMask(controller.text)
+          : controller.text;
     });
 
     try {
@@ -431,6 +498,7 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
             dropdownOptions: _dropdownOptions,
             blurChecks: _isEditing ? _blurChecks : const {},
             blurActions: _isEditing ? _blurActions : const {},
+            inputFormatters: _isEditing ? _inputFormatters : const {},
           ),
           const SizedBox(height: 20),
           _buildAdditionalInfo(test),

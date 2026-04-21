@@ -10,6 +10,7 @@ import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
 import '../widgets/dropdown_field.dart';
 import '../widgets/field_validation.dart';
+import '../widgets/numeric_mask_formatter.dart';
 
 class AddGlassesTestScreen extends StatefulWidget {
   final Customer customer;
@@ -56,12 +57,74 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       axisKey: 'l_axis',
       cylinderKey: 'l_cylinder',
     ),
+    'r_add_read': quarterStepCheck(fieldKey: 'r_add_read'),
+    'r_add_int': quarterStepCheck(fieldKey: 'r_add_int'),
+    'r_add_bif': quarterStepCheck(fieldKey: 'r_add_bif'),
+    'r_add_mul': quarterStepCheck(fieldKey: 'r_add_mul'),
+    'l_add_read': quarterStepCheck(fieldKey: 'l_add_read'),
+    'l_add_int': quarterStepCheck(fieldKey: 'l_add_int'),
+    'l_add_bif': quarterStepCheck(fieldKey: 'l_add_bif'),
+    'l_add_mul': quarterStepCheck(fieldKey: 'l_add_mul'),
   };
 
   /// Fields whose focus loss triggers a derived-value recomputation.
   late final Map<String, FieldAction> _blurActions = {
     'r_pd': sumOrDoubleAction(aKey: 'r_pd', bKey: 'l_pd', targetKey: 'sum_pd'),
     'l_pd': sumOrDoubleAction(aKey: 'r_pd', bKey: 'l_pd', targetKey: 'sum_pd'),
+    'r_sphere': padFractionalZerosAction(fieldKey: 'r_sphere', fracDigits: 2),
+    'l_sphere': padFractionalZerosAction(fieldKey: 'l_sphere', fracDigits: 2),
+    'r_cylinder': padFractionalZerosAction(
+      fieldKey: 'r_cylinder',
+      fracDigits: 2,
+    ),
+    'l_cylinder': padFractionalZerosAction(
+      fieldKey: 'l_cylinder',
+      fracDigits: 2,
+    ),
+    'r_prism': padFractionalZerosAction(fieldKey: 'r_prism', fracDigits: 2),
+    'l_prism': padFractionalZerosAction(fieldKey: 'l_prism', fracDigits: 2),
+    'r_add_read': padFractionalZerosAction(
+      fieldKey: 'r_add_read',
+      fracDigits: 2,
+    ),
+    'r_add_int': padFractionalZerosAction(fieldKey: 'r_add_int', fracDigits: 2),
+    'r_add_bif': padFractionalZerosAction(fieldKey: 'r_add_bif', fracDigits: 2),
+    'r_add_mul': padFractionalZerosAction(fieldKey: 'r_add_mul', fracDigits: 2),
+    'l_add_read': padFractionalZerosAction(
+      fieldKey: 'l_add_read',
+      fracDigits: 2,
+    ),
+    'l_add_int': padFractionalZerosAction(fieldKey: 'l_add_int', fracDigits: 2),
+    'l_add_bif': padFractionalZerosAction(fieldKey: 'l_add_bif', fracDigits: 2),
+    'l_add_mul': padFractionalZerosAction(fieldKey: 'l_add_mul', fracDigits: 2),
+  };
+
+  /// Shared instances so widget identity stays stable across rebuilds.
+  static final _signedThreeDotTwoMask = [
+    NumericMaskFormatter(intDigits: 3, fracDigits: 2, allowSign: true),
+  ];
+  static final _twoDotTwoMask = [
+    NumericMaskFormatter(intDigits: 2, fracDigits: 2),
+  ];
+  static final _oneDotTwoMask = [
+    NumericMaskFormatter(intDigits: 1, fracDigits: 2),
+  ];
+
+  late final Map<String, List<TextInputFormatter>> _inputFormatters = {
+    'r_sphere': _signedThreeDotTwoMask,
+    'l_sphere': _signedThreeDotTwoMask,
+    'r_cylinder': _signedThreeDotTwoMask,
+    'l_cylinder': _signedThreeDotTwoMask,
+    'r_prism': _twoDotTwoMask,
+    'l_prism': _twoDotTwoMask,
+    'r_add_read': _oneDotTwoMask,
+    'r_add_int': _oneDotTwoMask,
+    'r_add_bif': _oneDotTwoMask,
+    'r_add_mul': _oneDotTwoMask,
+    'l_add_read': _oneDotTwoMask,
+    'l_add_int': _oneDotTwoMask,
+    'l_add_bif': _oneDotTwoMask,
+    'l_add_mul': _oneDotTwoMask,
   };
 
   /// Wraps [child] in an [OnBlurValidator] when [key] has a registered check.
@@ -148,10 +211,15 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         'id': -1,
       };
       _controllers.forEach((key, controller) {
+        // Masked fields may still contain placeholder `_`s at save time if
+        // the user hit Ctrl+S without ever blurring the field.
+        final raw = _inputFormatters.containsKey(key)
+            ? stripNumericMask(controller.text)
+            : controller.text;
         if (key == 'exam_date') {
-          newMap[key] = _formatDateForDb(controller.text);
+          newMap[key] = _formatDateForDb(raw);
         } else {
-          newMap[key] = controller.text;
+          newMap[key] = raw;
         }
       });
 
@@ -762,6 +830,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
     final field = TextFormField(
       controller: _controllers[key],
       textAlign: TextAlign.center,
+      inputFormatters: _inputFormatters[key],
       style: const TextStyle(
         color: AppColors.inputValue,
         fontWeight: FontWeight.w600,

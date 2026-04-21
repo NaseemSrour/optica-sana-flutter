@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:optica_sana/themes/app_theme.dart';
 
 /// A reusable dropdown field backed by a list of string options.
@@ -20,6 +21,10 @@ class DropdownField extends StatefulWidget {
   /// captured automatically. [value] and [onChanged] are then not required.
   final TextEditingController? controller;
 
+  /// Optional text-input formatters applied to the underlying text field,
+  /// so callers can combine dropdown suggestions with input masks.
+  final List<TextInputFormatter>? inputFormatters;
+
   const DropdownField({
     super.key,
     required this.options,
@@ -30,6 +35,7 @@ class DropdownField extends StatefulWidget {
     this.width,
     this.displayMapper,
     this.controller,
+    this.inputFormatters,
   });
 
   @override
@@ -94,7 +100,9 @@ class _DropdownFieldState extends State<DropdownField> {
             controller: _controller,
             width: w.isFinite ? w : 90.0,
             dropdownMenuEntries: entries,
-            initialSelection: widget.value ??
+            inputFormatters: widget.inputFormatters,
+            initialSelection:
+                widget.value ??
                 (widget.controller?.text.isNotEmpty == true
                     ? widget.controller!.text
                     : null),
@@ -126,7 +134,9 @@ class _DropdownFieldState extends State<DropdownField> {
           width: w.isFinite ? w : 200,
           label: widget.label != null ? Text(widget.label!) : null,
           dropdownMenuEntries: entries,
-          initialSelection: widget.value ??
+          inputFormatters: widget.inputFormatters,
+          initialSelection:
+              widget.value ??
               (widget.controller?.text.isNotEmpty == true
                   ? widget.controller!.text
                   : null),

@@ -26,6 +26,9 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
     ('segment_diameter', 'field_segment_diam'),
     ('lenses_manufacturer', 'field_lenses_manufacturer'),
     ('lenses_coated', 'field_lenses_coated'),
+    ('contact_lens_type', 'field_contact_lens_type'),
+    ('contact_lens_manufacturer', 'field_contact_lens_manufacturer'),
+    ('contact_lens_brand', 'field_contact_lens_brand'),
   ];
 
   Map<String, List<String>> _options = {};
@@ -130,10 +133,7 @@ class _ManageListsScreenState extends State<ManageListsScreen> {
                 ),
                 subtitle: Text(
                   '${opts.length} ${'manage_lists_values_count'.tr()}',
-                  style: const TextStyle(
-                    color: AppColors.label,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: AppColors.label, fontSize: 12),
                 ),
                 children: [
                   if (opts.isEmpty)

@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../db_flutter/models.dart';
 import '../themes/app_theme.dart';
 import 'dropdown_field.dart';
@@ -14,6 +15,7 @@ class GlassesTestTable extends StatelessWidget {
   final Map<String, List<String>> dropdownOptions;
   final Map<String, FieldCheck> blurChecks;
   final Map<String, FieldAction> blurActions;
+  final Map<String, List<TextInputFormatter>> inputFormatters;
 
   const GlassesTestTable({
     super.key,
@@ -23,6 +25,7 @@ class GlassesTestTable extends StatelessWidget {
     this.dropdownOptions = const {},
     this.blurChecks = const {},
     this.blurActions = const {},
+    this.inputFormatters = const {},
   });
 
   @override
@@ -518,6 +521,7 @@ class GlassesTestTable extends StatelessWidget {
     final field = TextFormField(
       controller: controllers![fieldKey],
       textAlign: TextAlign.center,
+      inputFormatters: inputFormatters[fieldKey],
       style: const TextStyle(
         color: AppColors.inputValue,
         fontWeight: FontWeight.w600,
