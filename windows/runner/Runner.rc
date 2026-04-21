@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "Optisana" "\0"
+            VALUE "CompanyName", "Naseem Srour" "\0"
+            VALUE "FileDescription", "OptiSana" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "Optisana" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 Optisana. All rights reserved." "\0"
-            VALUE "OriginalFilename", "Optisana.exe" "\0"
-            VALUE "ProductName", "Optisana" "\0"
+            VALUE "InternalName", "OptiSana" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 OptiSana. All rights reserved." "\0"
+            VALUE "OriginalFilename", "OptiSana.exe" "\0"
+            VALUE "ProductName", "OptiSana" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

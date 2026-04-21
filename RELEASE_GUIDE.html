@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OptiSana — Release Guide</title>
+<style>
+  :root {
+    --bg: #0f1724;
+    --panel: #1a2332;
+    --panel-2: #243244;
+    --text: #e6edf3;
+    --muted: #9aa8bd;
+    --accent: #4fb3ff;
+    --accent-2: #7ee787;
+    --warn: #ffb454;
+    --danger: #ff6b6b;
+    --border: #2d3b52;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 32px;
+  }
+  header {
+    text-align: center;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  header h1 {
+    font-size: 2.6rem;
+    margin: 0 0 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header p { color: var(--muted); margin: 0; }
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.4rem;
+    margin-top: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #0f1724;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  h3 { color: var(--accent); margin-top: 24px; margin-bottom: 8px; }
+  section.step {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  pre {
+    background: #0b1220;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 0.9rem;
+    margin: 8px 0;
+  }
+  code {
+    font-family: "Cascadia Code", Consolas, monospace;
+    background: var(--panel-2);
+    color: var(--accent-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+  .callout {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 14px 0;
+    border-left: 4px solid;
+  }
+  .callout.info    { background: rgba(79,179,255,0.08);  border-color: var(--accent); }
+  .callout.warn    { background: rgba(255,180,84,0.08);  border-color: var(--warn); }
+  .callout.success { background: rgba(126,231,135,0.08); border-color: var(--accent-2); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 6px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.92rem;
+  }
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--muted); font-weight: 600; }
+  .file-path {
+    color: var(--accent-2);
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 0.9em;
+  }
+  .kbd {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.85em;
+    font-family: "Cascadia Code", Consolas, monospace;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--panel-2);
+    color: var(--muted);
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .tag.once { background: rgba(255,180,84,0.15); color: var(--warn); }
+  .tag.every { background: rgba(126,231,135,0.15); color: var(--accent-2); }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .toc {
+    background: var(--panel-2);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+  .toc h3 { margin-top: 0; color: var(--text); }
+  .toc ol { margin: 0; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <h1>OptiSana — Production Release Guide</h1>
+    <p>Windows desktop build &amp; Inno Setup installer workflow</p>
+  </header>
+
+  <div class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#prereq">One-time setup</a></li>
+      <li><a href="#bump">Bump version</a></li>
+      <li><a href="#build">Build the Windows release</a></li>
+      <li><a href="#installer">Compile the installer</a></li>
+      <li><a href="#ship">Ship it</a></li>
+      <li><a href="#future">Per-release checklist</a></li>
+      <li><a href="#notes">Notes &amp; troubleshooting</a></li>
+    </ol>
+  </div>
+
+  <section class="step" id="prereq">
+    <h2><span class="num">1</span> One-time setup <span class="tag once">do once</span></h2>
+    <p>Install these tools on your build machine:</p>
+    <ul>
+      <li><strong>Flutter SDK</strong> — already installed (used for <code>flutter run -d windows</code>).</li>
+      <li><strong>Visual Studio 2022</strong> with the <em>Desktop development with C++</em> workload — required by Flutter to build Windows apps.</li>
+      <li><strong>Inno Setup 6</strong> — download from
+        <a href="https://jrsoftware.org/isinfo.php" style="color: var(--accent);">jrsoftware.org/isinfo.php</a>
+        and install with default options.
+      </li>
+    </ul>
+    <div class="callout info">
+      <strong>Already done in your repo</strong>
+      The <span class="file-path">installer/OptiSana.iss</span> script has been created. You do not need to recreate it.
+    </div>
+  </section>
+
+  <section class="step" id="bump">
+    <h2><span class="num">2</span> Bump the version <span class="tag every">every release</span></h2>
+    <p>Update the version in <strong>two</strong> places so the exe metadata, the installer filename, and the uninstall entry all agree.</p>
+
+    <h3>a. <span class="file-path">pubspec.yaml</span></h3>
+<pre><code>version: 1.0.1+2   # was 1.0.0+1</code></pre>
+    <ul>
+      <li><code>1.0.1</code> — user-visible version (<code>Major.Minor.Patch</code>).</li>
+      <li><code>+2</code> — internal build number. Increment every release.</li>
+    </ul>
+
+    <h3>b. <span class="file-path">installer/OptiSana.iss</span></h3>
+<pre><code>#define MyAppVersion "1.0.1"</code></pre>
+
+    <div class="callout warn">
+      <strong>Do not change <code>MyAppId</code></strong>
+      The GUID in <code>AppId</code> identifies the installed app to Windows. Keep it the same so clients get an <em>upgrade</em> instead of a second parallel install.
+    </div>
+  </section>
+
+  <section class="step" id="build">
+    <h2><span class="num">3</span> Build the Windows release <span class="tag every">every release</span></h2>
+    <p>Run these from the project root in PowerShell:</p>
+<pre><code>flutter clean
+flutter pub get
+flutter build windows --release</code></pre>
+    <p>Output lands in:</p>
+<pre><code>build\windows\x64\runner\Release\
+├── OptiSana.exe
+├── flutter_windows.dll
+├── audioplayers_windows_plugin.dll
+├── sqlite3.dll            (and other plugin DLLs)
+└── data\
+    ├── icudtl.dat
+    └── flutter_assets\    (translations, sounds, images)</code></pre>
+    <div class="callout info">
+      <strong>Why <code>flutter clean</code>?</strong>
+      It forces CMake to regenerate, which is only strictly needed the first time after renaming the exe. You can skip it on subsequent releases if nothing in <span class="file-path">windows/</span> changed — but running it is always safe.
+    </div>
+  </section>
+
+  <section class="step" id="installer">
+    <h2><span class="num">4</span> Compile the installer <span class="tag every">every release</span></h2>
+    <p>Two equivalent ways to compile the <span class="file-path">.iss</span> script:</p>
+
+    <h3>Option A — command line (recommended)</h3>
+<pre><code>&amp; "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\OptiSana.iss</code></pre>
+
+    <h3>Option B — GUI</h3>
+    <ol>
+      <li>Open <span class="file-path">installer/OptiSana.iss</span> in Inno Setup Compiler.</li>
+      <li>Press <span class="kbd">F9</span> (or <strong>Build → Compile</strong>).</li>
+    </ol>
+
+    <p>Result:</p>
+<pre><code>build\installer\OptiSana-Setup-1.0.1.exe</code></pre>
+
+    <div class="callout success">
+      <strong>That single <code>.exe</code> is everything your clients need.</strong>
+      It contains the app, all DLLs, and the <code>data\</code> folder compressed with LZMA2.
+    </div>
+  </section>
+
+  <section class="step" id="ship">
+    <h2><span class="num">5</span> Ship it <span class="tag every">every release</span></h2>
+    <p>Deliver <span class="file-path">OptiSana-Setup-1.0.1.exe</span> by email, USB, WeTransfer, or a shared drive. The client experience:</p>
+    <ol>
+      <li>Double-click the installer.</li>
+      <li>Windows SmartScreen may say <em>"Windows protected your PC"</em> → click <strong>More info</strong> → <strong>Run anyway</strong>. (This only disappears with a paid code-signing certificate.)</li>
+      <li>UAC prompts for admin — approve.</li>
+      <li>Next → Next → Install → Finish.</li>
+      <li>Installed to <code>C:\Program Files\OptiSana\</code> with a Start Menu shortcut (and desktop shortcut if they ticked the box).</li>
+    </ol>
+
+    <div class="callout info">
+      <strong>Upgrades are automatic</strong>
+      Running a newer <code>OptiSana-Setup-X.Y.Z.exe</code> over an existing install replaces the files in place. User data is preserved:
+      <ul style="margin-top: 8px;">
+        <li>Database: <code>%UserProfile%\Documents\OpticaSana.db</code></li>
+        <li>Preferences (password, font size, sound): <code>HKCU\Software\Naseem Srour\OptiSana</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="step" id="future">
+    <h2><span class="num">6</span> Per-release checklist</h2>
+    <p>Quick reference for every future release:</p>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Action</th><th>File / Command</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Commit &amp; push all code changes</td><td><code>git commit</code> / <code>git push</code></td></tr>
+        <tr><td>2</td><td>Bump app version</td><td><span class="file-path">pubspec.yaml</span></td></tr>
+        <tr><td>3</td><td>Bump installer version</td><td><span class="file-path">installer/OptiSana.iss</span></td></tr>
+        <tr><td>4</td><td>Sanity check</td><td><code>flutter analyze</code></td></tr>
+        <tr><td>5</td><td>Build</td><td><code>flutter build windows --release</code></td></tr>
+        <tr><td>6</td><td>Package</td><td><code>ISCC.exe installer\OptiSana.iss</code></td></tr>
+        <tr><td>7</td><td>Smoke-test the installer on your machine</td><td>Run it, launch app, close, uninstall</td></tr>
+        <tr><td>8</td><td>Tag the release in git</td><td><code>git tag v1.0.1</code></td></tr>
+        <tr><td>9</td><td>Deliver to clients</td><td>Email / USB / shared drive</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="step" id="notes">
+    <h2><span class="num">7</span> Notes &amp; troubleshooting</h2>
+
+    <h3>SmartScreen warning</h3>
+    <p>Without code-signing, clients see <em>"Windows protected your PC"</em> once. They click <strong>More info → Run anyway</strong>. To remove this permanently, purchase a code-signing certificate (~$100–250/year) and run <code>signtool sign</code> on both <code>OptiSana.exe</code> and <code>OptiSana-Setup-X.Y.Z.exe</code>.</p>
+
+    <h3>Visual C++ Redistributable</h3>
+    <p>The app depends on the MSVC runtime. It's pre-installed on all modern Windows 10/11, but if a client ever hits a <em>"VCRUNTIME140.dll missing"</em> error, point them to
+      <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe" style="color: var(--accent);">aka.ms/vs/17/release/vc_redist.x64.exe</a>.
+    </p>
+
+    <h3>Rolling back an install</h3>
+    <p>The installer registers a proper uninstaller. Clients can remove the app via <strong>Settings → Apps → OptiSana → Uninstall</strong>. Their database and preferences are kept.</p>
+
+    <h3>Replacing the app icon</h3>
+    <p>Drop a new 256×256 multi-resolution <code>.ico</code> at
+      <span class="file-path">windows/runner/resources/app_icon.ico</span>
+      and rebuild. The exe, installer, and Start Menu shortcut all update automatically.
+    </p>
+
+    <h3>If the build fails</h3>
+    <ul>
+      <li><code>CMake Error</code> about MSVC → open Visual Studio Installer and make sure <em>Desktop development with C++</em> is checked.</li>
+      <li><code>Target of URI doesn't exist</code> → run <code>flutter pub get</code>.</li>
+      <li>Old exe name lingers (<code>Optisana.exe</code>) → run <code>flutter clean</code> then rebuild.</li>
+    </ul>
+  </section>
+
+  <footer>
+    OptiSana release workflow · Last updated April 2026
+  </footer>
+
+</div>
+
+</body>
+</html>
