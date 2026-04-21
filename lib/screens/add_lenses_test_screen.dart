@@ -175,6 +175,8 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
                   const SizedBox(height: 20),
                   _buildPrescriptionTable(context),
                   const SizedBox(height: 20),
+                  _buildSolutionField(),
+                  const SizedBox(height: 12),
                   _buildNotesField(),
                 ],
               ),
@@ -450,6 +452,20 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
       ),
       decoration: InputDecoration(labelText: 'field_notes'.tr(), isDense: true),
       maxLines: 3,
+    );
+  }
+
+  Widget _buildSolutionField() {
+    return TextFormField(
+      controller: _controllers['solution'],
+      style: const TextStyle(
+        color: AppColors.inputValue,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: InputDecoration(
+        labelText: 'field_solution'.tr(),
+        isDense: true,
+      ),
     );
   }
 

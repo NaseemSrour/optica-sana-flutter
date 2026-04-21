@@ -82,6 +82,22 @@ class LensesTestTables extends StatelessWidget {
         _buildPrescriptionTable(context),
         const SizedBox(height: 16),
 
+        // ── Solution ──────────────────────────────────────────────────────
+        TextFormField(
+          controller: controllers?['solution'],
+          enabled: isEditing,
+          style: TextStyle(
+            color: isEditing ? AppColors.inputValue : AppColors.displayValue,
+            fontWeight: isEditing ? FontWeight.w600 : FontWeight.normal,
+          ),
+          decoration: InputDecoration(
+            labelText: 'field_solution'.tr(),
+            border: const OutlineInputBorder(),
+            isDense: true,
+          ),
+        ),
+        const SizedBox(height: 12),
+
         // ── Notes ─────────────────────────────────────────────────────────
         TextFormField(
           controller: controllers?['notes'],

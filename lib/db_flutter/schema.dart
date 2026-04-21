@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS customers (
             sex TEXT,
             tel_home TEXT,
             tel_mobile TEXT,
+            tel_mobile_2 TEXT,
             address TEXT,
             town TEXT,
             postal_code TEXT,
@@ -146,6 +147,7 @@ CREATE TABLE IF NOT EXISTS glasses_tests (
     l_material TEXT,
     l_tint TEXT,
     l_va TEXT,
+    solution TEXT,
     notes TEXT,
 
 

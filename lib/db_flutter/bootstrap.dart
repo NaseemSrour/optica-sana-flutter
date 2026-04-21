@@ -5,7 +5,7 @@ import 'schema.dart';
 
 class DatabaseHelper {
   static final _databaseName = "OpticaSana.db";
-  static final _databaseVersion = 2;
+  static final _databaseVersion = 3;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -60,6 +60,15 @@ class DatabaseHelper {
       await db.execute(dropdownOptionsSql);
       await _seedDropdownOptions(db);
     }
+    if (oldVersion < 3) {
+      // v3: add a second mobile number for customers and a `solution` free
+      // text column on contact-lens tests. Both are nullable TEXT columns,
+      // so the migration is non-destructive.
+      await db.execute('ALTER TABLE customers ADD COLUMN tel_mobile_2 TEXT');
+      await db.execute(
+        'ALTER TABLE contact_lenses_tests ADD COLUMN solution TEXT',
+      );
+    }
   }
 
   Future<void> _seedDropdownOptions(Database db) async {
@@ -91,11 +100,11 @@ class DatabaseHelper {
       ('lenses_coated', 'MVP', 2),
     ];
     for (final (fieldKey, value, sortOrder) in seeds) {
-      await db.insert(
-        'dropdown_options',
-        {'field_key': fieldKey, 'value': value, 'sort_order': sortOrder},
-        conflictAlgorithm: ConflictAlgorithm.ignore,
-      );
+      await db.insert('dropdown_options', {
+        'field_key': fieldKey,
+        'value': value,
+        'sort_order': sortOrder,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
     }
   }
 }
