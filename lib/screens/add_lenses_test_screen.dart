@@ -211,10 +211,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         }
         return TextFormField(
           controller: _controllers[key],
-          style: const TextStyle(
-            color: AppColors.inputValue,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.input(),
           decoration: InputDecoration(
             labelText: labels[index],
             hintText: key.contains('date') ? 'hint_date'.tr() : null,
@@ -446,10 +443,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   Widget _buildNotesField() {
     return TextFormField(
       controller: _controllers['notes'],
-      style: const TextStyle(
-        color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
-      ),
+      style: AppTextStyles.input(),
       decoration: InputDecoration(labelText: 'field_notes'.tr(), isDense: true),
       maxLines: 3,
     );
@@ -458,10 +452,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   Widget _buildSolutionField() {
     return TextFormField(
       controller: _controllers['solution'],
-      style: const TextStyle(
-        color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
-      ),
+      style: AppTextStyles.input(),
       decoration: InputDecoration(
         labelText: 'field_solution'.tr(),
         isDense: true,

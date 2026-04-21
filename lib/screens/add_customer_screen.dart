@@ -364,10 +364,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       controller: controller,
       focusNode: focusNode,
       textDirection: textDirection,
-      style: const TextStyle(
-        color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
-      ),
+      style: AppTextStyles.input(),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

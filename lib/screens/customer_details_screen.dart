@@ -485,10 +485,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             keyboardType: TextInputType.number,
             inputFormatters: [DateMaskFormatter()],
             textDirection: ui.TextDirection.ltr,
-            style: const TextStyle(
-              color: AppColors.inputValue,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.input(),
             decoration: InputDecoration(
               labelText: entry.key.tr(),
               isDense: true,
@@ -512,10 +509,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
           textDirection: entry.value == 'birth_date'
               ? ui.TextDirection.ltr
               : null,
-          style: TextStyle(
-            color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
-            fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
-          ),
+          style: _isEditing ? AppTextStyles.input() : AppTextStyles.display(),
           decoration: InputDecoration(labelText: entry.key.tr(), isDense: true),
           validator: (value) {
             if ([

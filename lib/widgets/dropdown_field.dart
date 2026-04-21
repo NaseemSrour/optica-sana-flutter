@@ -94,7 +94,8 @@ class _DropdownFieldState extends State<DropdownField> {
             controller: _controller,
             width: w.isFinite ? w : 90.0,
             dropdownMenuEntries: entries,
-            initialSelection: widget.value ??
+            initialSelection:
+                widget.value ??
                 (widget.controller?.text.isNotEmpty == true
                     ? widget.controller!.text
                     : null),
@@ -126,7 +127,8 @@ class _DropdownFieldState extends State<DropdownField> {
           width: w.isFinite ? w : 200,
           label: widget.label != null ? Text(widget.label!) : null,
           dropdownMenuEntries: entries,
-          initialSelection: widget.value ??
+          initialSelection:
+              widget.value ??
               (widget.controller?.text.isNotEmpty == true
                   ? widget.controller!.text
                   : null),
@@ -137,7 +139,7 @@ class _DropdownFieldState extends State<DropdownField> {
             isDense: true,
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
-          textStyle: const TextStyle(color: AppColors.inputValue),
+          textStyle: AppTextStyles.input(weight: FontWeight.normal),
         );
       },
     );

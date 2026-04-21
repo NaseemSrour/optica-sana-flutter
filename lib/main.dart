@@ -9,6 +9,7 @@ import 'package:optica_sana/db_flutter/bootstrap.dart';
 import 'package:optica_sana/db_flutter/repositories/contact_lenses_repo.dart';
 import 'package:optica_sana/db_flutter/repositories/customer_repo.dart';
 import 'package:optica_sana/db_flutter/repositories/glasses_repo.dart';
+import 'package:optica_sana/flutter_services/app_settings.dart';
 import 'package:optica_sana/flutter_services/customer_service.dart';
 import 'package:optica_sana/flutter_services/sound_service.dart';
 import 'package:optica_sana/screens/welcome_screen.dart';
@@ -26,6 +27,7 @@ void main() async {
   await EasyLocalization.ensureInitialized();
   await DatabaseHelper.instance.database;
   await SoundService.instance.init();
+  await AppSettings.instance.init();
 
   runApp(
     EasyLocalization(
@@ -51,18 +53,21 @@ class MyApp extends StatelessWidget {
       lensesRepo,
     );
 
-    return MaterialApp(
-      title: 'OptiSana',
-      localizationsDelegates: [
-        ...context.localizationDelegates,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
-      theme: AppTheme.themeData,
-      home: WelcomeScreen(customerService: customerService),
+    return ListenableBuilder(
+      listenable: AppSettings.instance,
+      builder: (context, _) => MaterialApp(
+        title: 'OptiSana',
+        localizationsDelegates: [
+          ...context.localizationDelegates,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
+        theme: AppTheme.themeData,
+        home: WelcomeScreen(customerService: customerService),
+      ),
     );
   }
 }

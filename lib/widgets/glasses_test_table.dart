@@ -406,17 +406,13 @@ class GlassesTestTable extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            '6/',
-            style: TextStyle(
-              color: Colors.white70,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
           Text(
-            displayText,
-            style: const TextStyle(color: AppColors.displayValue),
+            '6/',
+            style: AppTextStyles.display(
+              weight: FontWeight.w600,
+            ).copyWith(color: Colors.white70),
           ),
+          Text(displayText, style: AppTextStyles.display()),
         ],
       ),
     );
@@ -469,7 +465,7 @@ class GlassesTestTable extends StatelessWidget {
   Widget _pdHalfCell(String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
-      child: Text(text, style: const TextStyle(color: AppColors.displayValue)),
+      child: Text(text, style: AppTextStyles.display()),
     );
   }
 
@@ -511,20 +507,16 @@ class GlassesTestTable extends StatelessWidget {
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    '6/',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
                   Text(
-                    text,
-                    style: const TextStyle(color: AppColors.displayValue),
+                    '6/',
+                    style: AppTextStyles.display(
+                      weight: FontWeight.w600,
+                    ).copyWith(color: Colors.white70),
                   ),
+                  Text(text, style: AppTextStyles.display()),
                 ],
               )
-            : Text(text, style: const TextStyle(color: AppColors.displayValue)),
+            : Text(text, style: AppTextStyles.display()),
       ),
     );
   }

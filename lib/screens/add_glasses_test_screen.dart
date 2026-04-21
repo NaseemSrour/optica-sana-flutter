@@ -290,10 +290,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         }
         return TextFormField(
           controller: _controllers[key],
-          style: const TextStyle(
-            color: AppColors.inputValue,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.input(),
           decoration: InputDecoration(
             labelText: labels[index],
             hintText: key.contains('date') ? 'hint_date'.tr() : null,
@@ -307,10 +304,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
   Widget _buildNotesField() {
     return TextFormField(
       controller: _controllers['notes'],
-      style: const TextStyle(
-        color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
-      ),
+      style: AppTextStyles.input(),
       decoration: InputDecoration(labelText: 'field_notes'.tr(), isDense: true),
       maxLines: 3,
     );
@@ -365,10 +359,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         }
         return TextFormField(
           controller: _controllers[key],
-          style: const TextStyle(
-            color: AppColors.inputValue,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.input(),
           decoration: InputDecoration(
             labelText: _labelFor(key),
             hintText: key.contains('date') ? 'hint_date'.tr() : null,
@@ -650,10 +641,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
           child: TextFormField(
             controller: _controllers['lenses_diameter_1'],
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.inputValue,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.input(),
             decoration: InputDecoration(
               labelText: 'field_lenses_diam_1'.tr(),
               isDense: true,
@@ -671,10 +659,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
           child: TextFormField(
             controller: _controllers['lenses_diameter_2'],
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.inputValue,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.input(),
             decoration: InputDecoration(
               labelText: 'field_lenses_diam_2'.tr(),
               isDense: true,
