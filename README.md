@@ -112,20 +112,20 @@ Install only the toolchains for the platforms you actually build for.
 - **Inno Setup 6** — required only to build the installer.
   Download: <https://jrsoftware.org/isinfo.php>
 
-#### Android
+#### Android - Not Tested
 
 - **Android Studio** (bundles the Android SDK, platform-tools, emulator).
 - **Java 17** (bundled with recent Android Studio).
 - Accept SDK licenses: `flutter doctor --android-licenses`.
 
-#### iOS / macOS
+#### iOS / macOS - Not Tested
 
 - **macOS 13** or newer.
 - **Xcode 15** or newer (from the Mac App Store).
 - **CocoaPods**: `sudo gem install cocoapods`.
 - A valid Apple Developer account (only needed to sign / distribute).
 
-#### Linux desktop
+#### Linux desktop - Not Tested
 
 - `clang`, `cmake`, `ninja-build`, `pkg-config`, `libgtk-3-dev`, `liblzma-dev`.
 - On Debian / Ubuntu:
@@ -133,7 +133,7 @@ Install only the toolchains for the platforms you actually build for.
   sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
   ```
 
-#### Web
+#### Web - Not Tested
 
 - Chrome or Edge (already installed on any dev machine).
 - No extra setup — enabled by default in recent Flutter versions.
@@ -200,7 +200,7 @@ optica-sana-flutter/
 flutter run -d windows
 ```
 
-### Other platforms
+### Other platforms  - Not Tested
 
 ```powershell
 flutter devices                 # list available targets
@@ -225,21 +225,21 @@ flutter build windows --release
 Output: `build\windows\x64\runner\Release\` — contains `OptiSana.exe`, `flutter_windows.dll`,
 all plugin DLLs, and a `data\` folder. The entire folder must be distributed together.
 
-### Android
+### Android  - Not Tested
 
 ```powershell
 flutter build appbundle --release     # for Play Store (.aab)
 flutter build apk --release           # standalone .apk
 ```
 
-### iOS / macOS
+### iOS / macOS - Not Tested
 
 ```bash
 flutter build ios --release
 flutter build macos --release
 ```
 
-### Web
+### Web - Not Tested
 
 ```powershell
 flutter build web --release
@@ -257,6 +257,8 @@ flutter build windows --release
 
 # 2. Compile the installer
 & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\OptiSana.iss
+
+# --> Or alternatively you can right-click the OptiSana.iss file in the Windows file explorer, and click 'compile', which comes from the Inno program we've installed.
 ```
 
 Output: `build\installer\OptiSana-Setup-<version>.exe` — a single, self-contained installer.
@@ -310,19 +312,3 @@ Supported locales and the fallback are registered in [`lib/main.dart`](lib/main.
 
 Proprietary — © 2026 Naseem Srour. All rights reserved.
 Not open source. Do not redistribute without permission.
-# optica_sana
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
