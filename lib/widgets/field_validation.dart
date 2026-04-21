@@ -106,6 +106,30 @@ FieldCheck glassesAxisCheck({
   };
 }
 
+/// If [fieldKey] is non-empty and parses as a number, it must be a multiple
+/// of 0.25 (i.e. its fractional part is one of .00 / .25 / .50 / .75).
+/// Empty fields are considered valid. [errorTrKey] is the localization key
+/// for the error message to show when the value doesn't fit the step.
+FieldCheck quarterStepCheck({
+  required String fieldKey,
+  String errorTrKey = 'msg_quarter_step_invalid',
+}) {
+  return (controllers) {
+    final raw = controllers[fieldKey]?.text.replaceAll('_', '').trim() ?? '';
+    final cleaned = raw.endsWith('.') ? raw.substring(0, raw.length - 1) : raw;
+    if (cleaned.isEmpty || cleaned == '+' || cleaned == '-') return null;
+    final value = double.tryParse(cleaned.replaceAll(',', '.'));
+    if (value == null) return null;
+    // Scale by 4 and compare to the nearest integer so binary-float noise
+    // (e.g. 0.1 + 0.15 ≠ 0.25) doesn't trip the check.
+    final scaled = value * 4;
+    if ((scaled - scaled.roundToDouble()).abs() > 1e-6) {
+      return errorTrKey.tr();
+    }
+    return null;
+  };
+}
+
 // ─── Form-level helpers ───────────────────────────────────────────────────
 
 /// Runs every [checks] against [controllers] and returns the first error
@@ -169,7 +193,12 @@ FieldAction composeActions(List<FieldAction> actions) {
 
 double? _parseNum(String? raw) {
   if (raw == null) return null;
-  final trimmed = raw.trim();
+  // Strip mask placeholders and any dangling trailing dot that the
+  // NumericMaskFormatter may have left behind (e.g. `7.__` → `7`).
+  var trimmed = raw.replaceAll('_', '').trim();
+  if (trimmed.endsWith('.')) {
+    trimmed = trimmed.substring(0, trimmed.length - 1);
+  }
   if (trimmed.isEmpty) return null;
   return double.tryParse(trimmed.replaceAll(',', '.'));
 }
@@ -265,5 +294,38 @@ FieldAction keratometryCylAction({
       controllers[targetKey],
       _formatNum(cyl, fractionDigits: fractionDigits),
     );
+  };
+}
+
+/// Pads [fieldKey] with trailing fractional zeros so it always displays
+/// exactly [fracDigits] digits after the decimal point (e.g. `7.5` → `7.50`).
+/// Empty values stay empty; unparseable values are left untouched.
+FieldAction padFractionalZerosAction({
+  required String fieldKey,
+  required int fracDigits,
+}) {
+  return (controllers) {
+    final ctrl = controllers[fieldKey];
+    if (ctrl == null) return;
+    // Strip mask placeholders (`_`) and a trailing dot so a partially typed
+    // masked value like `7.__` still pads cleanly to `7.00`.
+    var raw = ctrl.text.replaceAll('_', '').trim();
+    if (raw.endsWith('.')) raw = raw.substring(0, raw.length - 1);
+    if (raw.isEmpty || raw == '+' || raw == '-') {
+      // If the controller only ever held mask placeholders (or a lone
+      // sign), clear it so the field reverts to a clean empty state.
+      if (ctrl.text.isNotEmpty) ctrl.text = '';
+      return;
+    }
+    // toStringAsFixed preserves `-` naturally but drops an explicit `+`.
+    // Remember it so we can re-prepend after formatting.
+    final keepPlus = raw.startsWith('+');
+    final value = double.tryParse(raw.replaceAll(',', '.'));
+    if (value == null) return;
+    final formatted = value.toStringAsFixed(fracDigits);
+    final withSign = keepPlus && !formatted.startsWith('-')
+        ? '+$formatted'
+        : formatted;
+    _setControllerText(ctrl, withSign);
   };
 }

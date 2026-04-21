@@ -10,6 +10,7 @@ import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
 import '../widgets/dropdown_field.dart';
 import '../widgets/field_validation.dart';
+import '../widgets/numeric_mask_formatter.dart';
 
 class AddLensesTestScreen extends StatefulWidget {
   final Customer customer;
@@ -33,22 +34,120 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
 
   late final Map<String, FieldAction> _blurActions = {
     'r_rH': composeActions([
+      padFractionalZerosAction(fieldKey: 'r_rH', fracDigits: 2),
       averageAction(aKey: 'r_rH', bKey: 'r_rV', targetKey: 'r_aver'),
       keratometryCylAction(hKey: 'r_rH', vKey: 'r_rV', targetKey: 'r_k_cyl'),
     ]),
     'r_rV': composeActions([
+      padFractionalZerosAction(fieldKey: 'r_rV', fracDigits: 2),
       averageAction(aKey: 'r_rH', bKey: 'r_rV', targetKey: 'r_aver'),
       keratometryCylAction(hKey: 'r_rH', vKey: 'r_rV', targetKey: 'r_k_cyl'),
     ]),
     'l_rH': composeActions([
+      padFractionalZerosAction(fieldKey: 'l_rH', fracDigits: 2),
       averageAction(aKey: 'l_rH', bKey: 'l_rV', targetKey: 'l_aver'),
       keratometryCylAction(hKey: 'l_rH', vKey: 'l_rV', targetKey: 'l_k_cyl'),
     ]),
     'l_rV': composeActions([
+      padFractionalZerosAction(fieldKey: 'l_rV', fracDigits: 2),
       averageAction(aKey: 'l_rH', bKey: 'l_rV', targetKey: 'l_aver'),
       keratometryCylAction(hKey: 'l_rH', vKey: 'l_rV', targetKey: 'l_k_cyl'),
     ]),
+    'r_diameter': padFractionalZerosAction(
+      fieldKey: 'r_diameter',
+      fracDigits: 2,
+    ),
+    'l_diameter': padFractionalZerosAction(
+      fieldKey: 'l_diameter',
+      fracDigits: 2,
+    ),
+    'r_base_curve_numerator': padFractionalZerosAction(
+      fieldKey: 'r_base_curve_numerator',
+      fracDigits: 2,
+    ),
+    'r_base_curve_denominator': padFractionalZerosAction(
+      fieldKey: 'r_base_curve_denominator',
+      fracDigits: 2,
+    ),
+    'l_base_curve_numerator': padFractionalZerosAction(
+      fieldKey: 'l_base_curve_numerator',
+      fracDigits: 2,
+    ),
+    'l_base_curve_denominator': padFractionalZerosAction(
+      fieldKey: 'l_base_curve_denominator',
+      fracDigits: 2,
+    ),
+    'r_lens_sph': padFractionalZerosAction(
+      fieldKey: 'r_lens_sph',
+      fracDigits: 2,
+    ),
+    'l_lens_sph': padFractionalZerosAction(
+      fieldKey: 'l_lens_sph',
+      fracDigits: 2,
+    ),
+    'r_lens_cyl': padFractionalZerosAction(
+      fieldKey: 'r_lens_cyl',
+      fracDigits: 2,
+    ),
+    'l_lens_cyl': padFractionalZerosAction(
+      fieldKey: 'l_lens_cyl',
+      fracDigits: 2,
+    ),
   };
+
+  /// Shared instances so widget identity stays stable across rebuilds.
+  static final _oneDotTwoMask = [
+    NumericMaskFormatter(intDigits: 1, fracDigits: 2),
+  ];
+  static final _signedThreeDotTwoMask = [
+    NumericMaskFormatter(intDigits: 3, fracDigits: 2, allowSign: true),
+  ];
+  static final _signedTwoDotTwoMask = [
+    NumericMaskFormatter(intDigits: 2, fracDigits: 2, allowSign: true),
+  ];
+
+  late final Map<String, List<TextInputFormatter>> _inputFormatters = {
+    'r_rH': _oneDotTwoMask,
+    'r_rV': _oneDotTwoMask,
+    'l_rH': _oneDotTwoMask,
+    'l_rV': _oneDotTwoMask,
+    'r_diameter': _oneDotTwoMask,
+    'l_diameter': _oneDotTwoMask,
+    'r_base_curve_numerator': _oneDotTwoMask,
+    'r_base_curve_denominator': _oneDotTwoMask,
+    'l_base_curve_numerator': _oneDotTwoMask,
+    'l_base_curve_denominator': _oneDotTwoMask,
+    'r_lens_sph': _signedThreeDotTwoMask,
+    'l_lens_sph': _signedThreeDotTwoMask,
+    'r_lens_cyl': _signedTwoDotTwoMask,
+    'l_lens_cyl': _signedTwoDotTwoMask,
+  };
+
+  /// Dropdown-list keys fetched at init time. Each provides free-text +
+  /// autocompletion for a column in the prescription table.
+  static const _dropdownListKeys = {
+    'examiner',
+    'contact_lens_type',
+    'contact_lens_manufacturer',
+    'contact_lens_brand',
+  };
+
+  /// Maps a field controller key to the dropdown list key that supplies
+  /// its suggestions.
+  static const _fieldToListKey = {
+    'r_lens_type': 'contact_lens_type',
+    'l_lens_type': 'contact_lens_type',
+    'r_manufacturer': 'contact_lens_manufacturer',
+    'l_manufacturer': 'contact_lens_manufacturer',
+    'r_brand': 'contact_lens_brand',
+    'l_brand': 'contact_lens_brand',
+  };
+
+  List<String> _optionsFor(String fieldKey) {
+    final listKey = _fieldToListKey[fieldKey];
+    if (listKey == null) return const [];
+    return _dropdownOptions[listKey] ?? const [];
+  }
 
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
@@ -63,9 +162,11 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   @override
   void initState() {
     super.initState();
-    DropdownOptionsService.instance.getOptions('examiner').then((opts) {
-      if (mounted) setState(() => _dropdownOptions['examiner'] = opts);
-    });
+    for (final key in _dropdownListKeys) {
+      DropdownOptionsService.instance.getOptions(key).then((opts) {
+        if (mounted) setState(() => _dropdownOptions[key] = opts);
+      });
+    }
     final sampleTest = ContactLensesTest(
       id: 65454,
       customerId: widget.customer.id,
@@ -96,10 +197,16 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         'customer_id': widget.customer.id,
       };
       _controllers.forEach((key, controller) {
+        // Masked fields may still contain placeholder `_`s at save time if
+        // the user hit Ctrl+S without ever blurring the field. Clean those
+        // out before persisting.
+        final raw = _inputFormatters.containsKey(key)
+            ? stripNumericMask(controller.text)
+            : controller.text;
         if (key == 'exam_date') {
-          newMap[key] = _formatDateForDb(controller.text);
+          newMap[key] = _formatDateForDb(raw);
         } else {
-          newMap[key] = controller.text;
+          newMap[key] = raw;
         }
       });
 
@@ -483,19 +590,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   Widget _buildTextFormFieldCell(String key) {
     final hasSixPrefix = key == 'r_va' || key == 'l_va' || key == 'both_va';
 
-    final field = TextFormField(
-      controller: _controllers[key],
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
-      ),
-      decoration: const InputDecoration(
-        border: InputBorder.none,
-        filled: false,
-        isDense: true,
-      ),
-    );
+    final field = _buildInputWidget(key);
 
     if (!hasSixPrefix) {
       return Padding(
@@ -521,6 +616,35 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     );
   }
 
+  /// Builds the raw input widget for [key]: a compact [DropdownField] when
+  /// options are registered for that field, otherwise a plain [TextFormField].
+  /// Both variants share the same inputFormatters / styling.
+  Widget _buildInputWidget(String key) {
+    final opts = _optionsFor(key);
+    if (opts.isNotEmpty) {
+      return DropdownField(
+        compact: true,
+        options: opts,
+        controller: _controllers[key],
+        inputFormatters: _inputFormatters[key],
+      );
+    }
+    return TextFormField(
+      controller: _controllers[key],
+      textAlign: TextAlign.center,
+      inputFormatters: _inputFormatters[key],
+      style: const TextStyle(
+        color: AppColors.inputValue,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        filled: false,
+        isDense: true,
+      ),
+    );
+  }
+
   Widget _wrapWithBlurAction(String key, Widget child) {
     final action = _blurActions[key];
     if (action == null) return child;
@@ -537,35 +661,11 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
       child: Row(
         children: [
           Expanded(
-            child: TextFormField(
-              controller: _controllers[numKey],
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.inputValue,
-                fontWeight: FontWeight.w600,
-              ),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                filled: false,
-                isDense: true,
-              ),
-            ),
+            child: _wrapWithBlurAction(numKey, _buildInputWidget(numKey)),
           ),
           const Text('/', style: TextStyle(color: AppColors.label)),
           Expanded(
-            child: TextFormField(
-              controller: _controllers[denKey],
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.inputValue,
-                fontWeight: FontWeight.w600,
-              ),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                filled: false,
-                isDense: true,
-              ),
-            ),
+            child: _wrapWithBlurAction(denKey, _buildInputWidget(denKey)),
           ),
         ],
       ),

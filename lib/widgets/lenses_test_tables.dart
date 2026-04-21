@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../db_flutter/models.dart';
 import '../themes/app_theme.dart';
 import 'dropdown_field.dart';
@@ -13,6 +14,7 @@ class LensesTestTables extends StatelessWidget {
   final Map<String, TextEditingController>? controllers;
   final Map<String, List<String>> dropdownOptions;
   final Map<String, FieldAction> blurActions;
+  final Map<String, List<TextInputFormatter>> inputFormatters;
 
   const LensesTestTables({
     super.key,
@@ -21,6 +23,7 @@ class LensesTestTables extends StatelessWidget {
     this.controllers,
     this.dropdownOptions = const {},
     this.blurActions = const {},
+    this.inputFormatters = const {},
   });
 
   @override
@@ -480,23 +483,39 @@ class LensesTestTables extends StatelessWidget {
   }
 
   Widget _editableCell(String fieldKey) {
-    final field = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: TextFormField(
-        controller: controllers![fieldKey],
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: AppColors.inputValue,
-          fontWeight: FontWeight.w600,
-        ),
-        decoration: const InputDecoration(
-          isDense: true,
-          border: OutlineInputBorder(),
-          filled: false,
-        ),
-      ),
-    );
+    final opts = dropdownOptions[fieldKey];
     final action = blurActions[fieldKey];
+    final Widget field;
+    if (opts != null && opts.isNotEmpty) {
+      // Combo dropdown: free-text allowed, list populates the suggestions.
+      field = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: DropdownField(
+          compact: true,
+          options: opts,
+          controller: controllers![fieldKey],
+          inputFormatters: inputFormatters[fieldKey],
+        ),
+      );
+    } else {
+      field = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: TextFormField(
+          controller: controllers![fieldKey],
+          textAlign: TextAlign.center,
+          inputFormatters: inputFormatters[fieldKey],
+          style: const TextStyle(
+            color: AppColors.inputValue,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: const InputDecoration(
+            isDense: true,
+            border: OutlineInputBorder(),
+            filled: false,
+          ),
+        ),
+      );
+    }
     if (action == null || controllers == null) return field;
     return OnBlurAction(
       controllers: controllers!,
