@@ -5,7 +5,7 @@ import 'schema.dart';
 
 class DatabaseHelper {
   static final _databaseName = "OpticaSana.db";
-  static final _databaseVersion = 2;
+  static final _databaseVersion = 1;
 
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -37,7 +37,6 @@ class DatabaseHelper {
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
       onOpen: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -53,13 +52,6 @@ class DatabaseHelper {
       }
     }
     await _seedDropdownOptions(db);
-  }
-
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await db.execute(dropdownOptionsSql);
-      await _seedDropdownOptions(db);
-    }
   }
 
   Future<void> _seedDropdownOptions(Database db) async {
@@ -91,11 +83,11 @@ class DatabaseHelper {
       ('lenses_coated', 'MVP', 2),
     ];
     for (final (fieldKey, value, sortOrder) in seeds) {
-      await db.insert(
-        'dropdown_options',
-        {'field_key': fieldKey, 'value': value, 'sort_order': sortOrder},
-        conflictAlgorithm: ConflictAlgorithm.ignore,
-      );
+      await db.insert('dropdown_options', {
+        'field_key': fieldKey,
+        'value': value,
+        'sort_order': sortOrder,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
     }
   }
 }

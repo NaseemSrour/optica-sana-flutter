@@ -85,6 +85,22 @@ class LensesTestTables extends StatelessWidget {
         _buildPrescriptionTable(context),
         const SizedBox(height: 16),
 
+        // ── Solution ──────────────────────────────────────────────────────
+        TextFormField(
+          controller: controllers?['solution'],
+          enabled: isEditing,
+          style: TextStyle(
+            color: isEditing ? AppColors.inputValue : AppColors.displayValue,
+            fontWeight: isEditing ? FontWeight.w600 : FontWeight.normal,
+          ),
+          decoration: InputDecoration(
+            labelText: 'field_solution'.tr(),
+            border: const OutlineInputBorder(),
+            isDense: true,
+          ),
+        ),
+        const SizedBox(height: 12),
+
         // ── Notes ─────────────────────────────────────────────────────────
         TextFormField(
           controller: controllers?['notes'],
@@ -425,17 +441,13 @@ class LensesTestTables extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            '6/',
-            style: TextStyle(
-              color: Colors.white70,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
           Text(
-            displayText,
-            style: const TextStyle(color: AppColors.displayValue),
+            '6/',
+            style: AppTextStyles.display(
+              weight: FontWeight.w600,
+            ).copyWith(color: Colors.white70),
           ),
+          Text(displayText, style: AppTextStyles.display()),
         ],
       ),
     );
@@ -465,10 +477,7 @@ class LensesTestTables extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Text(
-          text,
-          style: const TextStyle(color: AppColors.displayValue),
-        ),
+        child: Text(text, style: AppTextStyles.display()),
       ),
     );
   }

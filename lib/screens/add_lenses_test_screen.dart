@@ -102,8 +102,8 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   static final _signedThreeDotTwoMask = [
     NumericMaskFormatter(intDigits: 3, fracDigits: 2, allowSign: true),
   ];
-  static final _twoDotTwoMask = [
-    NumericMaskFormatter(intDigits: 2, fracDigits: 2),
+  static final _signedTwoDotTwoMask = [
+    NumericMaskFormatter(intDigits: 2, fracDigits: 2, allowSign: true),
   ];
 
   late final Map<String, List<TextInputFormatter>> _inputFormatters = {
@@ -119,8 +119,8 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     'l_base_curve_denominator': _oneDotTwoMask,
     'r_lens_sph': _signedThreeDotTwoMask,
     'l_lens_sph': _signedThreeDotTwoMask,
-    'r_lens_cyl': _twoDotTwoMask,
-    'l_lens_cyl': _twoDotTwoMask,
+    'r_lens_cyl': _signedTwoDotTwoMask,
+    'l_lens_cyl': _signedTwoDotTwoMask,
   };
 
   /// Dropdown-list keys fetched at init time. Each provides free-text +
@@ -282,6 +282,8 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
                   const SizedBox(height: 20),
                   _buildPrescriptionTable(context),
                   const SizedBox(height: 20),
+                  _buildSolutionField(),
+                  const SizedBox(height: 12),
                   _buildNotesField(),
                 ],
               ),
@@ -316,10 +318,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         }
         return TextFormField(
           controller: _controllers[key],
-          style: const TextStyle(
-            color: AppColors.inputValue,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.input(),
           decoration: InputDecoration(
             labelText: labels[index],
             hintText: key.contains('date') ? 'hint_date'.tr() : null,
@@ -551,12 +550,20 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   Widget _buildNotesField() {
     return TextFormField(
       controller: _controllers['notes'],
-      style: const TextStyle(
-        color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
-      ),
+      style: AppTextStyles.input(),
       decoration: InputDecoration(labelText: 'field_notes'.tr(), isDense: true),
       maxLines: 3,
+    );
+  }
+
+  Widget _buildSolutionField() {
+    return TextFormField(
+      controller: _controllers['solution'],
+      style: AppTextStyles.input(),
+      decoration: InputDecoration(
+        labelText: 'field_solution'.tr(),
+        isDense: true,
+      ),
     );
   }
 
@@ -609,16 +616,6 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     );
   }
 
-  Widget _wrapWithBlurAction(String key, Widget child) {
-    final action = _blurActions[key];
-    if (action == null) return child;
-    return OnBlurAction(
-      controllers: _controllers,
-      action: action,
-      child: child,
-    );
-  }
-
   /// Builds the raw input widget for [key]: a compact [DropdownField] when
   /// options are registered for that field, otherwise a plain [TextFormField].
   /// Both variants share the same inputFormatters / styling.
@@ -645,6 +642,16 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         filled: false,
         isDense: true,
       ),
+    );
+  }
+
+  Widget _wrapWithBlurAction(String key, Widget child) {
+    final action = _blurActions[key];
+    if (action == null) return child;
+    return OnBlurAction(
+      controllers: _controllers,
+      action: action,
+      child: child,
     );
   }
 

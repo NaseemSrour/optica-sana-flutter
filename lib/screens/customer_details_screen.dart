@@ -107,6 +107,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       'sex': TextEditingController(text: widget.customer.sex),
       'tel_home': TextEditingController(text: widget.customer.telHome),
       'tel_mobile': TextEditingController(text: widget.customer.telMobile),
+      'tel_mobile_2': TextEditingController(text: widget.customer.telMobile2),
       'address': TextEditingController(text: widget.customer.address),
       'town': TextEditingController(text: widget.customer.town),
       'postal_code': TextEditingController(text: widget.customer.postalCode),
@@ -169,6 +170,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         sex: _controllers['sex']!.text,
         telHome: _controllers['tel_home']!.text,
         telMobile: _controllers['tel_mobile']!.text,
+        telMobile2: _controllers['tel_mobile_2']!.text,
         address: _controllers['address']!.text,
         town: _controllers['town']!.text,
         postalCode: _controllers['postal_code']!.text,
@@ -453,6 +455,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       'field_sex': 'sex',
       'field_tel_home': 'tel_home',
       'field_tel_mobile': 'tel_mobile',
+      'field_tel_mobile_2': 'tel_mobile_2',
       'field_address': 'address',
       'field_town': 'town',
       'field_postal_code': 'postal_code',
@@ -482,10 +485,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             keyboardType: TextInputType.number,
             inputFormatters: [DateMaskFormatter()],
             textDirection: ui.TextDirection.ltr,
-            style: const TextStyle(
-              color: AppColors.inputValue,
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTextStyles.input(),
             decoration: InputDecoration(
               labelText: entry.key.tr(),
               isDense: true,
@@ -509,10 +509,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
           textDirection: entry.value == 'birth_date'
               ? ui.TextDirection.ltr
               : null,
-          style: TextStyle(
-            color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
-            fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
-          ),
+          style: _isEditing ? AppTextStyles.input() : AppTextStyles.display(),
           decoration: InputDecoration(labelText: entry.key.tr(), isDense: true),
           validator: (value) {
             if ([

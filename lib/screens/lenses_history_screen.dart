@@ -91,8 +91,8 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
   static final _signedThreeDotTwoMask = [
     NumericMaskFormatter(intDigits: 3, fracDigits: 2, allowSign: true),
   ];
-  static final _twoDotTwoMask = [
-    NumericMaskFormatter(intDigits: 2, fracDigits: 2),
+  static final _signedTwoDotTwoMask = [
+    NumericMaskFormatter(intDigits: 2, fracDigits: 2, allowSign: true),
   ];
 
   late final Map<String, List<TextInputFormatter>> _inputFormatters = {
@@ -104,8 +104,8 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
     'l_diameter': _oneDotTwoMask,
     'r_lens_sph': _signedThreeDotTwoMask,
     'l_lens_sph': _signedThreeDotTwoMask,
-    'r_lens_cyl': _twoDotTwoMask,
-    'l_lens_cyl': _twoDotTwoMask,
+    'r_lens_cyl': _signedTwoDotTwoMask,
+    'l_lens_cyl': _signedTwoDotTwoMask,
   };
 
   /// Maps field controller keys to the dropdown list key that supplies

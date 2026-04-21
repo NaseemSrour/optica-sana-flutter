@@ -10,6 +10,7 @@ import 'package:optica_sana/screens/add_customer_screen.dart';
 import 'package:optica_sana/screens/app_info_screen.dart';
 import 'package:optica_sana/screens/backup_restore_screen.dart';
 import 'package:optica_sana/screens/manage_lists_screen.dart';
+import 'package:optica_sana/screens/settings_screen.dart';
 import 'package:optica_sana/screens/sound_manager_screen.dart';
 import 'package:optica_sana/screens/stats_screen.dart';
 import 'package:optica_sana/screens/birthday_search_screen.dart';
@@ -132,7 +133,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                     controller: _searchController,
                     focusNode: _searchFocusNode,
                     autofocus: true,
-                    style: const TextStyle(color: AppColors.inputValue),
+                    style: AppTextStyles.input(weight: FontWeight.normal),
                     decoration: InputDecoration(
                       labelText: 'search_label'.tr(),
                       prefixIcon: const Icon(
@@ -366,9 +367,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
               Navigator.pop(context);
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const StatsScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const StatsScreen()),
               );
             },
           ),
@@ -414,6 +413,18 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                 ),
               ],
             ),
+          ),
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.settings_outlined),
+            title: Text('drawer_settings'.tr()),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
           ),
           ListTile(
             dense: true,

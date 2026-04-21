@@ -336,24 +336,39 @@ class GlassesTestTable extends StatelessWidget {
       }
       return _vaHalfCell(vaKey, vaData);
     }
-    // L row: both_va top-right, l_va bottom-left (mirroring the DOS UI layout)
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            const Spacer(),
-            Expanded(child: _vaHalfCell('both_va', glassesTest?.bothVa ?? '')),
-          ],
-        ),
-        Container(height: 1, color: AppColors.tableBorder),
-        Row(
-          children: [
-            Expanded(child: _vaHalfCell(vaKey, vaData)),
-            const Spacer(),
-          ],
-        ),
-      ],
+    // L row: both_va top-right, l_va bottom-left (mirroring the DOS UI
+    // layout). In edit mode, focus traversal enters on l_va (left field in
+    // the row) and then moves up to both_va before leaving the cell.
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Spacer(),
+              Expanded(
+                child: FocusTraversalOrder(
+                  order: const NumericFocusOrder(2),
+                  child: _vaHalfCell('both_va', glassesTest?.bothVa ?? ''),
+                ),
+              ),
+            ],
+          ),
+          Container(height: 1, color: AppColors.tableBorder),
+          Row(
+            children: [
+              Expanded(
+                child: FocusTraversalOrder(
+                  order: const NumericFocusOrder(1),
+                  child: _vaHalfCell(vaKey, vaData),
+                ),
+              ),
+              const Spacer(),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -394,17 +409,13 @@ class GlassesTestTable extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            '6/',
-            style: TextStyle(
-              color: Colors.white70,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
           Text(
-            displayText,
-            style: const TextStyle(color: AppColors.displayValue),
+            '6/',
+            style: AppTextStyles.display(
+              weight: FontWeight.w600,
+            ).copyWith(color: Colors.white70),
           ),
+          Text(displayText, style: AppTextStyles.display()),
         ],
       ),
     );
@@ -422,33 +433,42 @@ class GlassesTestTable extends StatelessWidget {
         ],
       );
     }
-    // L row: sum_pd/near_pd top-right, l_pd bottom-left
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            const Spacer(),
-            Expanded(child: _buildSumNearPdCell()),
-          ],
-        ),
-        Container(height: 1, color: AppColors.tableBorder),
-        Row(
-          children: [
-            Expanded(
-              child: isEditing ? _editableCell(pdKey) : _pdHalfCell(pdData),
-            ),
-            const Spacer(),
-          ],
-        ),
-      ],
+    // L row: sum_pd/near_pd top-right, l_pd bottom-left. In edit mode the
+    // tab order enters on l_pd, then sum_pd, then near_pd.
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Spacer(),
+              Expanded(child: _buildSumNearPdCell()),
+            ],
+          ),
+          Container(height: 1, color: AppColors.tableBorder),
+          Row(
+            children: [
+              Expanded(
+                child: isEditing
+                    ? FocusTraversalOrder(
+                        order: const NumericFocusOrder(1),
+                        child: _editableCell(pdKey),
+                      )
+                    : _pdHalfCell(pdData),
+              ),
+              const Spacer(),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _pdHalfCell(String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
-      child: Text(text, style: const TextStyle(color: AppColors.displayValue)),
+      child: Text(text, style: AppTextStyles.display()),
     );
   }
 
@@ -456,12 +476,22 @@ class GlassesTestTable extends StatelessWidget {
     if (isEditing) {
       return Row(
         children: [
-          Expanded(child: _editableCell('sum_pd')),
+          Expanded(
+            child: FocusTraversalOrder(
+              order: const NumericFocusOrder(2),
+              child: _editableCell('sum_pd'),
+            ),
+          ),
           const Text(
             '/',
             style: TextStyle(color: AppColors.label, fontSize: 12),
           ),
-          Expanded(child: _editableCell('near_pd')),
+          Expanded(
+            child: FocusTraversalOrder(
+              order: const NumericFocusOrder(3),
+              child: _editableCell('near_pd'),
+            ),
+          ),
         ],
       );
     }
@@ -480,20 +510,16 @@ class GlassesTestTable extends StatelessWidget {
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    '6/',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
                   Text(
-                    text,
-                    style: const TextStyle(color: AppColors.displayValue),
+                    '6/',
+                    style: AppTextStyles.display(
+                      weight: FontWeight.w600,
+                    ).copyWith(color: Colors.white70),
                   ),
+                  Text(text, style: AppTextStyles.display()),
                 ],
               )
-            : Text(text, style: const TextStyle(color: AppColors.displayValue)),
+            : Text(text, style: AppTextStyles.display()),
       ),
     );
   }

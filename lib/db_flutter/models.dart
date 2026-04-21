@@ -9,6 +9,7 @@ class Customer {
   String? sex;
   String? telHome;
   String? telMobile;
+  String? telMobile2;
   String? address;
   String? town;
   String? postalCode;
@@ -31,6 +32,7 @@ class Customer {
     this.sex,
     this.telHome,
     this.telMobile,
+    this.telMobile2,
     this.address,
     this.town,
     this.postalCode,
@@ -55,6 +57,7 @@ class Customer {
       sex: map['sex'],
       telHome: map['tel_home'],
       telMobile: map['tel_mobile'],
+      telMobile2: map['tel_mobile_2'],
       address: map['address'],
       town: map['town'],
       postalCode: map['postal_code'],
@@ -80,6 +83,7 @@ class Customer {
       'sex': sex,
       'tel_home': telHome,
       'tel_mobile': telMobile,
+      'tel_mobile_2': telMobile2,
       'address': address,
       'town': town,
       'postal_code': postalCode,
@@ -398,6 +402,7 @@ class ContactLensesTest {
   String? lTint;
   String? lVa;
 
+  String? solution;
   String? notes;
 
   ContactLensesTest({
@@ -448,6 +453,7 @@ class ContactLensesTest {
     this.lMaterial,
     this.lTint,
     this.lVa,
+    this.solution,
     this.notes,
   });
 
@@ -506,6 +512,7 @@ class ContactLensesTest {
       lMaterial: map['l_material']?.toString(),
       lTint: map['l_tint']?.toString(),
       lVa: map['l_va']?.toString(),
+      solution: map['solution']?.toString(),
       notes: map['notes']?.toString(),
     );
   }
@@ -559,6 +566,7 @@ class ContactLensesTest {
       'l_material': lMaterial,
       'l_tint': lTint,
       'l_va': lVa,
+      'solution': solution,
       'notes': notes,
     };
   }

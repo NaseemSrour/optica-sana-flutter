@@ -32,6 +32,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   List<String> _sexOptions = [];
   final _telHomeController = TextEditingController();
   final _telMobileController = TextEditingController();
+  final _telMobile2Controller = TextEditingController();
   final _addressController = TextEditingController();
   final _townController = TextEditingController();
   final _postalCodeController = TextEditingController();
@@ -90,6 +91,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     _birthDateFocusNode.dispose();
     _telHomeController.dispose();
     _telMobileController.dispose();
+    _telMobile2Controller.dispose();
     _addressController.dispose();
     _townController.dispose();
     _postalCodeController.dispose();
@@ -114,6 +116,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         sex: _selectedSex ?? '',
         telHome: _telHomeController.text,
         telMobile: _telMobileController.text,
+        telMobile2: _telMobile2Controller.text,
         address: _addressController.text,
         town: _townController.text,
         postalCode: _postalCodeController.text,
@@ -287,6 +290,11 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           controller: _telMobileController,
           label: '📱  ${'field_tel_mobile'.tr()}',
         ),
+        const SizedBox(height: 12),
+        _field(
+          controller: _telMobile2Controller,
+          label: '📱  ${'field_tel_mobile_2'.tr()}',
+        ),
       ],
     );
   }
@@ -356,10 +364,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       controller: controller,
       focusNode: focusNode,
       textDirection: textDirection,
-      style: const TextStyle(
-        color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
-      ),
+      style: AppTextStyles.input(),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

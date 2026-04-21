@@ -43,42 +43,70 @@ class DropdownField extends StatefulWidget {
 }
 
 class _DropdownFieldState extends State<DropdownField> {
-  TextEditingController? _ownedController;
-
-  // Returns the external controller if provided, otherwise the one we created.
-  TextEditingController get _controller =>
-      widget.controller ?? _ownedController!;
+  // DropdownMenu must *always* be given its own controller. Sharing a
+  // controller with a widget that is being unmounted (e.g. a TextFormField
+  // in view mode) triggers "Cannot get renderObject of inactive element"
+  // because DropdownMenu.initState writes to the controller, which still
+  // has the old widget's EditableText as a listener.
+  late final TextEditingController _internal;
 
   @override
   void initState() {
     super.initState();
-    if (widget.controller == null) {
-      _ownedController = TextEditingController(text: _display(widget.value));
-    }
+    _internal = TextEditingController(text: _initialText());
+    _internal.addListener(_syncToExternal);
+    widget.controller?.addListener(_syncFromExternal);
   }
 
   @override
   void didUpdateWidget(DropdownField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Only sync if we own the controller — if the parent owns it, they manage it.
-    if (widget.controller != null) return;
-    if (oldWidget.value != widget.value) {
-      final displayed = _display(widget.value);
-      if (_controller.text != displayed) {
-        _controller.text = displayed ?? '';
-      }
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?.removeListener(_syncFromExternal);
+      widget.controller?.addListener(_syncFromExternal);
+    }
+    if (widget.controller == null && oldWidget.value != widget.value) {
+      final displayed = _display(widget.value) ?? '';
+      if (_internal.text != displayed) _internal.text = displayed;
     }
   }
 
   @override
   void dispose() {
-    _ownedController?.dispose(); // never dispose an external controller
+    widget.controller?.removeListener(_syncFromExternal);
+    _internal.removeListener(_syncToExternal);
+    _internal.dispose();
     super.dispose();
+  }
+
+  void _syncFromExternal() {
+    final ext = widget.controller!.text;
+    if (_internal.text != ext) _internal.text = ext;
+  }
+
+  void _syncToExternal() {
+    final ext = widget.controller;
+    if (ext == null) return;
+    if (ext.text != _internal.text) ext.text = _internal.text;
+  }
+
+  String _initialText() {
+    if (widget.controller != null) return widget.controller!.text;
+    return _display(widget.value) ?? '';
   }
 
   String? _display(String? raw) {
     if (raw == null || raw.isEmpty) return null;
     return widget.displayMapper != null ? widget.displayMapper!(raw) : raw;
+  }
+
+  void _handleSelected(String? v) {
+    widget.onChanged?.call(v);
+    if (widget.controller != null &&
+        v != null &&
+        widget.controller!.text != v) {
+      widget.controller!.text = v;
+    }
   }
 
   @override
@@ -92,64 +120,49 @@ class _DropdownFieldState extends State<DropdownField> {
         )
         .toList();
 
+    final initialSelection =
+        widget.value ??
+        (widget.controller?.text.isNotEmpty == true
+            ? widget.controller!.text
+            : null);
+
     if (widget.compact) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final w = widget.width ?? constraints.maxWidth;
-          return DropdownMenu<String>(
-            controller: _controller,
-            width: w.isFinite ? w : 90.0,
-            dropdownMenuEntries: entries,
-            inputFormatters: widget.inputFormatters,
-            initialSelection:
-                widget.value ??
-                (widget.controller?.text.isNotEmpty == true
-                    ? widget.controller!.text
-                    : null),
-            onSelected: (v) => widget.onChanged?.call(v),
-            menuStyle: const MenuStyle(
-              padding: WidgetStatePropertyAll(EdgeInsets.zero),
-            ),
-            inputDecorationTheme: const InputDecorationTheme(
-              isDense: true,
-              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-            ),
-            textStyle: const TextStyle(
-              fontSize: 12,
-              color: AppColors.inputValue,
-            ),
-          );
-        },
+      final w = widget.width ?? 90.0;
+      return DropdownMenu<String>(
+        controller: _internal,
+        width: w,
+        dropdownMenuEntries: entries,
+        inputFormatters: widget.inputFormatters,
+        initialSelection: initialSelection,
+        onSelected: _handleSelected,
+        menuStyle: const MenuStyle(
+          padding: WidgetStatePropertyAll(EdgeInsets.zero),
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+        ),
+        textStyle: const TextStyle(fontSize: 12, color: AppColors.inputValue),
       );
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final w = widget.width ?? constraints.maxWidth;
-        return DropdownMenu<String>(
-          controller: _controller,
-          width: w.isFinite ? w : 200,
-          label: widget.label != null ? Text(widget.label!) : null,
-          dropdownMenuEntries: entries,
-          inputFormatters: widget.inputFormatters,
-          initialSelection:
-              widget.value ??
-              (widget.controller?.text.isNotEmpty == true
-                  ? widget.controller!.text
-                  : null),
-          onSelected: (v) {
-            widget.onChanged?.call(v);
-          },
-          inputDecorationTheme: const InputDecorationTheme(
-            isDense: true,
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          ),
-          textStyle: const TextStyle(color: AppColors.inputValue),
-        );
-      },
+    return DropdownMenu<String>(
+      controller: _internal,
+      width: widget.width,
+      expandedInsets: widget.width == null ? EdgeInsets.zero : null,
+      label: widget.label != null ? Text(widget.label!) : null,
+      dropdownMenuEntries: entries,
+      inputFormatters: widget.inputFormatters,
+      initialSelection: initialSelection,
+      onSelected: _handleSelected,
+      inputDecorationTheme: const InputDecorationTheme(
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      ),
+      textStyle: AppTextStyles.input(weight: FontWeight.normal),
     );
   }
 }
