@@ -14,6 +14,7 @@ import 'package:optica_sana/db_flutter/models.dart';
 import '../widgets/app_notification.dart';
 import '../widgets/date_mask_formatter.dart';
 import '../widgets/dropdown_field.dart';
+import '../widgets/field_validation.dart';
 import '../widgets/glasses_test_table.dart';
 
 class CustomerDetailsScreen extends StatefulWidget {
@@ -39,14 +40,23 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
   GlassesTest? _latestGlassesTest;
   List<String> _sexOptions = [];
 
+  /// On-blur validation rules. Keys match controller keys. Runs both as each
+  /// field loses focus and again before saving so it cannot be bypassed.
+  late final Map<String, FieldCheck> _blurChecks = {
+    'ssn': requiredFieldCheck(fieldKey: 'ssn', errorTrKey: 'err_value'),
+    'fname': requiredFieldCheck(fieldKey: 'fname', errorTrKey: 'err_value'),
+    'lname': requiredFieldCheck(fieldKey: 'lname', errorTrKey: 'err_value'),
+  };
+
   // ── Date helpers ─────────────────────────────────────────────────────────────
 
   /// YYYY-MM-DD → DD/MM/YYYY (for display / edit)
   static String _toDisplayDate(String? raw) {
     if (raw == null || raw.isEmpty) return '';
     try {
-      return DateFormat('dd/MM/yyyy')
-          .format(DateFormat('yyyy-MM-dd').parse(raw));
+      return DateFormat(
+        'dd/MM/yyyy',
+      ).format(DateFormat('yyyy-MM-dd').parse(raw));
     } catch (_) {
       return '';
     }
@@ -58,8 +68,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
     final digits = display.replaceAll(RegExp(r'[^\d]'), '');
     if (digits.length < 8) return '';
     try {
-      return DateFormat('yyyy-MM-dd')
-          .format(DateFormat('dd/MM/yyyy').parse(display));
+      return DateFormat(
+        'yyyy-MM-dd',
+      ).format(DateFormat('dd/MM/yyyy').parse(display));
     } catch (_) {
       return '';
     }
@@ -74,8 +85,10 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         );
       }
     } else {
-      final digits = _controllers['birth_date']!.text
-          .replaceAll(RegExp(r'[^\d]'), '');
+      final digits = _controllers['birth_date']!.text.replaceAll(
+        RegExp(r'[^\d]'),
+        '',
+      );
       if (digits.isEmpty) _controllers['birth_date']!.clear();
     }
   }
@@ -89,7 +102,8 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
       'fname': TextEditingController(text: widget.customer.fname),
       'lname': TextEditingController(text: widget.customer.lname),
       'birth_date': TextEditingController(
-          text: _toDisplayDate(widget.customer.birthDate)),
+        text: _toDisplayDate(widget.customer.birthDate),
+      ),
       'sex': TextEditingController(text: widget.customer.sex),
       'tel_home': TextEditingController(text: widget.customer.telHome),
       'tel_mobile': TextEditingController(text: widget.customer.telMobile),
@@ -138,6 +152,12 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
 
   Future<void> _saveCustomer() async {
     if (_formKey.currentState!.validate()) {
+      final uniqueChecks = _blurChecks.values.toSet().toList();
+      final err = runChecks(_controllers, uniqueChecks);
+      if (err != null) {
+        AppNotification.show(context, err, type: NotificationType.error);
+        return;
+      }
       _formKey.currentState!.save();
 
       final updatedCustomer = Customer(
@@ -483,7 +503,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                 setState(() => _controllers['sex']!.text = v ?? ''),
           );
         }
-        return TextFormField(
+        final field = TextFormField(
           controller: _controllers[entry.value],
           enabled: _isEditing,
           textDirection: entry.value == 'birth_date'
@@ -493,18 +513,26 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
             fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
           ),
-          decoration: InputDecoration(
-            labelText: entry.key.tr(),
-            isDense: true,
-          ),
+          decoration: InputDecoration(labelText: entry.key.tr(), isDense: true),
           validator: (value) {
-            if (['field_ssn', 'field_fname', 'field_lname'].contains(entry.key)) {
+            if ([
+              'field_ssn',
+              'field_fname',
+              'field_lname',
+            ].contains(entry.key)) {
               if (value == null || value.isEmpty) {
                 return 'err_value'.tr();
               }
             }
             return null;
           },
+        );
+        final blurCheck = _isEditing ? _blurChecks[entry.value] : null;
+        if (blurCheck == null) return field;
+        return OnBlurValidator(
+          controllers: _controllers,
+          check: blurCheck,
+          child: field,
         );
       },
     );
@@ -517,7 +545,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
         title: Text('confirm_delete_title'.tr()),
         content: Text(
           'confirm_delete_customer_body'.tr(
-            namedArgs: {'name': '${widget.customer.fname} ${widget.customer.lname}'},
+            namedArgs: {
+              'name': '${widget.customer.fname} ${widget.customer.lname}',
+            },
           ),
         ),
         actions: [

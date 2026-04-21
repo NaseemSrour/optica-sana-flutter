@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import '../db_flutter/models.dart';
 import '../themes/app_theme.dart';
 import 'dropdown_field.dart';
+import 'field_validation.dart';
 
 class GlassesTestTable extends StatelessWidget {
   final GlassesTest? glassesTest;
   final bool isEditing;
   final Map<String, TextEditingController>? controllers;
   final Map<String, List<String>> dropdownOptions;
+  final Map<String, FieldCheck> blurChecks;
 
   const GlassesTestTable({
     super.key,
@@ -18,6 +20,7 @@ class GlassesTestTable extends StatelessWidget {
     this.isEditing = false,
     this.controllers,
     this.dropdownOptions = const {},
+    this.blurChecks = const {},
   });
 
   @override
@@ -61,7 +64,11 @@ class GlassesTestTable extends StatelessWidget {
                 )
               else
                 Text(
-                  'label_examiner_display'.tr(namedArgs: {'value': glassesTest!.examiner ?? 'label_na'.tr()}),
+                  'label_examiner_display'.tr(
+                    namedArgs: {
+                      'value': glassesTest!.examiner ?? 'label_na'.tr(),
+                    },
+                  ),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
             ],
@@ -353,7 +360,10 @@ class GlassesTestTable extends StatelessWidget {
           children: [
             const Text(
               '6/',
-              style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             Expanded(
               child: TextFormField(
@@ -381,9 +391,15 @@ class GlassesTestTable extends StatelessWidget {
         children: [
           const Text(
             '6/',
-            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Colors.white70,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          Text(displayText, style: const TextStyle(color: AppColors.displayValue)),
+          Text(
+            displayText,
+            style: const TextStyle(color: AppColors.displayValue),
+          ),
         ],
       ),
     );
@@ -436,7 +452,10 @@ class GlassesTestTable extends StatelessWidget {
       return Row(
         children: [
           Expanded(child: _editableCell('sum_pd')),
-          const Text('/', style: TextStyle(color: AppColors.label, fontSize: 12)),
+          const Text(
+            '/',
+            style: TextStyle(color: AppColors.label, fontSize: 12),
+          ),
           Expanded(child: _editableCell('near_pd')),
         ],
       );
@@ -469,10 +488,7 @@ class GlassesTestTable extends StatelessWidget {
                   ),
                 ],
               )
-            : Text(
-                text,
-                style: const TextStyle(color: AppColors.displayValue),
-              ),
+            : Text(text, style: const TextStyle(color: AppColors.displayValue)),
       ),
     );
   }
@@ -490,8 +506,12 @@ class GlassesTestTable extends StatelessWidget {
       );
     }
 
-    final isFv = fieldKey == 'r_fv' || fieldKey == 'l_fv' ||
-        fieldKey == 'r_va' || fieldKey == 'l_va' || fieldKey == 'both_va';
+    final isFv =
+        fieldKey == 'r_fv' ||
+        fieldKey == 'l_fv' ||
+        fieldKey == 'r_va' ||
+        fieldKey == 'l_va' ||
+        fieldKey == 'both_va';
 
     final field = TextFormField(
       controller: controllers![fieldKey],
@@ -510,7 +530,7 @@ class GlassesTestTable extends StatelessWidget {
     if (!isFv) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: field,
+        child: _wrapIfValidated(fieldKey, field),
       );
     }
 
@@ -526,9 +546,19 @@ class GlassesTestTable extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          Expanded(child: field),
+          Expanded(child: _wrapIfValidated(fieldKey, field)),
         ],
       ),
+    );
+  }
+
+  Widget _wrapIfValidated(String key, Widget child) {
+    final check = blurChecks[key];
+    if (check == null || controllers == null) return child;
+    return OnBlurValidator(
+      controllers: controllers!,
+      check: check,
+      child: child,
     );
   }
 }

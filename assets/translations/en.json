@@ -92,6 +92,7 @@
   "msg_lenses_save_error": "Error saving test: {error}",
   "msg_test_saved": "Test saved successfully!",
   "msg_test_save_error": "Error saving test: {error}",
+  "msg_axis_invalid": "Axis must be a whole number between 0 and 180 when a cylinder value is set.",
   "msg_error_loading_history": "Error loading history: {error}",
   "msg_no_glasses_history": "No glasses history found for this customer.",
   "msg_no_lenses_history": "No contact lenses history found for this customer.",
@@ -206,5 +207,12 @@
   "birthday_today": "Today!",
   "birthday_tomorrow": "Tomorrow",
   "birthday_in_days": "In {days} days",
-  "birthday_turns_age": "Turns {age}"
+  "birthday_turns_age": "Turns {age}",
+
+  "drawer_sound_manager": "Notification Sounds",
+  "sound_manager_title": "Notification Sounds",
+  "sound_manager_none": "None (Silent)",
+  "sound_manager_no_sounds": "No sound files configured.\nAdd .mp3 or .wav files to assets/sounds/\nand register them in SoundService.",
+  "sound_manager_current": "Current sound: {name}",
+  "sound_manager_preview": "Preview"
 }

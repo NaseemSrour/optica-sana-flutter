@@ -88,6 +88,7 @@
   "msg_glasses_fetched_error": "שגיאה בטעינת בדיקת משקפיים: {error}",
   "msg_glasses_saved": "בדיקת משקפיים חדשה נשמרה בהצלחה!",
   "msg_glasses_save_error": "שגיאה בשמירת בדיקה: {error}",
+  "msg_axis_invalid": "הציר חייב להיות מספר שלם בין 0 ל-180 כאשר מוגדר ערך לצילינדר.",
   "msg_lenses_saved": "בדיקת עדשות חדשה נשמרה בהצלחה!",
   "msg_lenses_save_error": "שגיאה בשמירת בדיקה: {error}",
   "msg_test_saved": "הבדיקה נשמרה בהצלחה!",
@@ -206,5 +207,12 @@
   "birthday_today": "היום!",
   "birthday_tomorrow": "מחר",
   "birthday_in_days": "בעוד {days} ימים",
-  "birthday_turns_age": "מלאות {age}"
+  "birthday_turns_age": "מלאות {age}",
+
+  "drawer_sound_manager": "צלילי התראה",
+  "sound_manager_title": "צלילי התראה",
+  "sound_manager_none": "ללא (שקט)",
+  "sound_manager_no_sounds": "לא הוגדרו קבצי שמע.\nהוסף קבצי .mp3 או .wav לתיקיית assets/sounds/\nורשום אותם ב-SoundService.",
+  "sound_manager_current": "צליל נוכחי: {name}",
+  "sound_manager_preview": "תצוגה מקדימה"
 }

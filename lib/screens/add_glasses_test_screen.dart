@@ -9,6 +9,7 @@ import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
 import '../widgets/dropdown_field.dart';
+import '../widgets/field_validation.dart';
 
 class AddGlassesTestScreen extends StatefulWidget {
   final Customer customer;
@@ -40,6 +41,33 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
     'lenses_coated',
     'examiner',
   };
+
+  /// Fields that run an on-blur validation. The key is the field whose focus
+  /// loss triggers the [FieldCheck]; the check itself may inspect any related
+  /// fields via the shared controllers map.
+  late final Map<String, FieldCheck> _blurChecks = {
+    'r_axis': glassesAxisCheck(axisKey: 'r_axis', cylinderKey: 'r_cylinder'),
+    'l_axis': glassesAxisCheck(axisKey: 'l_axis', cylinderKey: 'l_cylinder'),
+    'r_cylinder': glassesAxisCheck(
+      axisKey: 'r_axis',
+      cylinderKey: 'r_cylinder',
+    ),
+    'l_cylinder': glassesAxisCheck(
+      axisKey: 'l_axis',
+      cylinderKey: 'l_cylinder',
+    ),
+  };
+
+  /// Wraps [child] in an [OnBlurValidator] when [key] has a registered check.
+  Widget _wrapIfValidated(String key, Widget child) {
+    final check = _blurChecks[key];
+    if (check == null) return child;
+    return OnBlurValidator(
+      controllers: _controllers,
+      check: check,
+      child: child,
+    );
+  }
 
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
@@ -88,6 +116,16 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
 
   Future<void> _saveTest() async {
     if (_formKey.currentState!.validate()) {
+      // Run all registered blur checks up-front so the user cannot bypass
+      // them by hitting Ctrl+S without focusing the fields first. Use a Set
+      // over the values to avoid running the same shared check twice.
+      final uniqueChecks = _blurChecks.values.toSet().toList();
+      final err = runChecks(_controllers, uniqueChecks);
+      if (err != null) {
+        AppNotification.show(context, err, type: NotificationType.error);
+        return;
+      }
+
       final newMap = <String, dynamic>{
         'customer_id': widget.customer.id,
         'id': -1,
@@ -160,9 +198,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
       },
       actions: {
-        SaveIntent: CallbackAction<SaveIntent>(
-          onInvoke: (_) => _saveTest(),
-        ),
+        SaveIntent: CallbackAction<SaveIntent>(onInvoke: (_) => _saveTest()),
         BackIntent: CallbackAction<BackIntent>(
           onInvoke: (_) {
             Navigator.pop(context);
@@ -258,10 +294,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         color: AppColors.inputValue,
         fontWeight: FontWeight.w600,
       ),
-      decoration: InputDecoration(
-        labelText: 'field_notes'.tr(),
-        isDense: true,
-      ),
+      decoration: InputDecoration(labelText: 'field_notes'.tr(), isDense: true),
       maxLines: 3,
     );
   }
@@ -278,8 +311,10 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
               k != 'both_va' &&
               k != 'sum_pd' &&
               k != 'near_pd' &&
-              k != 'lenses_diameter_2' && // combined into lenses_diameter_1 cell
-              k != 'lenses_diameter_decentration_vertical', // combined into decentration_h cell
+              k !=
+                  'lenses_diameter_2' && // combined into lenses_diameter_1 cell
+              k !=
+                  'lenses_diameter_decentration_vertical', // combined into decentration_h cell
         )
         .toList();
 
@@ -334,8 +369,12 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
         border: TableBorder.all(color: AppColors.tableBorder),
         columnWidths: const {
           0: IntrinsicColumnWidth(),
-          6: FlexColumnWidth(1.5), // Base column wider for UP/DOWN/IN/OUT dropdown
-          7: FlexColumnWidth(2),   // VA column wider to fit staggered r_va/both_va/l_va
+          6: FlexColumnWidth(
+            1.5,
+          ), // Base column wider for UP/DOWN/IN/OUT dropdown
+          7: FlexColumnWidth(
+            2,
+          ), // VA column wider to fit staggered r_va/both_va/l_va
           8: FlexColumnWidth(4),
           10: FlexColumnWidth(2.5), // PD column wider to fit sum/near stagger
         },
@@ -624,14 +663,22 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       ),
       child: Row(
         children: [
-          const Text('R:',
-              style: TextStyle(
-                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          const Text(
+            'R:',
+            style: TextStyle(
+              color: AppColors.label,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           Expanded(child: _buildInlineField('r_iop')),
           const SizedBox(width: 16),
-          const Text('L:',
-              style: TextStyle(
-                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          const Text(
+            'L:',
+            style: TextStyle(
+              color: AppColors.label,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           Expanded(child: _buildInlineField('l_iop')),
         ],
       ),
@@ -649,17 +696,27 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       ),
       child: Row(
         children: [
-          const Text('H:',
-              style: TextStyle(
-                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          const Text(
+            'H:',
+            style: TextStyle(
+              color: AppColors.label,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           Expanded(
-              child: _buildInlineField('lenses_diameter_decentration_horizontal')),
+            child: _buildInlineField('lenses_diameter_decentration_horizontal'),
+          ),
           const SizedBox(width: 16),
-          const Text('V:',
-              style: TextStyle(
-                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          const Text(
+            'V:',
+            style: TextStyle(
+              color: AppColors.label,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           Expanded(
-              child: _buildInlineField('lenses_diameter_decentration_vertical')),
+            child: _buildInlineField('lenses_diameter_decentration_vertical'),
+          ),
         ],
       ),
     );
@@ -678,8 +735,12 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       );
     }
 
-    final isFv = key == 'r_fv' || key == 'l_fv' ||
-        key == 'r_va' || key == 'l_va' || key == 'both_va';
+    final isFv =
+        key == 'r_fv' ||
+        key == 'l_fv' ||
+        key == 'r_va' ||
+        key == 'l_va' ||
+        key == 'both_va';
 
     final field = TextFormField(
       controller: _controllers[key],
@@ -698,7 +759,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
     if (!isFv) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: field,
+        child: _wrapIfValidated(key, field),
       );
     }
 

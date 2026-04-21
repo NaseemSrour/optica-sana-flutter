@@ -10,6 +10,7 @@ import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
 import '../widgets/date_mask_formatter.dart';
 import '../widgets/dropdown_field.dart';
+import '../widgets/field_validation.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   final CustomerService customerService;
@@ -72,7 +73,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     final digits = date.replaceAll(RegExp(r'[^\d]'), '');
     if (digits.length < 8) return '';
     try {
-      return DateFormat('yyyy-MM-dd').format(DateFormat('dd/MM/yyyy').parse(date));
+      return DateFormat(
+        'yyyy-MM-dd',
+      ).format(DateFormat('dd/MM/yyyy').parse(date));
     } catch (_) {
       return '';
     }
@@ -156,7 +159,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
       },
       actions: {
-        SaveIntent: CallbackAction<SaveIntent>(onInvoke: (_) => _saveCustomer()),
+        SaveIntent: CallbackAction<SaveIntent>(
+          onInvoke: (_) => _saveCustomer(),
+        ),
         BackIntent: CallbackAction<BackIntent>(
           onInvoke: (_) {
             Navigator.pop(context);
@@ -176,7 +181,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           ],
         ),
         body: Container(
-          decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -220,7 +227,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               child: _field(
                 controller: _fnameController,
                 label: '👤  ${'field_fname'.tr()}',
-                validator: (v) => (v == null || v.isEmpty) ? 'err_fname'.tr() : null,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'err_fname'.tr() : null,
+                blurCheck: simpleRequiredCheck(
+                  controller: _fnameController,
+                  errorTrKey: 'err_fname',
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -228,7 +240,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               child: _field(
                 controller: _lnameController,
                 label: '👤  ${'field_lname'.tr()}',
-                validator: (v) => (v == null || v.isEmpty) ? 'err_lname'.tr() : null,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'err_lname'.tr() : null,
+                blurCheck: simpleRequiredCheck(
+                  controller: _lnameController,
+                  errorTrKey: 'err_lname',
+                ),
               ),
             ),
           ],
@@ -239,6 +256,10 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           label: '🪪  ${'field_ssn'.tr()}',
           keyboardType: TextInputType.number,
           validator: (v) => (v == null || v.isEmpty) ? 'err_ssn'.tr() : null,
+          blurCheck: simpleRequiredCheck(
+            controller: _ssnController,
+            errorTrKey: 'err_ssn',
+          ),
         ),
         const SizedBox(height: 12),
         _field(
@@ -257,9 +278,15 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           onChanged: (v) => setState(() => _selectedSex = v),
         ),
         const SizedBox(height: 12),
-        _field(controller: _telHomeController, label: '📞  ${'field_tel_home'.tr()}'),
+        _field(
+          controller: _telHomeController,
+          label: '📞  ${'field_tel_home'.tr()}',
+        ),
         const SizedBox(height: 12),
-        _field(controller: _telMobileController, label: '📱  ${'field_tel_mobile'.tr()}'),
+        _field(
+          controller: _telMobileController,
+          label: '📱  ${'field_tel_mobile'.tr()}',
+        ),
       ],
     );
   }
@@ -269,21 +296,39 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _field(controller: _addressController, label: '🏠  ${'field_address'.tr()}'),
+        _field(
+          controller: _addressController,
+          label: '🏠  ${'field_address'.tr()}',
+        ),
         const SizedBox(height: 12),
         _field(controller: _townController, label: '🏙️  ${'field_town'.tr()}'),
         const SizedBox(height: 12),
-        _field(controller: _postalCodeController, label: '📮  ${'field_postal_code'.tr()}'),
+        _field(
+          controller: _postalCodeController,
+          label: '📮  ${'field_postal_code'.tr()}',
+        ),
         const SizedBox(height: 12),
-        _field(controller: _statusController, label: '🏷️  ${'field_status'.tr()}'),
+        _field(
+          controller: _statusController,
+          label: '🏷️  ${'field_status'.tr()}',
+        ),
         const SizedBox(height: 12),
         _field(controller: _orgController, label: '🏢  ${'field_org'.tr()}'),
         const SizedBox(height: 12),
-        _field(controller: _occupationController, label: '💼  ${'field_occupation'.tr()}'),
+        _field(
+          controller: _occupationController,
+          label: '💼  ${'field_occupation'.tr()}',
+        ),
         const SizedBox(height: 12),
-        _field(controller: _hobbiesController, label: '🎨  ${'field_hobbies'.tr()}'),
+        _field(
+          controller: _hobbiesController,
+          label: '🎨  ${'field_hobbies'.tr()}',
+        ),
         const SizedBox(height: 12),
-        _field(controller: _refererController, label: '🔗  ${'field_referer'.tr()}'),
+        _field(
+          controller: _refererController,
+          label: '🔗  ${'field_referer'.tr()}',
+        ),
         const SizedBox(height: 4),
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
@@ -305,8 +350,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     ui.TextDirection? textDirection,
     int? maxLines = 1,
     String? Function(String?)? validator,
+    String? Function()? blurCheck,
   }) {
-    return TextFormField(
+    final field = TextFormField(
       controller: controller,
       focusNode: focusNode,
       textDirection: textDirection,
@@ -324,10 +370,11 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       maxLines: maxLines,
       validator: validator,
     );
+    if (blurCheck == null) return field;
+    return OnBlurValidator.simple(simpleCheck: blurCheck, child: field);
   }
 }
 
 class SaveIntent extends Intent {}
 
 class BackIntent extends Intent {}
-

@@ -8,6 +8,7 @@ import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
 import '../widgets/dropdown_field.dart';
+import '../widgets/field_validation.dart';
 import '../widgets/glasses_test_table.dart';
 
 class GlassesHistoryScreen extends StatefulWidget {
@@ -42,6 +43,19 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
     'segment_diameter',
     'lenses_manufacturer',
     'lenses_coated',
+  };
+
+  late final Map<String, FieldCheck> _blurChecks = {
+    'r_axis': glassesAxisCheck(axisKey: 'r_axis', cylinderKey: 'r_cylinder'),
+    'l_axis': glassesAxisCheck(axisKey: 'l_axis', cylinderKey: 'l_cylinder'),
+    'r_cylinder': glassesAxisCheck(
+      axisKey: 'r_axis',
+      cylinderKey: 'r_cylinder',
+    ),
+    'l_cylinder': glassesAxisCheck(
+      axisKey: 'l_axis',
+      cylinderKey: 'l_cylinder',
+    ),
   };
 
   @override
@@ -110,6 +124,13 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
 
   Future<void> _saveTest() async {
     if (!_isEditing || _tests.isEmpty) return;
+
+    final uniqueChecks = _blurChecks.values.toSet().toList();
+    final err = runChecks(_controllers, uniqueChecks);
+    if (err != null) {
+      AppNotification.show(context, err, type: NotificationType.error);
+      return;
+    }
 
     final updatedValues = <String, dynamic>{
       'id': _tests[_currentIndex].id,
@@ -403,6 +424,7 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
             isEditing: _isEditing,
             controllers: _controllers,
             dropdownOptions: _dropdownOptions,
+            blurChecks: _isEditing ? _blurChecks : const {},
           ),
           const SizedBox(height: 20),
           _buildAdditionalInfo(test),
@@ -435,9 +457,15 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
                   keyB: 'l_iop',
                 ),
                 const SizedBox(height: 16),
-                _buildDropdownOrTextField('glasses_role', 'field_glasses_role'.tr()),
+                _buildDropdownOrTextField(
+                  'glasses_role',
+                  'field_glasses_role'.tr(),
+                ),
                 const SizedBox(height: 16),
-                _buildDropdownOrTextField('lenses_material', 'field_lenses_material'.tr()),
+                _buildDropdownOrTextField(
+                  'lenses_material',
+                  'field_lenses_material'.tr(),
+                ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -475,7 +503,10 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
                   keyB: 'lenses_diameter_decentration_vertical',
                 ),
                 const SizedBox(height: 16),
-                _buildDropdownOrTextField('segment_diameter', 'field_segment_diam'.tr()),
+                _buildDropdownOrTextField(
+                  'segment_diameter',
+                  'field_segment_diam'.tr(),
+                ),
                 const SizedBox(height: 16),
                 _buildTextField('diagnosis', 'field_diagnosis'.tr()),
               ],
@@ -495,7 +526,10 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
                 const SizedBox(height: 16),
                 _buildTextField('lenses_color', 'field_lenses_color'.tr()),
                 const SizedBox(height: 16),
-                _buildDropdownOrTextField('lenses_coated', 'field_lenses_coated'.tr()),
+                _buildDropdownOrTextField(
+                  'lenses_coated',
+                  'field_lenses_coated'.tr(),
+                ),
                 const SizedBox(height: 16),
                 _buildTextField('catalog_num', 'field_catalog_num'.tr()),
                 const SizedBox(height: 16),
@@ -533,8 +567,11 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _buildTextField('notes', 'field_notes'.tr(),
-                    maxLines: _isEditing ? 5 : null),
+                _buildTextField(
+                  'notes',
+                  'field_notes'.tr(),
+                  maxLines: _isEditing ? 5 : null,
+                ),
               ],
             ),
           ),
@@ -562,8 +599,7 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
           value: _controllers[key]?.text.isEmpty ?? true
               ? null
               : _controllers[key]!.text,
-          onChanged: (v) =>
-              setState(() => _controllers[key]!.text = v ?? ''),
+          onChanged: (v) => setState(() => _controllers[key]!.text = v ?? ''),
           displayMapper: displayMapper,
         );
       }
@@ -584,22 +620,22 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
     required String keyB,
   }) {
     Widget inlineField(String key) => TextFormField(
-          controller: _controllers[key],
-          enabled: _isEditing,
-          style: TextStyle(
-            color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
-            fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
-          ),
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-            disabledBorder: InputBorder.none,
-            isDense: true,
-            contentPadding: EdgeInsets.zero,
-            filled: false,
-          ),
-        );
+      controller: _controllers[key],
+      enabled: _isEditing,
+      style: TextStyle(
+        color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
+        fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
+      ),
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+        isDense: true,
+        contentPadding: EdgeInsets.zero,
+        filled: false,
+      ),
+    );
 
     return InputDecorator(
       isEmpty: false,
@@ -611,14 +647,22 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
       ),
       child: Row(
         children: [
-          Text(prefixA,
-              style: const TextStyle(
-                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          Text(
+            prefixA,
+            style: const TextStyle(
+              color: AppColors.label,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           Expanded(child: inlineField(keyA)),
           const SizedBox(width: 16),
-          Text(prefixB,
-              style: const TextStyle(
-                  color: AppColors.label, fontWeight: FontWeight.bold)),
+          Text(
+            prefixB,
+            style: const TextStyle(
+              color: AppColors.label,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           Expanded(child: inlineField(keyB)),
         ],
       ),
