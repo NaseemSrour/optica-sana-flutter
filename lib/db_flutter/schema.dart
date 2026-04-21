@@ -131,8 +131,8 @@ CREATE TABLE IF NOT EXISTS glasses_tests (
     r_lens_axis TEXT,
     r_material TEXT,
     r_tint TEXT,
-    r_lens_va_numerator TEXT,
-    r_lens_va_denominator TEXT,
+    r_va TEXT,
+    both_va TEXT,
 
     l_lens_type TEXT,
     l_manufacturer TEXT,
@@ -145,8 +145,7 @@ CREATE TABLE IF NOT EXISTS glasses_tests (
     l_lens_axis TEXT,
     l_material TEXT,
     l_tint TEXT,
-    l_lens_va_numerator TEXT, -- "6/6", "6/9", etc.
-    l_lens_va_denominator TEXT,
+    l_va TEXT,
     notes TEXT,
 
 

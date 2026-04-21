@@ -42,12 +42,14 @@
   "field_dominant_eye": "العين السائدة",
   "field_r_iop": "ضغط العين اليمنى",
   "field_l_iop": "ضغط العين اليسرى",
+  "field_iop": "ض.ع. (IOP)",
   "field_glasses_role": "وظيفة النظارات",
   "field_lenses_material": "مادة العدسات",
   "field_lenses_diam_1": "قطر العدسات 1",
   "field_lenses_diam_2": "قطر العدسات 2",
   "field_lenses_dia_dec_h": "إزاحة عدسات أفقية",
   "field_lenses_dia_dec_v": "إزاحة عدسات رأسية",
+  "field_lenses_dia_dec": "إزاحة العدسات",
   "field_segment_diam": "قطر الجزء",
   "field_diagnosis": "التشخيص",
   "field_lenses_manufacturer": "مصنّع العدسات",
@@ -86,6 +88,7 @@
   "msg_glasses_fetched_error": "خطأ في جلب آخر فحص للنظارات: {error}",
   "msg_glasses_saved": "تم حفظ فحص النظارات الجديد بنجاح!",
   "msg_glasses_save_error": "خطأ في حفظ الفحص: {error}",
+  "msg_axis_invalid": "يجب أن تكون قيمة المحور عدداً صحيحاً بين 0 و180 عند تحديد قيمة للأسطوانة.",
   "msg_lenses_saved": "تم حفظ فحص العدسات اللاصقة الجديد بنجاح!",
   "msg_lenses_save_error": "خطأ في حفظ الفحص: {error}",
   "msg_test_saved": "تم حفظ الفحص بنجاح!",
@@ -204,5 +207,12 @@
   "birthday_today": "اليوم!",
   "birthday_tomorrow": "غداً",
   "birthday_in_days": "بعد {days} أيام",
-  "birthday_turns_age": "يبلغ {age}"
+  "birthday_turns_age": "يبلغ {age}",
+
+  "drawer_sound_manager": "أصوات الإشعارات",
+  "sound_manager_title": "أصوات الإشعارات",
+  "sound_manager_none": "بدون (صامت)",
+  "sound_manager_no_sounds": "لم يتم تهيئة ملفات صوتية.\nأضف ملفات .mp3 أو .wav إلى assets/sounds/\nوسجّلها في SoundService.",
+  "sound_manager_current": "الصوت الحالي: {name}",
+  "sound_manager_preview": "معاينة"
 }

@@ -381,8 +381,8 @@ class ContactLensesTest {
   String? rLensAxis;
   String? rMaterial;
   String? rTint;
-  String? rLensVaNumerator;
-  String? rLensVaDenominator;
+  String? rVa;
+  String? bothVa;
 
   // ===== Contact Lens Prescription (Left) =====
   String? lLensType;
@@ -396,8 +396,7 @@ class ContactLensesTest {
   String? lLensAxis;
   String? lMaterial;
   String? lTint;
-  String? lLensVaNumerator;
-  String? lLensVaDenominator;
+  String? lVa;
 
   String? notes;
 
@@ -435,8 +434,8 @@ class ContactLensesTest {
     this.rLensAxis,
     this.rMaterial,
     this.rTint,
-    this.rLensVaNumerator,
-    this.rLensVaDenominator,
+    this.rVa,
+    this.bothVa,
     this.lLensType,
     this.lManufacturer,
     this.lBrand,
@@ -448,8 +447,7 @@ class ContactLensesTest {
     this.lLensAxis,
     this.lMaterial,
     this.lTint,
-    this.lLensVaNumerator,
-    this.lLensVaDenominator,
+    this.lVa,
     this.notes,
   });
 
@@ -494,8 +492,8 @@ class ContactLensesTest {
       rLensAxis: map['r_lens_axis']?.toString(),
       rMaterial: map['r_material']?.toString(),
       rTint: map['r_tint']?.toString(),
-      rLensVaNumerator: map['r_lens_va_numerator']?.toString(),
-      rLensVaDenominator: map['r_lens_va_denominator']?.toString(),
+      rVa: map['r_va']?.toString(),
+      bothVa: map['both_va']?.toString(),
       lLensType: map['l_lens_type']?.toString(),
       lManufacturer: map['l_manufacturer']?.toString(),
       lBrand: map['l_brand']?.toString(),
@@ -507,8 +505,7 @@ class ContactLensesTest {
       lLensAxis: map['l_lens_axis']?.toString(),
       lMaterial: map['l_material']?.toString(),
       lTint: map['l_tint']?.toString(),
-      lLensVaNumerator: map['l_lens_va_numerator']?.toString(),
-      lLensVaDenominator: map['l_lens_va_denominator']?.toString(),
+      lVa: map['l_va']?.toString(),
       notes: map['notes']?.toString(),
     );
   }
@@ -548,8 +545,8 @@ class ContactLensesTest {
       'r_lens_axis': rLensAxis,
       'r_material': rMaterial,
       'r_tint': rTint,
-      'r_lens_va_numerator': rLensVaNumerator,
-      'r_lens_va_denominator': rLensVaDenominator,
+      'r_va': rVa,
+      'both_va': bothVa,
       'l_lens_type': lLensType,
       'l_manufacturer': lManufacturer,
       'l_brand': lBrand,
@@ -561,8 +558,7 @@ class ContactLensesTest {
       'l_lens_axis': lLensAxis,
       'l_material': lMaterial,
       'l_tint': lTint,
-      'l_lens_va_numerator': lLensVaNumerator,
-      'l_lens_va_denominator': lLensVaDenominator,
+      'l_va': lVa,
       'notes': notes,
     };
   }

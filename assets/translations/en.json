@@ -42,12 +42,14 @@
   "field_dominant_eye": "Dominant Eye",
   "field_r_iop": "R IOP",
   "field_l_iop": "L IOP",
+  "field_iop": "I.O.P.",
   "field_glasses_role": "Glasses Role",
   "field_lenses_material": "Lenses Material",
   "field_lenses_diam_1": "Lenses Diameter 1",
   "field_lenses_diam_2": "Lenses Diameter 2",
   "field_lenses_dia_dec_h": "Lenses Dia. Decent. H",
   "field_lenses_dia_dec_v": "Lenses Dia. Decent. V",
+  "field_lenses_dia_dec": "Lens Decentration",
   "field_segment_diam": "Segment Diameter",
   "field_diagnosis": "Diagnosis",
   "field_lenses_manufacturer": "Lenses Manufacturer",
@@ -90,6 +92,7 @@
   "msg_lenses_save_error": "Error saving test: {error}",
   "msg_test_saved": "Test saved successfully!",
   "msg_test_save_error": "Error saving test: {error}",
+  "msg_axis_invalid": "Axis must be a whole number between 0 and 180 when a cylinder value is set.",
   "msg_error_loading_history": "Error loading history: {error}",
   "msg_no_glasses_history": "No glasses history found for this customer.",
   "msg_no_lenses_history": "No contact lenses history found for this customer.",
@@ -204,5 +207,12 @@
   "birthday_today": "Today!",
   "birthday_tomorrow": "Tomorrow",
   "birthday_in_days": "In {days} days",
-  "birthday_turns_age": "Turns {age}"
+  "birthday_turns_age": "Turns {age}",
+
+  "drawer_sound_manager": "Notification Sounds",
+  "sound_manager_title": "Notification Sounds",
+  "sound_manager_none": "None (Silent)",
+  "sound_manager_no_sounds": "No sound files configured.\nAdd .mp3 or .wav files to assets/sounds/\nand register them in SoundService.",
+  "sound_manager_current": "Current sound: {name}",
+  "sound_manager_preview": "Preview"
 }

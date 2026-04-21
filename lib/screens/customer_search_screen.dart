@@ -10,6 +10,7 @@ import 'package:optica_sana/screens/add_customer_screen.dart';
 import 'package:optica_sana/screens/app_info_screen.dart';
 import 'package:optica_sana/screens/backup_restore_screen.dart';
 import 'package:optica_sana/screens/manage_lists_screen.dart';
+import 'package:optica_sana/screens/sound_manager_screen.dart';
 import 'package:optica_sana/screens/stats_screen.dart';
 import 'package:optica_sana/screens/birthday_search_screen.dart';
 import 'package:optica_sana/screens/customer_details_screen.dart';
@@ -339,6 +340,20 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ManageListsScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.music_note_outlined),
+            title: Text('drawer_sound_manager'.tr()),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SoundManagerScreen(),
                 ),
               );
             },

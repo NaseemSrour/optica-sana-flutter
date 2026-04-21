@@ -4,8 +4,10 @@ import 'package:flutter/services.dart';
 
 import '../db_flutter/models.dart';
 import '../flutter_services/customer_service.dart';
+import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
+import '../widgets/field_validation.dart';
 import '../widgets/lenses_test_tables.dart';
 
 class LensesHistoryScreen extends StatefulWidget {
@@ -30,12 +32,35 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
 
   final FocusNode _focusNode = FocusNode();
   late final Map<String, TextEditingController> _controllers;
+  final _dropdownOptions = <String, List<String>>{};
+
+  late final Map<String, FieldAction> _blurActions = {
+    'r_rH': composeActions([
+      averageAction(aKey: 'r_rH', bKey: 'r_rV', targetKey: 'r_aver'),
+      keratometryCylAction(hKey: 'r_rH', vKey: 'r_rV', targetKey: 'r_k_cyl'),
+    ]),
+    'r_rV': composeActions([
+      averageAction(aKey: 'r_rH', bKey: 'r_rV', targetKey: 'r_aver'),
+      keratometryCylAction(hKey: 'r_rH', vKey: 'r_rV', targetKey: 'r_k_cyl'),
+    ]),
+    'l_rH': composeActions([
+      averageAction(aKey: 'l_rH', bKey: 'l_rV', targetKey: 'l_aver'),
+      keratometryCylAction(hKey: 'l_rH', vKey: 'l_rV', targetKey: 'l_k_cyl'),
+    ]),
+    'l_rV': composeActions([
+      averageAction(aKey: 'l_rH', bKey: 'l_rV', targetKey: 'l_aver'),
+      keratometryCylAction(hKey: 'l_rH', vKey: 'l_rV', targetKey: 'l_k_cyl'),
+    ]),
+  };
 
   @override
   void initState() {
     super.initState();
     _controllers = {};
     _loadHistory();
+    DropdownOptionsService.instance.getOptions('examiner').then((opts) {
+      if (mounted) setState(() => _dropdownOptions['examiner'] = opts);
+    });
   }
 
   Future<void> _loadHistory() async {
@@ -78,17 +103,9 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
       text:
           '${currentTest.rBaseCurveNumerator ?? ''}/${currentTest.rBaseCurveDenominator ?? ''}',
     );
-    _controllers['r_lens_va'] = TextEditingController(
-      text:
-          '${currentTest.rLensVaNumerator ?? ''}/${currentTest.rLensVaDenominator ?? ''}',
-    );
     _controllers['l_base_curve'] = TextEditingController(
       text:
           '${currentTest.lBaseCurveNumerator ?? ''}/${currentTest.lBaseCurveDenominator ?? ''}',
-    );
-    _controllers['l_lens_va'] = TextEditingController(
-      text:
-          '${currentTest.lLensVaNumerator ?? ''}/${currentTest.lLensVaDenominator ?? ''}',
     );
   }
 
@@ -129,24 +146,12 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         updatedValues['r_base_curve_denominator'] = parts.length > 1
             ? parts[1]
             : '';
-      } else if (key == 'r_lens_va') {
-        final parts = controller.text.split('/');
-        updatedValues['r_lens_va_numerator'] = parts.isNotEmpty ? parts[0] : '';
-        updatedValues['r_lens_va_denominator'] = parts.length > 1
-            ? parts[1]
-            : '';
       } else if (key == 'l_base_curve') {
         final parts = controller.text.split('/');
         updatedValues['l_base_curve_numerator'] = parts.isNotEmpty
             ? parts[0]
             : '';
         updatedValues['l_base_curve_denominator'] = parts.length > 1
-            ? parts[1]
-            : '';
-      } else if (key == 'l_lens_va') {
-        final parts = controller.text.split('/');
-        updatedValues['l_lens_va_numerator'] = parts.isNotEmpty ? parts[0] : '';
-        updatedValues['l_lens_va_denominator'] = parts.length > 1
             ? parts[1]
             : '';
       } else {
@@ -434,6 +439,8 @@ class _LensesHistoryScreenState extends State<LensesHistoryScreen> {
         lensesTest: test,
         isEditing: _isEditing,
         controllers: _controllers,
+        dropdownOptions: _dropdownOptions,
+        blurActions: _isEditing ? _blurActions : const {},
       ),
     );
   }

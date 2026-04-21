@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +8,9 @@ import '../flutter_services/customer_service.dart';
 import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
+import '../widgets/date_mask_formatter.dart';
 import '../widgets/dropdown_field.dart';
+import '../widgets/field_validation.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   final CustomerService customerService;
@@ -23,6 +27,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _fnameController = TextEditingController();
   final _lnameController = TextEditingController();
   final _birthDateController = TextEditingController();
+  final _birthDateFocusNode = FocusNode();
   String? _selectedSex;
   List<String> _sexOptions = [];
   final _telHomeController = TextEditingController();
@@ -41,18 +46,38 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   @override
   void initState() {
     super.initState();
+    _birthDateFocusNode.addListener(_onBirthDateFocus);
     DropdownOptionsService.instance.getOptions('sex').then((opts) {
       if (mounted) setState(() => _sexOptions = opts);
     });
   }
 
+  void _onBirthDateFocus() {
+    if (_birthDateFocusNode.hasFocus) {
+      if (_birthDateController.text.isEmpty) {
+        _birthDateController.value = const TextEditingValue(
+          text: '__/__/____',
+          selection: TextSelection.collapsed(offset: 0),
+        );
+      }
+    } else {
+      // If no digits were entered, clear back to empty
+      final digits = _birthDateController.text.replaceAll(RegExp(r'[^\d]'), '');
+      if (digits.isEmpty) _birthDateController.clear();
+    }
+  }
+
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
+    // Reject incomplete masks (less than 8 digits entered)
+    final digits = date.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.length < 8) return '';
     try {
-      final inputDate = DateFormat('d/M/yyyy').parse(date);
-      return DateFormat('yyyy-MM-dd').format(inputDate);
-    } catch (e) {
-      return date;
+      return DateFormat(
+        'yyyy-MM-dd',
+      ).format(DateFormat('dd/MM/yyyy').parse(date));
+    } catch (_) {
+      return '';
     }
   }
 
@@ -62,6 +87,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     _fnameController.dispose();
     _lnameController.dispose();
     _birthDateController.dispose();
+    _birthDateFocusNode.dispose();
     _telHomeController.dispose();
     _telMobileController.dispose();
     _addressController.dispose();
@@ -133,7 +159,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
       },
       actions: {
-        SaveIntent: CallbackAction<SaveIntent>(onInvoke: (_) => _saveCustomer()),
+        SaveIntent: CallbackAction<SaveIntent>(
+          onInvoke: (_) => _saveCustomer(),
+        ),
         BackIntent: CallbackAction<BackIntent>(
           onInvoke: (_) {
             Navigator.pop(context);
@@ -153,7 +181,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           ],
         ),
         body: Container(
-          decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -197,7 +227,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               child: _field(
                 controller: _fnameController,
                 label: '👤  ${'field_fname'.tr()}',
-                validator: (v) => (v == null || v.isEmpty) ? 'err_fname'.tr() : null,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'err_fname'.tr() : null,
+                blurCheck: simpleRequiredCheck(
+                  controller: _fnameController,
+                  errorTrKey: 'err_fname',
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -205,7 +240,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               child: _field(
                 controller: _lnameController,
                 label: '👤  ${'field_lname'.tr()}',
-                validator: (v) => (v == null || v.isEmpty) ? 'err_lname'.tr() : null,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'err_lname'.tr() : null,
+                blurCheck: simpleRequiredCheck(
+                  controller: _lnameController,
+                  errorTrKey: 'err_lname',
+                ),
               ),
             ),
           ],
@@ -216,12 +256,19 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           label: '🪪  ${'field_ssn'.tr()}',
           keyboardType: TextInputType.number,
           validator: (v) => (v == null || v.isEmpty) ? 'err_ssn'.tr() : null,
+          blurCheck: simpleRequiredCheck(
+            controller: _ssnController,
+            errorTrKey: 'err_ssn',
+          ),
         ),
         const SizedBox(height: 12),
         _field(
           controller: _birthDateController,
+          focusNode: _birthDateFocusNode,
           label: '🎂  ${'field_birth_date'.tr()}',
-          hint: 'hint_date'.tr(),
+          keyboardType: TextInputType.number,
+          inputFormatters: [DateMaskFormatter()],
+          textDirection: ui.TextDirection.ltr,
         ),
         const SizedBox(height: 12),
         DropdownField(
@@ -231,9 +278,15 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           onChanged: (v) => setState(() => _selectedSex = v),
         ),
         const SizedBox(height: 12),
-        _field(controller: _telHomeController, label: '📞  ${'field_tel_home'.tr()}'),
+        _field(
+          controller: _telHomeController,
+          label: '📞  ${'field_tel_home'.tr()}',
+        ),
         const SizedBox(height: 12),
-        _field(controller: _telMobileController, label: '📱  ${'field_tel_mobile'.tr()}'),
+        _field(
+          controller: _telMobileController,
+          label: '📱  ${'field_tel_mobile'.tr()}',
+        ),
       ],
     );
   }
@@ -243,21 +296,39 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _field(controller: _addressController, label: '🏠  ${'field_address'.tr()}'),
+        _field(
+          controller: _addressController,
+          label: '🏠  ${'field_address'.tr()}',
+        ),
         const SizedBox(height: 12),
         _field(controller: _townController, label: '🏙️  ${'field_town'.tr()}'),
         const SizedBox(height: 12),
-        _field(controller: _postalCodeController, label: '📮  ${'field_postal_code'.tr()}'),
+        _field(
+          controller: _postalCodeController,
+          label: '📮  ${'field_postal_code'.tr()}',
+        ),
         const SizedBox(height: 12),
-        _field(controller: _statusController, label: '🏷️  ${'field_status'.tr()}'),
+        _field(
+          controller: _statusController,
+          label: '🏷️  ${'field_status'.tr()}',
+        ),
         const SizedBox(height: 12),
         _field(controller: _orgController, label: '🏢  ${'field_org'.tr()}'),
         const SizedBox(height: 12),
-        _field(controller: _occupationController, label: '💼  ${'field_occupation'.tr()}'),
+        _field(
+          controller: _occupationController,
+          label: '💼  ${'field_occupation'.tr()}',
+        ),
         const SizedBox(height: 12),
-        _field(controller: _hobbiesController, label: '🎨  ${'field_hobbies'.tr()}'),
+        _field(
+          controller: _hobbiesController,
+          label: '🎨  ${'field_hobbies'.tr()}',
+        ),
         const SizedBox(height: 12),
-        _field(controller: _refererController, label: '🔗  ${'field_referer'.tr()}'),
+        _field(
+          controller: _refererController,
+          label: '🔗  ${'field_referer'.tr()}',
+        ),
         const SizedBox(height: 4),
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
@@ -272,13 +343,19 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   Widget _field({
     required TextEditingController controller,
     required String label,
+    FocusNode? focusNode,
     String? hint,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    ui.TextDirection? textDirection,
     int? maxLines = 1,
     String? Function(String?)? validator,
+    String? Function()? blurCheck,
   }) {
-    return TextFormField(
+    final field = TextFormField(
       controller: controller,
+      focusNode: focusNode,
+      textDirection: textDirection,
       style: const TextStyle(
         color: AppColors.inputValue,
         fontWeight: FontWeight.w600,
@@ -289,9 +366,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         isDense: true,
       ),
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       maxLines: maxLines,
       validator: validator,
     );
+    if (blurCheck == null) return field;
+    return OnBlurValidator.simple(simpleCheck: blurCheck, child: field);
   }
 }
 

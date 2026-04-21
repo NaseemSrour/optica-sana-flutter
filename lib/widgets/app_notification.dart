@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../flutter_services/sound_service.dart';
+
 enum NotificationType { success, error, warning, info }
 
 /// Shows a colored banner at the top of the screen.
@@ -22,6 +24,7 @@ class AppNotification {
     _current?.remove();
     _current = null;
 
+    SoundService.instance.playNotification();
     final overlay = Overlay.of(context, rootOverlay: true);
     late OverlayEntry entry;
     entry = OverlayEntry(
