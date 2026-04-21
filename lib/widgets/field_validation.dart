@@ -8,6 +8,12 @@ import 'app_notification.dart';
 typedef FieldCheck =
     String? Function(Map<String, TextEditingController> controllers);
 
+/// An action that runs against the current field values on blur, typically
+/// to populate a computed field. Returning normally is enough — implementations
+/// are expected to mutate the target controller(s) directly.
+typedef FieldAction =
+    void Function(Map<String, TextEditingController> controllers);
+
 /// Wraps a form field so that when focus leaves any descendant, [check] runs
 /// against [controllers] and any returned error is shown via [AppNotification].
 ///
@@ -114,4 +120,150 @@ String? runChecks(
     if (err != null) return err;
   }
   return null;
+}
+
+// ─── On-blur auto-fill actions ────────────────────────────────────────────
+
+/// Wraps a form field so that when focus leaves any descendant, [action]
+/// runs against [controllers]. The action is expected to mutate one or more
+/// controllers in-place (typically to compute derived values).
+///
+/// Transparent to focus traversal and does not change the child's appearance.
+class OnBlurAction extends StatelessWidget {
+  final Map<String, TextEditingController> controllers;
+  final FieldAction action;
+  final Widget child;
+
+  const OnBlurAction({
+    super.key,
+    required this.controllers,
+    required this.action,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      onFocusChange: (hasFocus) {
+        if (hasFocus) return;
+        action(controllers);
+      },
+      child: child,
+    );
+  }
+}
+
+/// Composes multiple [FieldAction]s so a single field can trigger several
+/// recomputations on blur.
+FieldAction composeActions(List<FieldAction> actions) {
+  return (controllers) {
+    for (final a in actions) {
+      a(controllers);
+    }
+  };
+}
+
+// ─── Reusable action factories ────────────────────────────────────────────
+
+double? _parseNum(String? raw) {
+  if (raw == null) return null;
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return null;
+  return double.tryParse(trimmed.replaceAll(',', '.'));
+}
+
+/// Formats a computed numeric result so that whole values render as integers
+/// (e.g. `63` not `63.0`) and decimals are capped at [fractionDigits] without
+/// trailing zeros (e.g. `0.25`, `-1.2`).
+String _formatNum(double value, {int fractionDigits = 2}) {
+  if (!value.isFinite) return '';
+  if (value == value.roundToDouble()) {
+    return value.toStringAsFixed(0);
+  }
+  final fixed = value.toStringAsFixed(fractionDigits);
+  // Strip trailing zeros and a dangling decimal point.
+  return fixed.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+}
+
+/// Writes [newText] into [controller] only if it differs, preserving the
+/// field's existing empty state when the computed result is empty.
+void _setControllerText(TextEditingController? controller, String newText) {
+  if (controller == null) return;
+  if (controller.text == newText) return;
+  controller.text = newText;
+}
+
+/// Populates [targetKey] with the sum of [aKey] and [bKey] when both are
+/// filled. When only one is filled, writes that value × 2. When both are
+/// empty, clears the target.
+FieldAction sumOrDoubleAction({
+  required String aKey,
+  required String bKey,
+  required String targetKey,
+  int fractionDigits = 2,
+}) {
+  return (controllers) {
+    final a = _parseNum(controllers[aKey]?.text);
+    final b = _parseNum(controllers[bKey]?.text);
+
+    String result;
+    if (a != null && b != null) {
+      result = _formatNum(a + b, fractionDigits: fractionDigits);
+    } else if (a != null) {
+      result = _formatNum(a * 2, fractionDigits: fractionDigits);
+    } else if (b != null) {
+      result = _formatNum(b * 2, fractionDigits: fractionDigits);
+    } else {
+      result = '';
+    }
+    _setControllerText(controllers[targetKey], result);
+  };
+}
+
+/// Populates [targetKey] with the arithmetic mean of [aKey] and [bKey], but
+/// only when both fields parse as numbers. Leaves the target untouched
+/// otherwise (so a previously computed value is not overwritten on partial
+/// input).
+FieldAction averageAction({
+  required String aKey,
+  required String bKey,
+  required String targetKey,
+  int fractionDigits = 2,
+}) {
+  return (controllers) {
+    final a = _parseNum(controllers[aKey]?.text);
+    final b = _parseNum(controllers[bKey]?.text);
+    if (a == null || b == null) return;
+    _setControllerText(
+      controllers[targetKey],
+      _formatNum((a + b) / 2, fractionDigits: fractionDigits),
+    );
+  };
+}
+
+/// Populates [targetKey] with the keratometric cylinder computed from the
+/// horizontal and vertical radii:
+///
+///   targetKey = (337.5 / aKey) - (337.5 / bKey)   [in diopters]
+///
+/// Only runs when both radii parse as non-zero numbers.
+FieldAction keratometryCylAction({
+  required String hKey,
+  required String vKey,
+  required String targetKey,
+  int fractionDigits = 2,
+}) {
+  return (controllers) {
+    final rh = _parseNum(controllers[hKey]?.text);
+    final rv = _parseNum(controllers[vKey]?.text);
+    if (rh == null || rv == null) return;
+    if (rh == 0 || rv == 0) return;
+    final cyl = (337.5 / rh) - (337.5 / rv);
+    _setControllerText(
+      controllers[targetKey],
+      _formatNum(cyl, fractionDigits: fractionDigits),
+    );
+  };
 }

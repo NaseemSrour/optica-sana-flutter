@@ -58,6 +58,11 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
     ),
   };
 
+  late final Map<String, FieldAction> _blurActions = {
+    'r_pd': sumOrDoubleAction(aKey: 'r_pd', bKey: 'l_pd', targetKey: 'sum_pd'),
+    'l_pd': sumOrDoubleAction(aKey: 'r_pd', bKey: 'l_pd', targetKey: 'sum_pd'),
+  };
+
   @override
   void initState() {
     super.initState();
@@ -425,6 +430,7 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
             controllers: _controllers,
             dropdownOptions: _dropdownOptions,
             blurChecks: _isEditing ? _blurChecks : const {},
+            blurActions: _isEditing ? _blurActions : const {},
           ),
           const SizedBox(height: 20),
           _buildAdditionalInfo(test),

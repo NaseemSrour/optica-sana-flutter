@@ -58,15 +58,32 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
     ),
   };
 
+  /// Fields whose focus loss triggers a derived-value recomputation.
+  late final Map<String, FieldAction> _blurActions = {
+    'r_pd': sumOrDoubleAction(aKey: 'r_pd', bKey: 'l_pd', targetKey: 'sum_pd'),
+    'l_pd': sumOrDoubleAction(aKey: 'r_pd', bKey: 'l_pd', targetKey: 'sum_pd'),
+  };
+
   /// Wraps [child] in an [OnBlurValidator] when [key] has a registered check.
   Widget _wrapIfValidated(String key, Widget child) {
     final check = _blurChecks[key];
-    if (check == null) return child;
-    return OnBlurValidator(
-      controllers: _controllers,
-      check: check,
-      child: child,
-    );
+    final action = _blurActions[key];
+    Widget result = child;
+    if (action != null) {
+      result = OnBlurAction(
+        controllers: _controllers,
+        action: action,
+        child: result,
+      );
+    }
+    if (check != null) {
+      result = OnBlurValidator(
+        controllers: _controllers,
+        check: check,
+        child: result,
+      );
+    }
+    return result;
   }
 
   String _formatDateForDb(String date) {

@@ -9,6 +9,7 @@ import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
 import '../widgets/app_notification.dart';
 import '../widgets/dropdown_field.dart';
+import '../widgets/field_validation.dart';
 
 class AddLensesTestScreen extends StatefulWidget {
   final Customer customer;
@@ -29,6 +30,25 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   final _focusNode = FocusNode();
   final _controllers = <String, TextEditingController>{};
   final _dropdownOptions = <String, List<String>>{};
+
+  late final Map<String, FieldAction> _blurActions = {
+    'r_rH': composeActions([
+      averageAction(aKey: 'r_rH', bKey: 'r_rV', targetKey: 'r_aver'),
+      keratometryCylAction(hKey: 'r_rH', vKey: 'r_rV', targetKey: 'r_k_cyl'),
+    ]),
+    'r_rV': composeActions([
+      averageAction(aKey: 'r_rH', bKey: 'r_rV', targetKey: 'r_aver'),
+      keratometryCylAction(hKey: 'r_rH', vKey: 'r_rV', targetKey: 'r_k_cyl'),
+    ]),
+    'l_rH': composeActions([
+      averageAction(aKey: 'l_rH', bKey: 'l_rV', targetKey: 'l_aver'),
+      keratometryCylAction(hKey: 'l_rH', vKey: 'l_rV', targetKey: 'l_k_cyl'),
+    ]),
+    'l_rV': composeActions([
+      averageAction(aKey: 'l_rH', bKey: 'l_rV', targetKey: 'l_aver'),
+      keratometryCylAction(hKey: 'l_rH', vKey: 'l_rV', targetKey: 'l_k_cyl'),
+    ]),
+  };
 
   String _formatDateForDb(String date) {
     if (date.isEmpty) return '';
@@ -117,9 +137,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         LogicalKeySet(LogicalKeyboardKey.escape): BackIntent(),
       },
       actions: {
-        SaveIntent: CallbackAction<SaveIntent>(
-          onInvoke: (_) => _saveTest(),
-        ),
+        SaveIntent: CallbackAction<SaveIntent>(onInvoke: (_) => _saveTest()),
         BackIntent: CallbackAction<BackIntent>(
           onInvoke: (_) {
             Navigator.pop(context);
@@ -130,9 +148,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'title_add_lenses'.tr(
-              namedArgs: {'name': widget.customer.fname},
-            ),
+            'title_add_lenses'.tr(namedArgs: {'name': widget.customer.fname}),
           ),
           actions: [
             IconButton(
@@ -218,8 +234,10 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
             ),
           ),
           padding: const EdgeInsets.only(left: 8),
-          child: Text('section_keratometry'.tr(),
-              style: Theme.of(context).textTheme.titleMedium),
+          child: Text(
+            'section_keratometry'.tr(),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ),
         Directionality(
           textDirection: ui.TextDirection.ltr,
@@ -240,7 +258,15 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
 
   TableRow _buildKeratometryHeaders(BuildContext context) {
     final headers = [
-      'rH', 'rV', 'Aver', 'Cylinder', 'AxH', 'rT', 'rN', 'rI', 'Rs',
+      'rH',
+      'rV',
+      'Aver',
+      'Cylinder',
+      'AxH',
+      'rT',
+      'rN',
+      'rI',
+      'Rs',
     ];
     return TableRow(
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
@@ -252,17 +278,34 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   }
 
   List<String> _getRightKeratometryKeys() => [
-        'r_rH', 'r_rV', 'r_aver', 'r_k_cyl', 'r_axH',
-        'r_rT', 'r_rN', 'r_rI', 'r_rS',
-      ];
+    'r_rH',
+    'r_rV',
+    'r_aver',
+    'r_k_cyl',
+    'r_axH',
+    'r_rT',
+    'r_rN',
+    'r_rI',
+    'r_rS',
+  ];
 
   List<String> _getLeftKeratometryKeys() => [
-        'l_rH', 'l_rV', 'l_aver', 'l_k_cyl', 'l_axH',
-        'l_rT', 'l_rN', 'l_rI', 'l_rS',
-      ];
+    'l_rH',
+    'l_rV',
+    'l_aver',
+    'l_k_cyl',
+    'l_axH',
+    'l_rT',
+    'l_rN',
+    'l_rI',
+    'l_rS',
+  ];
 
   TableRow _buildKeratometryRow(
-      BuildContext context, String eye, List<String> keys) {
+    BuildContext context,
+    String eye,
+    List<String> keys,
+  ) {
     return TableRow(
       children: [
         _headerCell(context, eye, isRowHeader: true),
@@ -282,8 +325,10 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
             ),
           ),
           padding: const EdgeInsets.only(left: 8),
-          child: Text('section_lens_prescription'.tr(),
-              style: Theme.of(context).textTheme.titleMedium),
+          child: Text(
+            'section_lens_prescription'.tr(),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ),
         Directionality(
           textDirection: ui.TextDirection.ltr,
@@ -304,8 +349,17 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
 
   TableRow _buildPrescriptionHeaders(BuildContext context) {
     final headers = [
-      'Type', 'Manufacturer', 'Brand', 'Diam', 'B.C.',
-      'Sph', 'Cyl', 'Axis', 'Mat.', 'Tint', 'VA',
+      'Type',
+      'Manufacturer',
+      'Brand',
+      'Diam',
+      'B.C.',
+      'Sph',
+      'Cyl',
+      'Axis',
+      'Mat.',
+      'Tint',
+      'VA',
     ];
     return TableRow(
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
@@ -317,21 +371,38 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   }
 
   List<String> _getRightPrescriptionKeys() => [
-        'r_lens_type', 'r_manufacturer', 'r_brand', 'r_diameter',
-        'r_base_curve_numerator',
-        'r_lens_sph', 'r_lens_cyl', 'r_lens_axis', 'r_material', 'r_tint',
-        'r_va',
-      ];
+    'r_lens_type',
+    'r_manufacturer',
+    'r_brand',
+    'r_diameter',
+    'r_base_curve_numerator',
+    'r_lens_sph',
+    'r_lens_cyl',
+    'r_lens_axis',
+    'r_material',
+    'r_tint',
+    'r_va',
+  ];
 
   List<String> _getLeftPrescriptionKeys() => [
-        'l_lens_type', 'l_manufacturer', 'l_brand', 'l_diameter',
-        'l_base_curve_numerator',
-        'l_lens_sph', 'l_lens_cyl', 'l_lens_axis', 'l_material', 'l_tint',
-        'l_va',
-      ];
+    'l_lens_type',
+    'l_manufacturer',
+    'l_brand',
+    'l_diameter',
+    'l_base_curve_numerator',
+    'l_lens_sph',
+    'l_lens_cyl',
+    'l_lens_axis',
+    'l_material',
+    'l_tint',
+    'l_va',
+  ];
 
   TableRow _buildPrescriptionRow(
-      BuildContext context, String eye, List<String> keys) {
+    BuildContext context,
+    String eye,
+    List<String> keys,
+  ) {
     return TableRow(
       children: [
         _headerCell(context, eye, isRowHeader: true),
@@ -377,16 +448,16 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         color: AppColors.inputValue,
         fontWeight: FontWeight.w600,
       ),
-      decoration: InputDecoration(
-        labelText: 'field_notes'.tr(),
-        isDense: true,
-      ),
+      decoration: InputDecoration(labelText: 'field_notes'.tr(), isDense: true),
       maxLines: 3,
     );
   }
 
-  Widget _headerCell(BuildContext context, String text,
-      {bool isRowHeader = false}) {
+  Widget _headerCell(
+    BuildContext context,
+    String text, {
+    bool isRowHeader = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Center(
@@ -403,8 +474,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
   }
 
   Widget _buildTextFormFieldCell(String key) {
-    final hasSixPrefix =
-        key == 'r_va' || key == 'l_va' || key == 'both_va';
+    final hasSixPrefix = key == 'r_va' || key == 'l_va' || key == 'both_va';
 
     final field = TextFormField(
       controller: _controllers[key],
@@ -423,7 +493,7 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     if (!hasSixPrefix) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: field,
+        child: _wrapWithBlurAction(key, field),
       );
     }
 
@@ -433,11 +503,24 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
         children: [
           const Text(
             '6/',
-            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Colors.white70,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          Expanded(child: field),
+          Expanded(child: _wrapWithBlurAction(key, field)),
         ],
       ),
+    );
+  }
+
+  Widget _wrapWithBlurAction(String key, Widget child) {
+    final action = _blurActions[key];
+    if (action == null) return child;
+    return OnBlurAction(
+      controllers: _controllers,
+      action: action,
+      child: child,
     );
   }
 

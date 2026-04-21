@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import '../db_flutter/models.dart';
 import '../themes/app_theme.dart';
 import 'dropdown_field.dart';
+import 'field_validation.dart';
 
 class LensesTestTables extends StatelessWidget {
   final ContactLensesTest? lensesTest;
   final bool isEditing;
   final Map<String, TextEditingController>? controllers;
   final Map<String, List<String>> dropdownOptions;
+  final Map<String, FieldAction> blurActions;
 
   const LensesTestTables({
     super.key,
@@ -18,6 +20,7 @@ class LensesTestTables extends StatelessWidget {
     this.isEditing = false,
     this.controllers,
     this.dropdownOptions = const {},
+    this.blurActions = const {},
   });
 
   @override
@@ -109,7 +112,10 @@ class LensesTestTables extends StatelessWidget {
             ),
           ),
           padding: const EdgeInsets.only(left: 8),
-          child: Text('section_keratometry'.tr(), style: Theme.of(context).textTheme.titleMedium),
+          child: Text(
+            'section_keratometry'.tr(),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ),
         Directionality(
           textDirection: ui.TextDirection.ltr,
@@ -119,12 +125,14 @@ class LensesTestTables extends StatelessWidget {
             children: [
               _buildKeratometryHeaders(context),
               _buildKeratometryRow(
-                context, 'R',
+                context,
+                'R',
                 _getRightKeratometryData(),
                 _getRightKeratometryKeys(),
               ),
               _buildKeratometryRow(
-                context, 'L',
+                context,
+                'L',
                 _getLeftKeratometryData(),
                 _getLeftKeratometryKeys(),
               ),
@@ -160,8 +168,15 @@ class LensesTestTables extends StatelessWidget {
 
   // Keys must match ContactLensesTest.toMap() exactly
   List<String> _getRightKeratometryKeys() => [
-    'r_rH', 'r_rV', 'r_aver', 'r_k_cyl', 'r_axH',
-    'r_rT', 'r_rN', 'r_rI', 'r_rS',
+    'r_rH',
+    'r_rV',
+    'r_aver',
+    'r_k_cyl',
+    'r_axH',
+    'r_rT',
+    'r_rN',
+    'r_rI',
+    'r_rS',
   ];
 
   List<String> _getLeftKeratometryData() => [
@@ -177,8 +192,15 @@ class LensesTestTables extends StatelessWidget {
   ];
 
   List<String> _getLeftKeratometryKeys() => [
-    'l_rH', 'l_rV', 'l_aver', 'l_k_cyl', 'l_axH',
-    'l_rT', 'l_rN', 'l_rI', 'l_rS',
+    'l_rH',
+    'l_rV',
+    'l_aver',
+    'l_k_cyl',
+    'l_axH',
+    'l_rT',
+    'l_rN',
+    'l_rI',
+    'l_rS',
   ];
 
   TableRow _buildKeratometryRow(
@@ -190,8 +212,9 @@ class LensesTestTables extends StatelessWidget {
     return TableRow(
       children: [
         _headerCell(context, eye, isRowHeader: true),
-        ...List.generate(data.length, (i) =>
-          isEditing ? _editableCell(keys[i]) : _dataCell(data[i]),
+        ...List.generate(
+          data.length,
+          (i) => isEditing ? _editableCell(keys[i]) : _dataCell(data[i]),
         ),
       ],
     );
@@ -221,12 +244,14 @@ class LensesTestTables extends StatelessWidget {
             children: [
               _buildPrescriptionHeaders(context),
               _buildPrescriptionRow(
-                context, 'R',
+                context,
+                'R',
                 _getRightPrescriptionData(),
                 _getRightPrescriptionKeys(),
               ),
               _buildPrescriptionRow(
-                context, 'L',
+                context,
+                'L',
                 _getLeftPrescriptionData(),
                 _getLeftPrescriptionKeys(),
               ),
@@ -239,8 +264,17 @@ class LensesTestTables extends StatelessWidget {
 
   TableRow _buildPrescriptionHeaders(BuildContext context) {
     final headers = [
-      'Type', 'Manuf.', 'Brand', 'Diam', 'B.C.',
-      'Sph', 'Cyl', 'Ax.', 'Mat.', 'Tint', 'VA',
+      'Type',
+      'Manuf.',
+      'Brand',
+      'Diam',
+      'B.C.',
+      'Sph',
+      'Cyl',
+      'Ax.',
+      'Mat.',
+      'Tint',
+      'VA',
     ];
     return TableRow(
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
@@ -266,9 +300,16 @@ class LensesTestTables extends StatelessWidget {
   ];
 
   List<String> _getRightPrescriptionKeys() => [
-    'r_lens_type', 'r_manufacturer', 'r_brand', 'r_diameter',
+    'r_lens_type',
+    'r_manufacturer',
+    'r_brand',
+    'r_diameter',
     'r_base_curve',
-    'r_lens_sph', 'r_lens_cyl', 'r_lens_axis', 'r_material', 'r_tint',
+    'r_lens_sph',
+    'r_lens_cyl',
+    'r_lens_axis',
+    'r_material',
+    'r_tint',
     'r_va',
   ];
 
@@ -287,9 +328,16 @@ class LensesTestTables extends StatelessWidget {
   ];
 
   List<String> _getLeftPrescriptionKeys() => [
-    'l_lens_type', 'l_manufacturer', 'l_brand', 'l_diameter',
+    'l_lens_type',
+    'l_manufacturer',
+    'l_brand',
+    'l_diameter',
     'l_base_curve',
-    'l_lens_sph', 'l_lens_cyl', 'l_lens_axis', 'l_material', 'l_tint',
+    'l_lens_sph',
+    'l_lens_cyl',
+    'l_lens_axis',
+    'l_material',
+    'l_tint',
     'l_va',
   ];
 
@@ -345,7 +393,10 @@ class LensesTestTables extends StatelessWidget {
           children: [
             const Text(
               '6/',
-              style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             Expanded(
               child: TextFormField(
@@ -373,15 +424,25 @@ class LensesTestTables extends StatelessWidget {
         children: [
           const Text(
             '6/',
-            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Colors.white70,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          Text(displayText, style: const TextStyle(color: AppColors.displayValue)),
+          Text(
+            displayText,
+            style: const TextStyle(color: AppColors.displayValue),
+          ),
         ],
       ),
     );
   }
 
-  Widget _headerCell(BuildContext context, String text, {bool isRowHeader = false}) {
+  Widget _headerCell(
+    BuildContext context,
+    String text, {
+    bool isRowHeader = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Center(
@@ -401,13 +462,16 @@ class LensesTestTables extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Text(text, style: const TextStyle(color: AppColors.displayValue)),
+        child: Text(
+          text,
+          style: const TextStyle(color: AppColors.displayValue),
+        ),
       ),
     );
   }
 
   Widget _editableCell(String fieldKey) {
-    return Padding(
+    final field = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: TextFormField(
         controller: controllers![fieldKey],
@@ -422,6 +486,13 @@ class LensesTestTables extends StatelessWidget {
           filled: false,
         ),
       ),
+    );
+    final action = blurActions[fieldKey];
+    if (action == null || controllers == null) return field;
+    return OnBlurAction(
+      controllers: controllers!,
+      action: action,
+      child: field,
     );
   }
 }

@@ -13,6 +13,7 @@ class GlassesTestTable extends StatelessWidget {
   final Map<String, TextEditingController>? controllers;
   final Map<String, List<String>> dropdownOptions;
   final Map<String, FieldCheck> blurChecks;
+  final Map<String, FieldAction> blurActions;
 
   const GlassesTestTable({
     super.key,
@@ -21,6 +22,7 @@ class GlassesTestTable extends StatelessWidget {
     this.controllers,
     this.dropdownOptions = const {},
     this.blurChecks = const {},
+    this.blurActions = const {},
   });
 
   @override
@@ -554,11 +556,23 @@ class GlassesTestTable extends StatelessWidget {
 
   Widget _wrapIfValidated(String key, Widget child) {
     final check = blurChecks[key];
-    if (check == null || controllers == null) return child;
-    return OnBlurValidator(
-      controllers: controllers!,
-      check: check,
-      child: child,
-    );
+    final action = blurActions[key];
+    if (controllers == null) return child;
+    Widget result = child;
+    if (action != null) {
+      result = OnBlurAction(
+        controllers: controllers!,
+        action: action,
+        child: result,
+      );
+    }
+    if (check != null) {
+      result = OnBlurValidator(
+        controllers: controllers!,
+        check: check,
+        child: result,
+      );
+    }
+    return result;
   }
 }
