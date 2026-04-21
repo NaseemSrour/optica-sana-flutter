@@ -127,23 +127,45 @@ class _DropdownFieldState extends State<DropdownField> {
             : null);
 
     if (widget.compact) {
-      final w = widget.width ?? 90.0;
+      // Shrink the trailing dropdown arrow so the input text has more room
+      // inside narrow table cells. Without this, DropdownMenu reserves ~48px
+      // for the arrow and clips the value on cells that are only ~90px wide.
+      const smallArrow = Padding(
+        padding: EdgeInsets.only(right: 4),
+        child: Icon(Icons.arrow_drop_down, size: 18, color: AppColors.label),
+      );
+      const smallArrowUp = Padding(
+        padding: EdgeInsets.only(right: 4),
+        child: Icon(Icons.arrow_drop_up, size: 18, color: AppColors.label),
+      );
       return DropdownMenu<String>(
         controller: _internal,
-        width: w,
+        width: widget.width,
+        // When no explicit width is given, stretch to the parent's width so
+        // the trailing arrow sits at the right edge of the table cell instead
+        // of floating in the middle with empty margins on either side.
+        expandedInsets: widget.width == null ? EdgeInsets.zero : null,
         dropdownMenuEntries: entries,
         inputFormatters: widget.inputFormatters,
         initialSelection: initialSelection,
         onSelected: _handleSelected,
+        trailingIcon: smallArrow,
+        selectedTrailingIcon: smallArrowUp,
         menuStyle: const MenuStyle(
           padding: WidgetStatePropertyAll(EdgeInsets.zero),
         ),
         inputDecorationTheme: const InputDecorationTheme(
           isDense: true,
-          contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          contentPadding: EdgeInsets.fromLTRB(4, 4, 0, 4),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
+          suffixIconConstraints: BoxConstraints(
+            minWidth: 22,
+            minHeight: 22,
+            maxWidth: 22,
+            maxHeight: 28,
+          ),
         ),
         textStyle: const TextStyle(fontSize: 12, color: AppColors.inputValue),
       );
