@@ -49,9 +49,11 @@ class CustomerService {
   }
 
   Future<void> updateCustomer(Customer customer) async {
+    /* SKIP FOR NOW 
     if (customer.id == null) {
       throw Exception("Customer does not contain an ID!");
     }
+    */
     final existingCustomer = await _customerRepo.getCustomer(customer.id!);
     if (existingCustomer == null) {
       throw Exception("Customer does not exist in DB!");
