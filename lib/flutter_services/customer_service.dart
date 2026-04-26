@@ -24,6 +24,10 @@ class CustomerService {
     return await _customerRepo.searchByNameOrSsn(query.trim());
   }
 
+  Future<List<Customer>> searchCustomersByNameOrSSNOrPhone(String query) async {
+    return await _customerRepo.searchByNameOrSsnOrPhone(query.trim());
+  }
+
   Future<Customer?> getCustomerBySSN(String customerSSN) {
     if (customerSSN.isEmpty) {
       throw Exception("ID must be provided!");
