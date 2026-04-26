@@ -246,11 +246,22 @@ class AppTheme {
 class AppTextStyles {
   AppTextStyles._();
 
+  /// Weight applied to actively-edited "user-typed value" text. Becomes
+  /// extra-bold when the user has enabled the bold-input setting so values
+  /// are easier to read at a glance.
+  static FontWeight get inputWeight =>
+      AppSettings.instance.inputBold ? FontWeight.w900 : FontWeight.w600;
+
+  /// Weight applied to read-only "saved value" text in history screens.
+  /// Goes from normal to bold when the bold-input setting is on.
+  static FontWeight get displayWeight =>
+      AppSettings.instance.inputBold ? FontWeight.bold : FontWeight.normal;
+
   /// Amber "user-typed value" style, sized by [AppSettings.inputFontSize].
-  static TextStyle input({FontWeight weight = FontWeight.w600}) {
+  static TextStyle input({FontWeight? weight}) {
     return TextStyle(
       color: AppColors.inputValue,
-      fontWeight: weight,
+      fontWeight: weight ?? inputWeight,
       fontSize: AppSettings.instance.inputFontSize,
     );
   }
@@ -258,10 +269,10 @@ class AppTextStyles {
   /// White "read-only display value" style, sized by
   /// [AppSettings.inputFontSize] so that values the user has already entered
   /// remain easy on the eyes when viewing saved records.
-  static TextStyle display({FontWeight weight = FontWeight.normal}) {
+  static TextStyle display({FontWeight? weight}) {
     return TextStyle(
       color: AppColors.displayValue,
-      fontWeight: weight,
+      fontWeight: weight ?? displayWeight,
       fontSize: AppSettings.instance.inputFontSize,
     );
   }

@@ -80,6 +80,28 @@ class CustomerRepo {
     return maps.map((map) => Customer.fromMap(map)).toList();
   }
 
+  Future<List<Customer>> searchByNameOrSsnOrPhone(String query) async {
+    final db = await _dbHelper.database;
+    final words = query.trim().split(' ').where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) {
+      return [];
+    }
+
+    final conditions = words
+        .map(
+          (_) =>
+              '(fname LIKE ? OR lname LIKE ? OR ssn LIKE ? OR tel_mobile LIKE ? OR tel_mobile_2 LIKE ?)',
+        )
+        .join(' AND ');
+    final params = words
+        .expand((w) => ['%$w%', '%$w%', '%$w%', '%$w%', '%$w%'])
+        .toList();
+
+    final sql = 'SELECT * FROM customers WHERE $conditions';
+    final maps = await db.rawQuery(sql, params);
+    return maps.map((map) => Customer.fromMap(map)).toList();
+  }
+
   Future<bool> updateCustomer(Customer customer) async {
     final db = await _dbHelper.database;
     final result = await db.update(

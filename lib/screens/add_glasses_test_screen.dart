@@ -246,32 +246,6 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
     }
   }
 
-  String _labelFor(String key) {
-    const map = {
-      'dominant_eye': 'field_dominant_eye',
-      'glasses_role': 'field_glasses_role',
-      'lenses_material': 'field_lenses_material',
-      'lenses_diameter_1': 'field_lenses_diam_1',
-      'lenses_diameter_2': 'field_lenses_diam_2',
-      'lenses_diameter_decentration_horizontal': 'field_lenses_dia_dec_h',
-      'lenses_diameter_decentration_vertical': 'field_lenses_dia_dec_v',
-      'segment_diameter': 'field_segment_diam',
-      'diagnosis': 'field_diagnosis',
-      'lenses_manufacturer': 'field_lenses_manufacturer',
-      'lenses_color': 'field_lenses_color',
-      'lenses_coated': 'field_lenses_coated',
-      'catalog_num': 'field_catalog_num',
-      'frame_manufacturer': 'field_frame_manufacturer',
-      'frame_supplier': 'field_frame_supplier',
-      'frame_model': 'field_frame_model',
-      'frame_size': 'field_frame_size',
-      'frame_bar_length': 'field_frame_bar_length',
-      'frame_color': 'field_frame_color',
-    };
-    final trKey = map[key];
-    return trKey != null ? trKey.tr() : key.replaceAll('_', ' ').toUpperCase();
-  }
-
   @override
   Widget build(BuildContext context) {
     return FocusableActionDetector(
@@ -322,9 +296,7 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
                   const SizedBox(height: 20),
                   _buildEyeDataTable(),
                   const SizedBox(height: 20),
-                  _buildNonEyeDataFields(),
-                  const SizedBox(height: 20),
-                  _buildNotesField(),
+                  _buildAdditionalInfo(),
                 ],
               ),
             ),
@@ -369,72 +341,249 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
     );
   }
 
-  Widget _buildNotesField() {
-    return TextFormField(
-      controller: _controllers['notes'],
-      style: AppTextStyles.input(),
-      decoration: InputDecoration(labelText: 'field_notes'.tr(), isDense: true),
-      maxLines: 3,
+  Widget _buildAdditionalInfo() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Each column is its own FocusTraversalGroup so Tab exhausts all
+        // fields in the left column before jumping to the right column.
+        Expanded(
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Column(
+              children: [
+                _buildDropdownOrTextField(
+                  'dominant_eye',
+                  'field_dominant_eye'.tr(),
+                ),
+                const SizedBox(height: 16),
+                _buildPrefixPairField(
+                  label: 'field_iop'.tr(),
+                  prefixA: 'R:',
+                  keyA: 'r_iop',
+                  prefixB: 'L:',
+                  keyB: 'l_iop',
+                ),
+                const SizedBox(height: 16),
+                _buildDropdownOrTextField(
+                  'glasses_role',
+                  'field_glasses_role'.tr(),
+                ),
+                const SizedBox(height: 16),
+                _buildDropdownOrTextField(
+                  'lenses_material',
+                  'field_lenses_material'.tr(),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        'lenses_diameter_1',
+                        'field_lenses_diam_1'.tr(),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '/',
+                        style: TextStyle(
+                          color: AppColors.label,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildTextField(
+                        'lenses_diameter_2',
+                        'field_lenses_diam_2'.tr(),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildPrefixPairField(
+                  label: 'field_lenses_dia_dec'.tr(),
+                  prefixA: 'H:',
+                  keyA: 'lenses_diameter_decentration_horizontal',
+                  prefixB: 'V:',
+                  keyB: 'lenses_diameter_decentration_vertical',
+                ),
+                const SizedBox(height: 16),
+                _buildDropdownOrTextField(
+                  'segment_diameter',
+                  'field_segment_diam'.tr(),
+                ),
+                const SizedBox(height: 16),
+                _buildDropdownOrTextField(
+                  'lenses_manufacturer',
+                  'field_lenses_manufacturer'.tr(),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        'lenses_color',
+                        'field_lenses_color'.tr(),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '/',
+                        style: TextStyle(
+                          color: AppColors.label,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildDropdownOrTextField(
+                        'lenses_coated',
+                        'field_lenses_coated'.tr(),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Column(
+              children: [
+                _buildTextField('catalog_num', 'field_catalog_num'.tr()),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  'frame_manufacturer',
+                  'field_frame_manufacturer'.tr(),
+                ),
+                const SizedBox(height: 16),
+                _buildTextField('frame_supplier', 'field_frame_supplier'.tr()),
+                const SizedBox(height: 16),
+                _buildTextField('frame_model', 'field_frame_model'.tr()),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        'frame_size',
+                        'field_frame_size'.tr(),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildTextField(
+                        'frame_bar_length',
+                        'field_frame_bar_length'.tr(),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildTextField(
+                        'frame_color',
+                        'field_frame_color'.tr(),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildTextField('diagnosis', 'field_diagnosis'.tr()),
+                const SizedBox(height: 16),
+                _buildTextField('notes', 'field_notes'.tr(), maxLines: 5),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildNonEyeDataFields() {
-    final nonEyeDataKeys = _controllers.keys
-        .where(
-          (k) =>
-              // r_iop is re-included below even though it starts with r_
-              (!k.startsWith('r_') && !k.startsWith('l_') || k == 'r_iop') &&
-              k != 'exam_date' &&
-              k != 'examiner' &&
-              k != 'notes' &&
-              k != 'both_va' &&
-              k != 'sum_pd' &&
-              k != 'near_pd' &&
-              k !=
-                  'lenses_diameter_2' && // combined into lenses_diameter_1 cell
-              k !=
-                  'lenses_diameter_decentration_vertical', // combined into decentration_h cell
-        )
-        .toList();
+  /// Shows a DropdownField when options for [key] are loaded, otherwise a
+  /// regular text field. Free-typed values are preserved via the controller.
+  Widget _buildDropdownOrTextField(String key, String label) {
+    if (_dropdownOptions[key]?.isNotEmpty ?? false) {
+      return DropdownField(
+        label: label,
+        options: _dropdownOptions[key]!,
+        controller: _controllers[key],
+      );
+    }
+    return _buildTextField(key, label);
+  }
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 250,
-        childAspectRatio: 4,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+  Widget _buildPrefixPairField({
+    required String label,
+    required String prefixA,
+    required String keyA,
+    required String prefixB,
+    required String keyB,
+  }) {
+    Widget inlineField(String key) => TextFormField(
+      controller: _controllers[key],
+      style: TextStyle(
+        color: AppColors.inputValue,
+        fontWeight: AppTextStyles.inputWeight,
       ),
-      itemCount: nonEyeDataKeys.length,
-      itemBuilder: (context, index) {
-        final key = nonEyeDataKeys[index];
-        if (key == 'lenses_diameter_1') {
-          return _buildDiameterCombinedCell();
-        }
-        if (key == 'r_iop') {
-          return _buildIopCombinedCell();
-        }
-        if (key == 'lenses_diameter_decentration_horizontal') {
-          return _buildDecentrationCombinedCell();
-        }
-        if (_gridDropdownKeys.contains(key)) {
-          return DropdownField(
-            label: _labelFor(key),
-            options: _dropdownOptions[key] ?? [],
-            controller: _controllers[key],
-          );
-        }
-        return TextFormField(
-          controller: _controllers[key],
-          style: AppTextStyles.input(),
-          decoration: InputDecoration(
-            labelText: _labelFor(key),
-            hintText: key.contains('date') ? 'hint_date'.tr() : null,
-            isDense: true,
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+        isDense: true,
+        contentPadding: EdgeInsets.zero,
+        filled: false,
+      ),
+    );
+
+    return InputDecorator(
+      isEmpty: false,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      child: Row(
+        children: [
+          Text(
+            prefixA,
+            style: const TextStyle(
+              color: AppColors.label,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        );
-      },
+          Expanded(child: inlineField(keyA)),
+          const SizedBox(width: 16),
+          Text(
+            prefixB,
+            style: const TextStyle(
+              color: AppColors.label,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Expanded(child: inlineField(keyB)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(String key, String label, {int? maxLines = 1}) {
+    return TextFormField(
+      controller: _controllers[key],
+      maxLines: maxLines,
+      style: AppTextStyles.input(),
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        isDense: true,
+      ),
     );
   }
 
@@ -702,130 +851,6 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
     );
   }
 
-  Widget _buildDiameterCombinedCell() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextFormField(
-            controller: _controllers['lenses_diameter_1'],
-            textAlign: TextAlign.center,
-            style: AppTextStyles.input(),
-            decoration: InputDecoration(
-              labelText: 'field_lenses_diam_1'.tr(),
-              isDense: true,
-            ),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            '/',
-            style: TextStyle(color: AppColors.label, fontSize: 16),
-          ),
-        ),
-        Expanded(
-          child: TextFormField(
-            controller: _controllers['lenses_diameter_2'],
-            textAlign: TextAlign.center,
-            style: AppTextStyles.input(),
-            decoration: InputDecoration(
-              labelText: 'field_lenses_diam_2'.tr(),
-              isDense: true,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInlineField(String key) {
-    return TextFormField(
-      controller: _controllers[key],
-      style: const TextStyle(
-        color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
-      ),
-      decoration: const InputDecoration(
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        isDense: true,
-        contentPadding: EdgeInsets.zero,
-        filled: false,
-      ),
-    );
-  }
-
-  Widget _buildIopCombinedCell() {
-    return InputDecorator(
-      isEmpty: false,
-      decoration: InputDecoration(
-        labelText: 'field_iop'.tr(),
-        border: const OutlineInputBorder(),
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      child: Row(
-        children: [
-          const Text(
-            'R:',
-            style: TextStyle(
-              color: AppColors.label,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Expanded(child: _buildInlineField('r_iop')),
-          const SizedBox(width: 16),
-          const Text(
-            'L:',
-            style: TextStyle(
-              color: AppColors.label,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Expanded(child: _buildInlineField('l_iop')),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDecentrationCombinedCell() {
-    return InputDecorator(
-      isEmpty: false,
-      decoration: InputDecoration(
-        labelText: 'field_lenses_dia_dec'.tr(),
-        border: const OutlineInputBorder(),
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-      child: Row(
-        children: [
-          const Text(
-            'H:',
-            style: TextStyle(
-              color: AppColors.label,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Expanded(
-            child: _buildInlineField('lenses_diameter_decentration_horizontal'),
-          ),
-          const SizedBox(width: 16),
-          const Text(
-            'V:',
-            style: TextStyle(
-              color: AppColors.label,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Expanded(
-            child: _buildInlineField('lenses_diameter_decentration_vertical'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildTextFormFieldCell(String key) {
     if (_tableDropdownKeys.contains(key)) {
       return DropdownField(
@@ -850,9 +875,9 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       controller: _controllers[key],
       textAlign: TextAlign.center,
       inputFormatters: _inputFormatters[key],
-      style: const TextStyle(
+      style: TextStyle(
         color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
+        fontWeight: AppTextStyles.inputWeight,
       ),
       decoration: const InputDecoration(
         border: InputBorder.none,

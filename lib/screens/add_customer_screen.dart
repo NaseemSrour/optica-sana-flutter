@@ -198,9 +198,17 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _buildIdentityColumn()),
+                      Expanded(
+                        child: FocusTraversalGroup(
+                          child: _buildIdentityColumn(),
+                        ),
+                      ),
                       const SizedBox(width: 24),
-                      Expanded(child: _buildAddressColumn()),
+                      Expanded(
+                        child: FocusTraversalGroup(
+                          child: _buildAddressColumn(),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -254,16 +262,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        _field(
-          controller: _ssnController,
-          label: '🪪  ${'field_ssn'.tr()}',
-          keyboardType: TextInputType.number,
-          validator: (v) => (v == null || v.isEmpty) ? 'err_ssn'.tr() : null,
-          blurCheck: simpleRequiredCheck(
-            controller: _ssnController,
-            errorTrKey: 'err_ssn',
-          ),
-        ),
+        _field(controller: _ssnController, label: '🪪  ${'field_ssn'.tr()}'),
         const SizedBox(height: 12),
         _field(
           controller: _birthDateController,

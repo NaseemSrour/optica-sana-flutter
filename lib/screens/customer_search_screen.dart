@@ -75,7 +75,7 @@ class _CustomerSearchScreenState extends State<CustomerSearchScreen> {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
       widget.customerService
-          .searchCustomersByNameOrSSN(_searchController.text)
+          .searchCustomersByNameOrSSNOrPhone(_searchController.text)
           .then((customers) {
             setState(() {
               _customers = customers;

@@ -582,7 +582,38 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
                   'field_segment_diam'.tr(),
                 ),
                 const SizedBox(height: 16),
-                _buildTextField('diagnosis', 'field_diagnosis'.tr()),
+                _buildDropdownOrTextField(
+                  'lenses_manufacturer',
+                  'field_lenses_manufacturer'.tr(),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        'lenses_color',
+                        'field_lenses_color'.tr(),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '/',
+                        style: TextStyle(
+                          color: AppColors.label,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildDropdownOrTextField(
+                        'lenses_coated',
+                        'field_lenses_coated'.tr(),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -593,18 +624,6 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
             policy: ReadingOrderTraversalPolicy(),
             child: Column(
               children: [
-                _buildDropdownOrTextField(
-                  'lenses_manufacturer',
-                  'field_lenses_manufacturer'.tr(),
-                ),
-                const SizedBox(height: 16),
-                _buildTextField('lenses_color', 'field_lenses_color'.tr()),
-                const SizedBox(height: 16),
-                _buildDropdownOrTextField(
-                  'lenses_coated',
-                  'field_lenses_coated'.tr(),
-                ),
-                const SizedBox(height: 16),
                 _buildTextField('catalog_num', 'field_catalog_num'.tr()),
                 const SizedBox(height: 16),
                 _buildTextField(
@@ -640,6 +659,8 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                _buildTextField('diagnosis', 'field_diagnosis'.tr()),
                 const SizedBox(height: 16),
                 _buildTextField(
                   'notes',
@@ -698,7 +719,9 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
       enabled: _isEditing,
       style: TextStyle(
         color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
-        fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
+        fontWeight: _isEditing
+            ? AppTextStyles.inputWeight
+            : AppTextStyles.displayWeight,
       ),
       decoration: const InputDecoration(
         border: InputBorder.none,
@@ -750,7 +773,9 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
       maxLines: maxLines,
       style: TextStyle(
         color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
-        fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
+        fontWeight: _isEditing
+            ? AppTextStyles.inputWeight
+            : AppTextStyles.displayWeight,
       ),
       decoration: InputDecoration(
         labelText: label,

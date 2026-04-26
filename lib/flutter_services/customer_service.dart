@@ -24,6 +24,10 @@ class CustomerService {
     return await _customerRepo.searchByNameOrSsn(query.trim());
   }
 
+  Future<List<Customer>> searchCustomersByNameOrSSNOrPhone(String query) async {
+    return await _customerRepo.searchByNameOrSsnOrPhone(query.trim());
+  }
+
   Future<Customer?> getCustomerBySSN(String customerSSN) {
     if (customerSSN.isEmpty) {
       throw Exception("ID must be provided!");
@@ -45,9 +49,11 @@ class CustomerService {
   }
 
   Future<void> updateCustomer(Customer customer) async {
+    /* SKIP FOR NOW 
     if (customer.id == null) {
       throw Exception("Customer does not contain an ID!");
     }
+    */
     final existingCustomer = await _customerRepo.getCustomer(customer.id!);
     if (existingCustomer == null) {
       throw Exception("Customer does not exist in DB!");
@@ -126,15 +132,15 @@ class CustomerService {
 
   // Validation helper functions
   void _validateInputCustomer(Customer customer) {
+    /* SKIP FOR NOW
     if (customer.ssn.length != 9) {
       throw Exception("ID should be 9 digits long!");
     }
+    */
     if (customer.fname.trim().isEmpty || customer.lname.trim().isEmpty) {
       throw Exception("First and last name are required!");
     }
-    if (customer.telMobile != null &&
-        (customer.telMobile!.length != 10 ||
-            int.tryParse(customer.telMobile!) == null)) {
+    if (customer.telMobile != null && (customer.telMobile!.length < 10)) {
       throw Exception("Invalid phone number!");
     }
     // Add other validation checks as needed
