@@ -113,6 +113,8 @@
   "settings_title": "Settings",
   "settings_input_font_size": "Input font size",
   "settings_input_font_size_hint": "Size of text you type into forms. Table cells keep their fixed size.",
+  "settings_input_bold": "Bold input values",
+  "settings_input_bold_hint": "Make values you type (in forms and tables) extra bold for easier reading.",
   "settings_reset": "Reset to default",
   "settings_preview_label": "Preview",
   "settings_preview_sample": "Sample typed value 123.45",

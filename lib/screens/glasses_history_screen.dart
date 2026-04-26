@@ -719,7 +719,9 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
       enabled: _isEditing,
       style: TextStyle(
         color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
-        fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
+        fontWeight: _isEditing
+            ? AppTextStyles.inputWeight
+            : AppTextStyles.displayWeight,
       ),
       decoration: const InputDecoration(
         border: InputBorder.none,
@@ -771,7 +773,9 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
       maxLines: maxLines,
       style: TextStyle(
         color: _isEditing ? AppColors.inputValue : AppColors.displayValue,
-        fontWeight: _isEditing ? FontWeight.w600 : FontWeight.normal,
+        fontWeight: _isEditing
+            ? AppTextStyles.inputWeight
+            : AppTextStyles.displayWeight,
       ),
       decoration: InputDecoration(
         labelText: label,

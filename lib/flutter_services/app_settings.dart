@@ -12,12 +12,17 @@ class AppSettings extends ChangeNotifier {
   static final AppSettings instance = AppSettings._();
 
   static const String _prefsKey = 'input_font_size';
+  static const String _boldPrefsKey = 'input_bold';
   static const double defaultInputFontSize = 16.0;
   static const double minInputFontSize = 12.0;
   static const double maxInputFontSize = 36.0;
+  static const bool defaultInputBold = false;
 
   double _inputFontSize = defaultInputFontSize;
   double get inputFontSize => _inputFontSize;
+
+  bool _inputBold = defaultInputBold;
+  bool get inputBold => _inputBold;
 
   SharedPreferences? _prefs;
 
@@ -29,6 +34,7 @@ class AppSettings extends ChangeNotifier {
         stored <= maxInputFontSize) {
       _inputFontSize = stored;
     }
+    _inputBold = _prefs!.getBool(_boldPrefsKey) ?? defaultInputBold;
   }
 
   Future<void> setInputFontSize(double size) async {
@@ -40,4 +46,11 @@ class AppSettings extends ChangeNotifier {
   }
 
   Future<void> resetInputFontSize() => setInputFontSize(defaultInputFontSize);
+
+  Future<void> setInputBold(bool bold) async {
+    if (bold == _inputBold) return;
+    _inputBold = bold;
+    notifyListeners();
+    await _prefs?.setBool(_boldPrefsKey, _inputBold);
+  }
 }

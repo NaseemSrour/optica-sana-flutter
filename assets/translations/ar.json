@@ -111,6 +111,8 @@
   "settings_title": "الإعدادات",
   "settings_input_font_size": "حجم خط الإدخال",
   "settings_input_font_size_hint": "حجم النص الذي تكتبه في النماذج. خلايا الجداول تحتفظ بحجمها الثابت.",
+  "settings_input_bold": "قيم الإدخال بخط عريض",
+  "settings_input_bold_hint": "اجعل القيم التي تدخلها (في النماذج والجداول) بخط أعرض لتسهيل القراءة.",
   "settings_reset": "إعادة للوضع الافتراضي",
   "settings_preview_label": "معاينة",
   "settings_preview_sample": "قيمة مكتوبة 123.45",

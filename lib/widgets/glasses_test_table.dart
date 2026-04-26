@@ -389,9 +389,9 @@ class GlassesTestTable extends StatelessWidget {
               child: TextFormField(
                 controller: controllers![key],
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.inputValue,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: AppTextStyles.inputWeight,
                 ),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
@@ -548,9 +548,9 @@ class GlassesTestTable extends StatelessWidget {
       controller: controllers![fieldKey],
       textAlign: TextAlign.center,
       inputFormatters: inputFormatters[fieldKey],
-      style: const TextStyle(
+      style: TextStyle(
         color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
+        fontWeight: AppTextStyles.inputWeight,
       ),
       decoration: const InputDecoration(
         border: InputBorder.none,

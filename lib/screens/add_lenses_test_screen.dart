@@ -647,9 +647,9 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
       controller: _controllers[key],
       textAlign: TextAlign.center,
       inputFormatters: _inputFormatters[key],
-      style: const TextStyle(
+      style: TextStyle(
         color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
+        fontWeight: AppTextStyles.inputWeight,
       ),
       decoration: const InputDecoration(
         border: InputBorder.none,

@@ -15,11 +15,13 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late double _fontSize;
+  late bool _inputBold;
 
   @override
   void initState() {
     super.initState();
     _fontSize = AppSettings.instance.inputFontSize;
+    _inputBold = AppSettings.instance.inputBold;
   }
 
   @override
@@ -115,12 +117,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               'settings_preview_sample'.tr(),
                               style: TextStyle(
                                 color: AppColors.inputValue,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: _inputBold
+                                    ? FontWeight.w900
+                                    : FontWeight.w600,
                                 fontSize: _fontSize,
                               ),
                             ),
                           ],
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text('settings_input_bold'.tr()),
+                        subtitle: Text(
+                          'settings_input_bold_hint'.tr(),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.label),
+                        ),
+                        value: _inputBold,
+                        onChanged: (v) async {
+                          setState(() => _inputBold = v);
+                          await AppSettings.instance.setInputBold(v);
+                        },
                       ),
                     ],
                   ),

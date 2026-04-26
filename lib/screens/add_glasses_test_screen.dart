@@ -527,9 +527,9 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
   }) {
     Widget inlineField(String key) => TextFormField(
       controller: _controllers[key],
-      style: const TextStyle(
+      style: TextStyle(
         color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
+        fontWeight: AppTextStyles.inputWeight,
       ),
       decoration: const InputDecoration(
         border: InputBorder.none,
@@ -875,9 +875,9 @@ class _AddGlassesTestScreenState extends State<AddGlassesTestScreen> {
       controller: _controllers[key],
       textAlign: TextAlign.center,
       inputFormatters: _inputFormatters[key],
-      style: const TextStyle(
+      style: TextStyle(
         color: AppColors.inputValue,
-        fontWeight: FontWeight.w600,
+        fontWeight: AppTextStyles.inputWeight,
       ),
       decoration: const InputDecoration(
         border: InputBorder.none,

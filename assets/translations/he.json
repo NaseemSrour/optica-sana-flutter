@@ -113,6 +113,8 @@
   "settings_title": "הגדרות",
   "settings_input_font_size": "גודל גופן לשדות קלט",
   "settings_input_font_size_hint": "גודל הטקסט שאתה מקליד בטפסים. תאי הטבלאות נשמרים בגודל הקבוע שלהם.",
+  "settings_input_bold": "ערכים בכתב מודגש",
+  "settings_input_bold_hint": "הפוך את הערכים שאתה מקליד (בטפסים ובטבלאות) למודגשים יותר לקריאה נוחה.",
   "settings_reset": "איפוס לברירת מחדל",
   "settings_preview_label": "תצוגה מקדימה",
   "settings_preview_sample": "ערך לדוגמה 123.45",
