@@ -126,15 +126,15 @@ class CustomerService {
 
   // Validation helper functions
   void _validateInputCustomer(Customer customer) {
+    /* SKIP FOR NOW
     if (customer.ssn.length != 9) {
       throw Exception("ID should be 9 digits long!");
     }
+    */
     if (customer.fname.trim().isEmpty || customer.lname.trim().isEmpty) {
       throw Exception("First and last name are required!");
     }
-    if (customer.telMobile != null &&
-        (customer.telMobile!.length != 10 ||
-            int.tryParse(customer.telMobile!) == null)) {
+    if (customer.telMobile != null && (customer.telMobile!.length < 10)) {
       throw Exception("Invalid phone number!");
     }
     // Add other validation checks as needed
