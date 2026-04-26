@@ -380,27 +380,41 @@ class LensesTestTables extends StatelessWidget {
 
   // R row: r_va left-aligned with 6/ prefix.
   // L row: both_va top-right, l_va bottom-left (staggered, DOS-style).
+  // Tab order: l_va first, then both_va.
   Widget _buildVaCell(String eye, String vaData, String vaKey) {
     if (eye == 'R') {
       return _vaHalfCell(vaKey, vaData);
     }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            const Spacer(),
-            Expanded(child: _vaHalfCell('both_va', lensesTest?.bothVa ?? '')),
-          ],
-        ),
-        Container(height: 1, color: AppColors.tableBorder),
-        Row(
-          children: [
-            Expanded(child: _vaHalfCell(vaKey, vaData)),
-            const Spacer(),
-          ],
-        ),
-      ],
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Spacer(),
+              Expanded(
+                child: FocusTraversalOrder(
+                  order: const NumericFocusOrder(2),
+                  child: _vaHalfCell('both_va', lensesTest?.bothVa ?? ''),
+                ),
+              ),
+            ],
+          ),
+          Container(height: 1, color: AppColors.tableBorder),
+          Row(
+            children: [
+              Expanded(
+                child: FocusTraversalOrder(
+                  order: const NumericFocusOrder(1),
+                  child: _vaHalfCell(vaKey, vaData),
+                ),
+              ),
+              const Spacer(),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

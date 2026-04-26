@@ -111,8 +111,8 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     'r_rV': _oneDotTwoMask,
     'l_rH': _oneDotTwoMask,
     'l_rV': _oneDotTwoMask,
-    'r_diameter': _oneDotTwoMask,
-    'l_diameter': _oneDotTwoMask,
+    'r_diameter': _signedTwoDotTwoMask,
+    'l_diameter': _signedTwoDotTwoMask,
     'r_base_curve_numerator': _oneDotTwoMask,
     'r_base_curve_denominator': _oneDotTwoMask,
     'l_base_curve_numerator': _oneDotTwoMask,
@@ -525,25 +525,39 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     );
   }
 
-  // L row VA cell: both_va top-right, l_va bottom-left
+  // L row VA cell: both_va top-right, l_va bottom-left.
+  // Tab order: l_va first, then both_va.
   Widget _buildLensesVaCell() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            const Spacer(),
-            Expanded(child: _buildTextFormFieldCell('both_va')),
-          ],
-        ),
-        Container(height: 1, color: AppColors.tableBorder),
-        Row(
-          children: [
-            Expanded(child: _buildTextFormFieldCell('l_va')),
-            const Spacer(),
-          ],
-        ),
-      ],
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Spacer(),
+              Expanded(
+                child: FocusTraversalOrder(
+                  order: const NumericFocusOrder(2),
+                  child: _buildTextFormFieldCell('both_va'),
+                ),
+              ),
+            ],
+          ),
+          Container(height: 1, color: AppColors.tableBorder),
+          Row(
+            children: [
+              Expanded(
+                child: FocusTraversalOrder(
+                  order: const NumericFocusOrder(1),
+                  child: _buildTextFormFieldCell('l_va'),
+                ),
+              ),
+              const Spacer(),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
