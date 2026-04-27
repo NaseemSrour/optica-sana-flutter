@@ -383,7 +383,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                 ProgressionScreen(
                   customer: widget.customer,
                   customerService: widget.customerService,
-                  useDummyData: true,
                 ),
               ),
             ),

@@ -250,7 +250,7 @@
   "sound_manager_preview": "תצוגה מקדימה",
 
   "prog_title": "{name} — התקדמות",
-  "prog_tooltip_open": "גרף התקדמות (אלפא)",
+  "prog_tooltip_open": "גרף התקדמות",
   "prog_metric_sphere": "ספירה",
   "prog_metric_cylinder": "צילינדר",
   "prog_chart_title_sphere": "התקדמות ספירה",
@@ -282,5 +282,12 @@
   "prog_strip_title": "שינוי בין ביקורים",
   "prog_strip_no_data": "אין מספיק נתונים",
   "prog_eye_short_right": "OD",
-  "prog_eye_short_left": "OS"
+  "prog_eye_short_left": "OS",
+  "prog_notes_edit": "עריכת הערות",
+  "prog_notes_save": "שמירת הערות",
+  "prog_notes_cancel": "ביטול שינויים",
+  "prog_notes_hint": "הוסיפו הקשר שעשוי להסביר שינויים במגמה…",
+  "prog_notes_empty": "לא נרשמו הערות עבור לקוח זה.",
+  "prog_notes_saved": "ההערות נשמרו",
+  "prog_notes_save_error": "שמירת ההערות נכשלה: {error}"
 }

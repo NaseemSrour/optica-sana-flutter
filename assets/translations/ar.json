@@ -248,7 +248,7 @@
   "sound_manager_preview": "معاينة",
 
   "prog_title": "{name} — تطور الوصفة",
-  "prog_tooltip_open": "رسم بياني للتطور (ألفا)",
+  "prog_tooltip_open": "رسم بياني للتطور",
   "prog_metric_sphere": "السفير",
   "prog_metric_cylinder": "السلندر",
   "prog_chart_title_sphere": "تطور السفير",
@@ -280,5 +280,12 @@
   "prog_strip_title": "التغير بين الزيارات",
   "prog_strip_no_data": "بيانات غير كافية",
   "prog_eye_short_right": "OD",
-  "prog_eye_short_left": "OS"
+  "prog_eye_short_left": "OS",
+  "prog_notes_edit": "تعديل الملاحظات",
+  "prog_notes_save": "حفظ الملاحظات",
+  "prog_notes_cancel": "تجاهل التغييرات",
+  "prog_notes_hint": "أضف سياقًا قد يفسّر تغيّرات المنحنى…",
+  "prog_notes_empty": "لا توجد ملاحظات لهذا الزبون.",
+  "prog_notes_saved": "تم حفظ الملاحظات",
+  "prog_notes_save_error": "فشل حفظ الملاحظات: {error}"
 }

@@ -111,7 +111,15 @@ prog_kv_sph / prog_kv_cyl / prog_kv_axis
 prog_trend_stable / prog_trend_more_minus / prog_trend_less_minus
 prog_strip_title / prog_strip_no_data
 prog_eye_short_right / prog_eye_short_left
+prog_notes_edit / prog_notes_save / prog_notes_cancel
+prog_notes_hint / prog_notes_empty
+prog_notes_saved / prog_notes_save_error  (named: {error})
 ```
+
+The notes panel at the bottom of `progression_screen.dart` re-uses the
+existing `field_notes` label key. It edits `Customer.notes` in place and
+persists via `CustomerService.updateCustomer`, mirroring the read/edit
+toggle pattern in `customer_details_screen.dart`.
 
 ## How data flows
 

@@ -44,10 +44,24 @@ class _ProgressionScreenState extends State<ProgressionScreen> {
   RxMetric _metric = RxMetric.sphere;
   bool _invertY = false;
 
+  // Notes panel state — kept local so the chart isn't rebuilt on every keystroke.
+  late final TextEditingController _notesController;
+  bool _isEditingNotes = false;
+  bool _savingNotes = false;
+  String _savedNotes = '';
+
   @override
   void initState() {
     super.initState();
     _future = _load();
+    _savedNotes = widget.customer.notes ?? '';
+    _notesController = TextEditingController(text: _savedNotes);
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
   }
 
   Future<List<RxDataPoint>> _load() async {
@@ -157,6 +171,8 @@ class _ProgressionScreenState extends State<ProgressionScreen> {
                         child: ProgressionDeltaStrip(viewModel: vm),
                       ),
                     ),
+                  const SizedBox(height: 16),
+                  _buildNotesCard(),
                 ],
               ),
             );
@@ -197,5 +213,143 @@ class _ProgressionScreenState extends State<ProgressionScreen> {
         ),
       ],
     );
+  }
+
+  /// Inline notes editor at the bottom of the progression screen.
+  ///
+  /// Mirrors the read/edit toggle pattern from `CustomerDetailsScreen`:
+  /// shows the saved notes in full (no maxLines cap) when read-only, and
+  /// expands to a 5-line editor when toggled. Saves through
+  /// `CustomerService.updateCustomer`, which runs the same validation as
+  /// the customer details screen.
+  Widget _buildNotesCard() {
+    final hasNotes = _savedNotes.trim().isNotEmpty;
+    return Card(
+      color: AppColors.surfaceVariant,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.sticky_note_2_outlined,
+                  color: AppColors.label,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'field_notes'.tr(),
+                  style: const TextStyle(
+                    color: AppColors.displayValue,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                if (_savingNotes)
+                  const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else if (_isEditingNotes) ...[
+                  IconButton(
+                    tooltip: 'prog_notes_cancel'.tr(),
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      setState(() {
+                        _notesController.text = _savedNotes;
+                        _isEditingNotes = false;
+                      });
+                    },
+                  ),
+                  IconButton(
+                    tooltip: 'prog_notes_save'.tr(),
+                    icon: const Icon(Icons.save, color: AppColors.inputValue),
+                    onPressed: _saveNotes,
+                  ),
+                ] else
+                  IconButton(
+                    tooltip: 'prog_notes_edit'.tr(),
+                    icon: const Icon(Icons.edit, color: AppColors.primary),
+                    onPressed: () => setState(() => _isEditingNotes = true),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (_isEditingNotes)
+              TextField(
+                controller: _notesController,
+                enabled: !_savingNotes,
+                maxLines: 5,
+                minLines: 3,
+                style: const TextStyle(
+                  color: AppColors.inputValue,
+                  fontWeight: FontWeight.w600,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'prog_notes_hint'.tr(),
+                  isDense: true,
+                ),
+              )
+            else if (hasNotes)
+              SelectableText(
+                _savedNotes,
+                style: const TextStyle(
+                  color: AppColors.displayValue,
+                  fontSize: 14,
+                ),
+              )
+            else
+              Text(
+                'prog_notes_empty'.tr(),
+                style: const TextStyle(
+                  color: AppColors.label,
+                  fontStyle: FontStyle.italic,
+                  fontSize: 13,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveNotes() async {
+    final newNotes = _notesController.text;
+    if (newNotes == _savedNotes) {
+      setState(() => _isEditingNotes = false);
+      return;
+    }
+    setState(() => _savingNotes = true);
+    try {
+      // Mutate the existing customer object so the upstream
+      // CustomerDetailsScreen reflects the edit when the user navigates back.
+      widget.customer.notes = newNotes;
+      await widget.customerService.updateCustomer(widget.customer);
+      if (!mounted) return;
+      setState(() {
+        _savedNotes = newNotes;
+        _isEditingNotes = false;
+        _savingNotes = false;
+      });
+      AppNotification.show(
+        context,
+        'prog_notes_saved'.tr(),
+        type: NotificationType.success,
+      );
+    } catch (e) {
+      // Roll back the in-memory mutation so we don't show stale data on retry.
+      widget.customer.notes = _savedNotes;
+      if (!mounted) return;
+      setState(() => _savingNotes = false);
+      AppNotification.show(
+        context,
+        'prog_notes_save_error'.tr(namedArgs: {'error': e.toString()}),
+        type: NotificationType.error,
+      );
+    }
   }
 }

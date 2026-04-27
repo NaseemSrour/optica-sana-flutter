@@ -250,7 +250,7 @@
   "sound_manager_preview": "Preview",
 
   "prog_title": "{name} — Progression",
-  "prog_tooltip_open": "Progression chart (alpha)",
+  "prog_tooltip_open": "Progression chart",
   "prog_metric_sphere": "Sphere",
   "prog_metric_cylinder": "Cylinder",
   "prog_chart_title_sphere": "Sphere progression",
@@ -282,5 +282,12 @@
   "prog_strip_title": "Visit-to-visit change",
   "prog_strip_no_data": "Not enough data",
   "prog_eye_short_right": "OD",
-  "prog_eye_short_left": "OS"
+  "prog_eye_short_left": "OS",
+  "prog_notes_edit": "Edit notes",
+  "prog_notes_save": "Save notes",
+  "prog_notes_cancel": "Discard changes",
+  "prog_notes_hint": "Add context that may explain trend changes…",
+  "prog_notes_empty": "No notes recorded for this customer.",
+  "prog_notes_saved": "Notes saved",
+  "prog_notes_save_error": "Failed to save notes: {error}"
 }
