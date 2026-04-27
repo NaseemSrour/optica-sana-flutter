@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../db_flutter/models.dart';
+import '../features/prescription_export/screens/prescription_export_screen.dart';
 import '../flutter_services/customer_service.dart';
 import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
@@ -353,6 +354,27 @@ class _GlassesHistoryScreenState extends State<GlassesHistoryScreen> {
           ),
           actions: [
             if (_tests.isNotEmpty) ...[
+              IconButton(
+                tooltip: 'rx_pdf_tooltip_open'.tr(),
+                icon: Image.asset(
+                  'assets/icons/pdf_icon.png',
+                  width: 48,
+                  height: 48,
+                ),
+                onPressed: _isEditing
+                    ? null
+                    : () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PrescriptionExportScreen(
+                            customer: widget.customer,
+                            customerService: widget.customerService,
+                            overrideGlasses: _tests[_currentIndex],
+                            excludeContactLenses: true,
+                          ),
+                        ),
+                      ),
+              ),
               IconButton(
                 tooltip: _isEditing ? 'tooltip_save'.tr() : 'tooltip_edit'.tr(),
                 icon: Icon(
