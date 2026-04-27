@@ -10,7 +10,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:ui' as ui;
 
 import '../../../themes/app_theme.dart';
 import '../logic/optical_tools.dart' as ot;
@@ -53,15 +52,19 @@ Future<void> showOpticalToolsSheet(
   );
 }
 
-/// Flips ASCII / Unicode directional arrows when the ambient text
-/// direction is RTL so chip labels like "Glasses → CL" visually point
-/// from source to destination regardless of locale.
-String _dirArrows(BuildContext context, String s) {
-  if (Directionality.of(context) != ui.TextDirection.rtl) return s;
-  return s
-      .replaceAll('\u2192', '\u2190') // → → ←
-      .replaceAll('\u2190', '\u2192') // ← → → (in case any source uses ←)
-      .replaceAll('->', '<-');
+/// Builds a chip label of the form `[from] → [to]` using a Material arrow
+/// icon that mirrors automatically under RTL Directionality.
+Widget _arrowLabel(String from, String to) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(from),
+      const SizedBox(width: 4),
+      const Icon(Icons.arrow_right_alt, size: 18),
+      const SizedBox(width: 4),
+      Text(to),
+    ],
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -290,7 +293,7 @@ class _ToolExpansion extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
-          _dirArrows(context, spec.subtitle),
+          spec.subtitle,
           style: const TextStyle(fontSize: 12, color: AppColors.label),
         ),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -605,8 +608,9 @@ class _VertexCardState extends State<_VertexCard> {
           children: [
             ActionChip(
               tooltip: 'optools_vertex_preset_g_cl_tooltip'.tr(),
-              label: Text(
-                _dirArrows(context, 'optools_vertex_preset_g_cl'.tr()),
+              label: _arrowLabel(
+                'optools_vertex_preset_g_cl_from'.tr(),
+                'optools_vertex_preset_g_cl_to'.tr(),
               ),
               onPressed: () => setState(() {
                 _oldVertex = 12;
@@ -615,8 +619,9 @@ class _VertexCardState extends State<_VertexCard> {
             ),
             ActionChip(
               tooltip: 'optools_vertex_preset_cl_g_tooltip'.tr(),
-              label: Text(
-                _dirArrows(context, 'optools_vertex_preset_cl_g'.tr()),
+              label: _arrowLabel(
+                'optools_vertex_preset_cl_g_from'.tr(),
+                'optools_vertex_preset_cl_g_to'.tr(),
               ),
               onPressed: () => setState(() {
                 _oldVertex = 0;
