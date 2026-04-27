@@ -9,6 +9,7 @@ import 'package:optica_sana/screens/add_glasses_test_screen.dart';
 import 'package:optica_sana/screens/add_lenses_test_screen.dart';
 import 'package:optica_sana/screens/lenses_history_screen.dart';
 import 'package:optica_sana/features/progression/screens/progression_screen.dart';
+import 'package:optica_sana/features/prescription_export/screens/prescription_export_screen.dart';
 import '../flutter_services/customer_service.dart';
 import '../flutter_services/dropdown_options_service.dart';
 import 'package:optica_sana/db_flutter/models.dart';
@@ -377,9 +378,27 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             const VerticalDivider(),
             IconButton(
               tooltip: 'prog_tooltip_open'.tr(),
-              icon: const Icon(Icons.insights, color: AppColors.accentTeal),
+              icon: Image.asset(
+                'assets/icons/analysis_icon.png',
+                width: 48,
+                height: 48,
+              ),
               onPressed: () => _navigateTo(
                 ProgressionScreen(
+                  customer: widget.customer,
+                  customerService: widget.customerService,
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: 'rx_pdf_tooltip_open'.tr(),
+              icon: Image.asset(
+                'assets/icons/pdf_icon.png',
+                width: 48,
+                height: 48,
+              ),
+              onPressed: () => _navigateTo(
+                PrescriptionExportScreen(
                   customer: widget.customer,
                   customerService: widget.customerService,
                 ),
