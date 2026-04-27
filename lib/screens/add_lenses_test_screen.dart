@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../db_flutter/models.dart';
+import '../features/optical_tools/screens/optical_tools_sheet.dart';
 import '../flutter_services/customer_service.dart';
 import '../flutter_services/dropdown_options_service.dart';
 import '../themes/app_theme.dart';
@@ -190,6 +191,43 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
     super.dispose();
   }
 
+  void _openOpticalTools() {
+    showOpticalToolsSheet(
+      context,
+      hostContext: OpticalToolsContext(
+        defaultEye: 'OD',
+        readEye: (eye) {
+          final p = eye == 'OS' ? 'l' : 'r';
+          double? parse(String key) {
+            final c = _controllers[key];
+            if (c == null) return null;
+            final raw = stripNumericMask(c.text).trim();
+            if (raw.isEmpty) return null;
+            return double.tryParse(raw);
+          }
+
+          return (
+            sph: parse('${p}_lens_sph'),
+            cyl: parse('${p}_lens_cyl'),
+            axis: parse('${p}_lens_axis'),
+          );
+        },
+        onApply: (eye, sph, cyl, axis) {
+          final p = eye == 'OS' ? 'l' : 'r';
+          // Sphere mask is signed-three-dot-two; cyl mask is signed-two-dot-two.
+          String fmt(double v) {
+            final sign = v < 0 ? '-' : '+';
+            return '$sign${v.abs().toStringAsFixed(2)}';
+          }
+
+          _controllers['${p}_lens_sph']?.text = fmt(sph);
+          _controllers['${p}_lens_cyl']?.text = fmt(cyl);
+          _controllers['${p}_lens_axis']?.text = axis.round().toString();
+        },
+      ),
+    );
+  }
+
   Future<void> _saveTest() async {
     if (_formKey.currentState!.validate()) {
       final newMap = <String, dynamic>{
@@ -258,6 +296,18 @@ class _AddLensesTestScreenState extends State<AddLensesTestScreen> {
             'title_add_lenses'.tr(namedArgs: {'name': widget.customer.fname}),
           ),
           actions: [
+            IconButton(
+              icon: Image.asset(
+                'assets/icons/calculations_icon.png',
+                width: 48,
+                height: 48,
+              ),
+              tooltip: 'tooltip_optical_tools'.tr(),
+              onPressed: _openOpticalTools,
+            ),
+            const SizedBox(width: 8),
+            const VerticalDivider(indent: 12, endIndent: 12, width: 1),
+            const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.save),
               tooltip: 'tooltip_save'.tr(),
