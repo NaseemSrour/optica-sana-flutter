@@ -10,6 +10,7 @@ import 'package:optica_sana/screens/add_lenses_test_screen.dart';
 import 'package:optica_sana/screens/lenses_history_screen.dart';
 import 'package:optica_sana/features/progression/screens/progression_screen.dart';
 import 'package:optica_sana/features/prescription_export/screens/prescription_export_screen.dart';
+import 'package:optica_sana/features/optical_tools/screens/optical_tools_sheet.dart';
 import '../flutter_services/customer_service.dart';
 import '../flutter_services/dropdown_options_service.dart';
 import 'package:optica_sana/db_flutter/models.dart';
@@ -404,6 +405,15 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
                 ),
               ),
             ),
+            IconButton(
+              tooltip: 'tooltip_optical_tools'.tr(),
+              icon: Image.asset(
+                'assets/icons/calculations_icon.png',
+                width: 48,
+                height: 48,
+              ),
+              onPressed: () => showOpticalToolsSheet(context),
+            ),
             const VerticalDivider(),
             IconButton(
               tooltip: _isEditing ? 'tooltip_save'.tr() : 'tooltip_edit'.tr(),
@@ -416,7 +426,9 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
             PopupMenuButton<String>(
               tooltip: 'tooltip_more_options'.tr(),
               onSelected: (value) {
-                if (value == 'delete') _confirmDeleteCustomer();
+                if (value == 'delete') {
+                  _confirmDeleteCustomer();
+                }
               },
               itemBuilder: (context) => [
                 PopupMenuItem<String>(
