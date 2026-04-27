@@ -44,7 +44,6 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
   /// On-blur validation rules. Keys match controller keys. Runs both as each
   /// field loses focus and again before saving so it cannot be bypassed.
   late final Map<String, FieldCheck> _blurChecks = {
-    'ssn': requiredFieldCheck(fieldKey: 'ssn', errorTrKey: 'err_value'),
     'fname': requiredFieldCheck(fieldKey: 'fname', errorTrKey: 'err_value'),
     'lname': requiredFieldCheck(fieldKey: 'lname', errorTrKey: 'err_value'),
   };
@@ -524,11 +523,7 @@ class _CustomerDetailsScreenState extends State<CustomerDetailsScreen> {
           style: _isEditing ? AppTextStyles.input() : AppTextStyles.display(),
           decoration: InputDecoration(labelText: entry.key.tr(), isDense: true),
           validator: (value) {
-            if ([
-              'field_ssn',
-              'field_fname',
-              'field_lname',
-            ].contains(entry.key)) {
+            if (['field_fname', 'field_lname'].contains(entry.key)) {
               if (value == null || value.isEmpty) {
                 return 'err_value'.tr();
               }
