@@ -67,30 +67,10 @@ class _PrescriptionExportScreenState extends State<PrescriptionExportScreen> {
   String? _lastSavedPath;
   bool _busy = false;
 
-  /// Locale used to render the PDF. Defaults to the app's active locale
-  /// but the user can override it from the picker — e.g. a Hebrew user
-  /// exporting in English to forward to a patient.
-  late String _pdfLocale;
-
-  static const _supportedLocales = ['en', 'he', 'ar'];
-
   @override
   void initState() {
     super.initState();
-    _pdfLocale = 'en';
     _bundleFuture = _loadBundle();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Pick up the current app locale once context is available.
-    final code = context.locale.languageCode;
-    if (_supportedLocales.contains(code)) {
-      // Only assign the first time so we don't clobber a user override on
-      // hot reloads / inherited-widget updates.
-      _pdfLocale = _supportedLocales.contains(_pdfLocale) ? _pdfLocale : code;
-    }
   }
 
   Future<_RxBundle> _loadBundle() async {
@@ -107,9 +87,9 @@ class _PrescriptionExportScreenState extends State<PrescriptionExportScreen> {
       glasses: glasses,
       lenses: lenses,
       branding: ClinicBranding(
-        name: 'rx_pdf_clinic_name'.tr(),
-        phone: 'rx_pdf_clinic_phone'.tr(),
-        address: 'rx_pdf_clinic_address'.tr(),
+        name: 'OPTISANA',
+        phone: 'RAMA: 04-9580336 / KFAR VRADIM: 04-9570043',
+        address: '',
         logoBytes: logo,
       ),
     );
@@ -123,17 +103,9 @@ class _PrescriptionExportScreenState extends State<PrescriptionExportScreen> {
       glasses: b.glasses,
       lenses: b.lenses,
       branding: b.branding,
-      localeCode: _pdfLocale,
     );
     _cachedPdfBytes = bytes;
     return bytes;
-  }
-
-  /// Invalidates the cached bytes so the next save/share rebuilds with the
-  /// freshly chosen locale.
-  void _invalidateCache() {
-    _cachedPdfBytes = null;
-    _lastSavedPath = null;
   }
 
   /// Resolves a stable folder under the user's Documents dir on desktop and
@@ -356,8 +328,6 @@ class _PrescriptionExportScreenState extends State<PrescriptionExportScreen> {
                           : 'rx_pdf_summary_has_contacts'.tr(),
                     ),
                   const SizedBox(height: 16),
-                  _buildLanguagePicker(),
-                  const SizedBox(height: 20),
                   Wrap(
                     spacing: 12,
                     runSpacing: 8,
@@ -443,41 +413,6 @@ class _PrescriptionExportScreenState extends State<PrescriptionExportScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  /// Lets the user pick the PDF rendering language independently of the
-  /// app locale. Useful when a Hebrew/Arabic user wants an English-only
-  /// document to send to a patient (avoids bidi mixing artifacts).
-  Widget _buildLanguagePicker() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Icon(Icons.translate, size: 18, color: AppColors.label),
-        const SizedBox(width: 8),
-        Text(
-          'rx_pdf_language_label'.tr(),
-          style: const TextStyle(color: AppColors.label, fontSize: 13),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'en', label: Text('EN')),
-              ButtonSegment(value: 'he', label: Text('HE')),
-              ButtonSegment(value: 'ar', label: Text('AR')),
-            ],
-            selected: {_pdfLocale},
-            showSelectedIcon: false,
-            onSelectionChanged: (s) {
-              setState(() {
-                _pdfLocale = s.first;
-                _invalidateCache();
-              });
-            },
-          ),
-        ),
-      ],
     );
   }
 }

@@ -48,40 +48,57 @@ class ProgressionDeltaStrip extends StatelessWidget {
     final pts = viewModel.points
         .where((p) => p.value(eye, viewModel.metric) != null)
         .toList();
+    // Soft tint of the eye colour acts as a row-stripe so OD and OS are
+    // visually distinct at a glance without competing with the pill colours.
+    final rowBg = color.withValues(alpha: 0.06);
+    final rowBorder = color.withValues(alpha: 0.25);
+    final rowDecoration = BoxDecoration(
+      color: rowBg,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: rowBorder, width: 0.5),
+    );
     if (pts.length < 2) {
-      return Row(
+      return Container(
+        decoration: rowDecoration,
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        child: Row(
+          children: [
+            _eyeBadge(label, color),
+            const SizedBox(width: 8),
+            Text(
+              'prog_strip_no_data'.tr(),
+              style: const TextStyle(color: AppColors.label, fontSize: 12),
+            ),
+          ],
+        ),
+      );
+    }
+    return Container(
+      decoration: rowDecoration,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      child: Row(
         children: [
           _eyeBadge(label, color),
           const SizedBox(width: 8),
-          Text(
-            'prog_strip_no_data'.tr(),
-            style: const TextStyle(color: AppColors.label, fontSize: 12),
-          ),
-        ],
-      );
-    }
-    return Row(
-      children: [
-        _eyeBadge(label, color),
-        const SizedBox(width: 8),
-        // Pills are arranged in chronological order (oldest → newest). Force
-        // LTR here so the visual time direction stays consistent regardless
-        // of the surrounding locale.
-        Expanded(
-          child: Directionality(
-            textDirection: ui.TextDirection.ltr,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (var i = 1; i < pts.length; i++)
-                    _deltaPill(from: pts[i - 1], to: pts[i], eye: eye),
-                ],
+          // Pills are arranged in chronological order (oldest → newest). Force
+          // LTR here so the visual time direction stays consistent regardless
+          // of the surrounding locale.
+          Expanded(
+            child: Directionality(
+              textDirection: ui.TextDirection.ltr,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (var i = 1; i < pts.length; i++)
+                      _deltaPill(from: pts[i - 1], to: pts[i], eye: eye),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

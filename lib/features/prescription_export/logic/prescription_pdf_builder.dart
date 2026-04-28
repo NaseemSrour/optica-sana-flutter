@@ -16,14 +16,10 @@ import 'rx_formatter.dart';
 /// latest contact-lens Rx). Sections without data are skipped — the PDF
 /// never invents values.
 ///
-/// All text labels go through a translator loaded from the per-locale
-/// JSON file in `assets/translations/`. The caller picks which locale to
-/// render in via [build]'s `localeCode` parameter, independently of the
-/// app's active UI locale — useful when a Hebrew user wants an English
-/// PDF to forward to a patient.
-///
-/// The optical data table itself stays English/LTR because SPH/CYL/AXIS
-/// column conventions are universal.
+/// All text labels are rendered in English. The PDF is intentionally
+/// language-agnostic: SPH/CYL/AXIS column conventions are universal and
+/// keeping the document monolingual avoids bidi-mixing artefacts when
+/// the patient name or notes contain Hebrew/Arabic characters.
 class PrescriptionPdfBuilder {
   /// Optional Unicode fonts. If the asset exists at the listed path the
   /// builder will use it for non-Latin runs (Hebrew/Arabic) so patient names
@@ -53,15 +49,16 @@ class PrescriptionPdfBuilder {
 
   /// Builds the PDF document and returns its bytes (suitable for sharing,
   /// printing, or saving to disk).
+  ///
+  /// The document is always rendered in English / LTR.
   static Future<Uint8List> build({
     required Customer customer,
     required GlassesTest? glasses,
     required ContactLensesTest? lenses,
     required ClinicBranding branding,
-    required String localeCode,
-    Duration validity = const Duration(days: 365),
+    Duration validity = const Duration(days: 90),
   }) async {
-    _tr = await _PdfTr.load(localeCode);
+    _tr = await _PdfTr.load('en');
     final doc = pw.Document(
       title: 'Prescription - ${customer.fname} ${customer.lname}',
       author: branding.name,
@@ -74,7 +71,7 @@ class PrescriptionPdfBuilder {
       fontFallback: fallbackFonts,
     );
 
-    final isRtl = _isRtlLocale(localeCode);
+    const isRtl = false;
     final warnings = _collectWarnings(glasses);
 
     doc.addPage(
@@ -83,7 +80,7 @@ class PrescriptionPdfBuilder {
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 36),
           theme: theme,
-          textDirection: isRtl ? pw.TextDirection.rtl : pw.TextDirection.ltr,
+          textDirection: pw.TextDirection.ltr,
         ),
         header: (ctx) => _buildHeader(branding, isRtl),
         footer: (ctx) => _buildFooter(ctx, branding, isRtl),
@@ -123,60 +120,67 @@ class PrescriptionPdfBuilder {
   // ── Sections ─────────────────────────────────────────────────────────────
 
   static pw.Widget _buildHeader(ClinicBranding b, bool isRtl) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.only(bottom: 8),
-      decoration: const pw.BoxDecoration(
-        border: pw.Border(
-          bottom: pw.BorderSide(color: PdfColors.grey400, width: 0.6),
+    // Layout is fixed regardless of locale: clinic name + contact info on
+    // the LEFT, logo on the RIGHT. Wrapped in an LTR Directionality so it
+    // doesn't get mirrored if the document direction is ever flipped.
+    return pw.Directionality(
+      textDirection: pw.TextDirection.ltr,
+      child: pw.Container(
+        padding: const pw.EdgeInsets.only(bottom: 8),
+        decoration: const pw.BoxDecoration(
+          border: pw.Border(
+            bottom: pw.BorderSide(color: PdfColors.grey400, width: 0.6),
+          ),
         ),
-      ),
-      child: pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
-        children: [
-          if (b.logoBytes != null)
-            pw.Container(
-              width: 110,
-              height: 110,
-              child: pw.Image(
-                pw.MemoryImage(b.logoBytes!),
-                fit: pw.BoxFit.contain,
+        child: pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    b.name,
+                    style: pw.TextStyle(
+                      fontSize: 24,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.blueGrey900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  if (b.phone.trim().isNotEmpty)
+                    pw.Text(
+                      '${_t('rx_pdf_label_phone')}: ${b.phone}',
+                      style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.blueGrey900,
+                      ),
+                    ),
+                  if (b.address.trim().isNotEmpty)
+                    pw.Text(
+                      b.address,
+                      style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.blueGrey900,
+                      ),
+                    ),
+                ],
               ),
             ),
-          pw.SizedBox(width: 16),
-          pw.Expanded(
-            child: pw.Column(
-              crossAxisAlignment: isRtl
-                  ? pw.CrossAxisAlignment.end
-                  : pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  b.name,
-                  style: pw.TextStyle(
-                    fontSize: 18,
-                    fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.blueGrey800,
-                  ),
+            pw.SizedBox(width: 16),
+            if (b.logoBytes != null)
+              pw.Container(
+                width: 150,
+                height: 150,
+                child: pw.Image(
+                  pw.MemoryImage(b.logoBytes!),
+                  fit: pw.BoxFit.contain,
                 ),
-                if (b.phone.trim().isNotEmpty)
-                  pw.Text(
-                    '${_t('rx_pdf_label_phone')}: ${b.phone}',
-                    style: const pw.TextStyle(
-                      fontSize: 10,
-                      color: PdfColors.grey700,
-                    ),
-                  ),
-                if (b.address.trim().isNotEmpty)
-                  pw.Text(
-                    b.address,
-                    style: const pw.TextStyle(
-                      fontSize: 10,
-                      color: PdfColors.grey700,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -184,9 +188,15 @@ class PrescriptionPdfBuilder {
   static pw.Widget _buildPatientBlock(Customer c, GlassesTest? g, bool isRtl) {
     final age = _ageFromDob(c.birthDate);
     final examDate = g != null
-        ? intl.DateFormat('yyyy-MM-dd').format(g.examDate)
+        ? intl.DateFormat('dd/MM/yyyy').format(g.examDate)
         : kRxEmpty;
-    final issued = intl.DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final issued = intl.DateFormat('dd/MM/yyyy').format(DateTime.now());
+    final dob = _formatDobDdMmYyyy(c.birthDate);
+    // The clinic operator works in Hebrew, where the PDF library can't
+    // shape the script natively. Reverse the customer's name characters
+    // so the Hebrew letters appear in the correct visual order on screen.
+    // Only the customer name is touched — every other field stays as-is.
+    final patientName = _reverseString('${c.fname} ${c.lname}');
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
@@ -201,9 +211,9 @@ class PrescriptionPdfBuilder {
         ),
         pw.SizedBox(height: 6),
         _kvGrid(isRtl, [
-          _Kv(_t('rx_pdf_label_patient'), '${c.fname} ${c.lname}'),
+          _Kv(_t('rx_pdf_label_patient'), patientName),
           _Kv(_t('rx_pdf_label_id'), formatText(c.ssn)),
-          _Kv(_t('rx_pdf_label_dob'), formatText(c.birthDate)),
+          _Kv(_t('rx_pdf_label_dob'), dob),
           _Kv(_t('rx_pdf_label_age'), age?.toString() ?? kRxEmpty),
           _Kv(_t('rx_pdf_label_exam_date'), examDate),
           _Kv(_t('rx_pdf_label_examiner'), formatText(g?.examiner)),
@@ -405,9 +415,6 @@ class PrescriptionPdfBuilder {
     }
 
     add(g?.diagnosis);
-    add(g?.notes);
-    add(l?.notes);
-    add(c.notes);
     if (parts.isEmpty) return pw.SizedBox();
 
     return pw.Column(
@@ -460,8 +467,8 @@ class PrescriptionPdfBuilder {
   static pw.Widget _buildSignatureBlock(GlassesTest? g, Duration validity) {
     final issued = DateTime.now();
     final until = issued.add(validity);
-    final issuedStr = intl.DateFormat('yyyy-MM-dd').format(issued);
-    final untilStr = intl.DateFormat('yyyy-MM-dd').format(until);
+    final issuedStr = intl.DateFormat('dd/MM/yyyy').format(issued);
+    final untilStr = intl.DateFormat('dd/MM/yyyy').format(until);
     final months = (validity.inDays / 30).round();
 
     return pw.Column(
@@ -684,6 +691,28 @@ class PrescriptionPdfBuilder {
     return '$b ($m)';
   }
 
+  /// Reverses the characters of [s]. Used to manually flip the customer's
+  /// Hebrew name for the PDF, since the embedded font doesn't shape the
+  /// script natively. Surrogate-pair aware via [Runes] so non-BMP code
+  /// points (rare in Hebrew but cheap to handle) survive the round-trip.
+  static String _reverseString(String s) {
+    if (s.isEmpty) return s;
+    return String.fromCharCodes(s.runes.toList().reversed);
+  }
+
+  /// Renders a YYYY-MM-DD birth date stored in the DB as DD/MM/YYYY.
+  /// Returns the placeholder constant when the input is missing or
+  /// unparsable so the PDF never shows a malformed date.
+  static String _formatDobDdMmYyyy(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return kRxEmpty;
+    try {
+      final d = intl.DateFormat('yyyy-MM-dd').parse(raw.trim());
+      return intl.DateFormat('dd/MM/yyyy').format(d);
+    } catch (_) {
+      return raw.trim();
+    }
+  }
+
   static int? _ageFromDob(String? raw) {
     if (raw == null || raw.trim().isEmpty) return null;
     try {
@@ -697,11 +726,6 @@ class PrescriptionPdfBuilder {
     } catch (_) {
       return null;
     }
-  }
-
-  static bool _isRtlLocale(String code) {
-    final lower = code.toLowerCase();
-    return lower.startsWith('he') || lower.startsWith('ar');
   }
 
   /// Loads any present optional Unicode fonts. Each missing asset is
