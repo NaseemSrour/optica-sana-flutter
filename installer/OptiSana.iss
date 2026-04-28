@@ -3,7 +3,7 @@
 ; Prerequisite: flutter build windows --release
 
 #define MyAppName         "OptiSana"
-#define MyAppVersion      "1.0.3"
+#define MyAppVersion      "1.0.5"
 #define MyAppPublisher    "Naseem Srour"
 #define MyAppExeName      "OptiSana.exe"
 #define MyAppId           "{{B7F4E3A2-9C1D-4F8B-A6E2-8D3C5F9A1B4E}"

@@ -50,7 +50,7 @@ class ProgressionDeltaStrip extends StatelessWidget {
         .toList();
     // Soft tint of the eye colour acts as a row-stripe so OD and OS are
     // visually distinct at a glance without competing with the pill colours.
-    final rowBg = color.withValues(alpha: 0.06);
+    final rowBg = color.withValues(alpha: 0.18);
     final rowBorder = color.withValues(alpha: 0.25);
     final rowDecoration = BoxDecoration(
       color: rowBg,
