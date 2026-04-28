@@ -172,8 +172,8 @@ class PrescriptionPdfBuilder {
             pw.SizedBox(width: 16),
             if (b.logoBytes != null)
               pw.Container(
-                width: 150,
-                height: 150,
+                width: 148,
+                height: 148,
                 child: pw.Image(
                   pw.MemoryImage(b.logoBytes!),
                   fit: pw.BoxFit.contain,
